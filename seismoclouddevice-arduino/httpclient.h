@@ -2,23 +2,44 @@
 int readLine(char* buf, int bufmax);
 void httpRequest(char* host, unsigned short port, char* path, String postVars);
 void httpAliveRequest();
+void httpQuakeRequest();
+
+void httpQuakeRequest() {
+  String postVars = String("deviceid=");
+  postVars += macToString(mac);
+  postVars += "&tsstart=";
+  postVars += getUNIXTime();
+  postVars += "&lat=" + String(latitude) + "&lon=" + String(longitude);
+  httpRequest("www.sapienzaapps.it", 80, "/seismocloud/terremoto.php", postVars);
+}
 
 void httpAliveRequest() {
   String postVars = String("deviceid=");
   postVars += macToString(mac);
-  postVars += "&lat=0&lon=0&model=uno&version=1.00";
+  // TODO: parametrized version and model
+  postVars += "&model=uno&version=1.00&lat=" + String(latitude) + "&lon=" + String(longitude);
   httpRequest("www.sapienzaapps.it", 80, "/seismocloud/alive.php", postVars);
 }
 
 void httpRequest(char* host, unsigned short port, char* path, String postVars) {
   // if there's a successful connection:
   if (client.connect(host, port)) {
-    Serial.println("connecting...");
+    Serial.println(F("connecting..."));
     // send the HTTP PUT request:
-    client.println("GET /seismocloud/eew.php HTTP/1.1");
-    client.println("Host: www.sapienzaapps.it");
-    client.println("User-Agent: arduino-ethernet");
-    client.println("Connection: close");
+    String req;
+    if(postVars == NULL) {
+      req = "GET " + String(path) + " HTTP/1.1";
+    } else {
+      req = "POST " + String(path) + " HTTP/1.1";
+    }
+    
+    client.println(req);
+
+    String hostHeader = String("Host: ");
+    hostHeader += host;
+    client.println(hostHeader);
+    client.println(F("User-Agent: arduino-ethernet"));
+    client.println(F("Connection: close"));
     client.println();
 
     unsigned long connms = millis();
@@ -42,11 +63,11 @@ void httpRequest(char* host, unsigned short port, char* path, String postVars) {
         }
       }
     } else {
-      Serial.println("Socket read error");
+      Serial.println(F("Socket read error"));
     }
   } else {
     // if you couldn't make a connection:
-    Serial.println("connection failed");
+    Serial.println(F("connection failed"));
   }
   client.stop();
 }
