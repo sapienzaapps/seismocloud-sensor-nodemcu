@@ -1,8 +1,13 @@
 
-String macToString(const byte* mac) {
-  char buf[13];
-  memset(buf, 0, 13);
-  snprintf(buf, 13, "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  return String(buf);
-}
+#ifndef __UTILS_H
+#define __UTILS_H
 
+#include <Arduino.h>
+
+String macToString(const byte* mac);
+bool isZero(byte* buf, int bufsize);
+void prepareUuid(byte* uuidNumber, char* buf);
+void printUuid(byte* uuidNumber);
+void printHex(byte number);
+
+#endif

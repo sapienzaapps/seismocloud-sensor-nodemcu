@@ -1,28 +1,27 @@
-
-#include <SPI.h>
-#include <Ethernet.h>
+// ********** CONFIGURABLE PART
 
 // assign a MAC address for the ethernet controller.
 // fill in your address here:
-byte mac[] = {
-  0, 0, 0, 0, 0, 0
+byte ethernetMac[] = {
+//  0, 0, 0, 0, 0, 0
+  0x02, 0xAB, 0xCD, 0x02, 0xAB, 0xCD
 };
 
-EthernetClient client;
-float latitude = 0;
-float longitude = 0;
-unsigned long bootTime = 0;
 
-#include "SoftReset.h"
-#include "AcceleroMMA7361.h"
-#include "ntp.h"
-#include "utils.h"
-#include "httpclient.h"
-#include "CommandInterface.h"
-#include "seismometer.h"
+// ********** END CONFIGURABLE PART
+
+// DO NOT EDIT BEYOND THIS LINE WHEN CONFIGURING DEVICE
+// (unless you're contibuting ;-) )
+
+
+#include <SPI.h>
+#include <Ethernet.h>
+#include <EEPROM.h>
+#include "common.h"
 
 unsigned long lastAliveMs = 0;
-unsigned long lastSeismoMs = 0;
+unsigned long lastProbeMs = 0;
+uint32_t probeCount = 0;
 
 void setup() {
   // start serial port:
@@ -33,17 +32,32 @@ void setup() {
 
   Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
 
-  byte zeromac[6];
-  memset(zeromac, 0, 6);
-  if(memcmp(zeromac, mac, 6) == 0) {
+  if(isZero(ethernetMac, 6)) {
     Serial.println(F("No MAC Address configured - please edit sketch file"));
     while(true);
+  }
+
+  // Check config and set UUID and lat/lon
+  loadConfig();
+
+  if(isZero(getUuidNumber(), 16)) {
+    byte uuidNumber[16];
+    TrueRandom.uuid(uuidNumber);
+    // Save UUID
+    setUuidNumber(uuidNumber);
+    Serial.print(F("No device id - generating a new one: "));
+    printUuid(uuidNumber);
+    Serial.println("");
+  } else {
+    Serial.print(F("Using device id: "));
+    printUuid(getUuidNumber());
+    Serial.println("");
   }
 
   // give the ethernet module time to boot up:
   delay(1000);
   
-  Ethernet.begin(mac);
+  Ethernet.begin(ethernetMac);
   
   // print the Ethernet board/shield's IP address:
   Serial.print(F("My IP address: "));
@@ -52,28 +66,33 @@ void setup() {
   Serial.println(F("Updating NTP Time"));
   do {
     updateNTP();
-    bootTime = getUNIXTime();
-    if(bootTime == 0) {
+    setBootTime(getUNIXTime());
+    if(getBootTime() == 0) {
       Serial.println(F("NTP update failed, retrying in 5 seconds..."));
       delay(5 * 1000);
     }
-  } while(bootTime == 0);
+  } while(getBootTime() == 0);
 
-  Serial.print(F("Local time is"));
-  Serial.println(bootTime);
+  Serial.print(F("Local time is "));
+  Serial.println(getBootTime());
 
   Serial.println(F("Init command interface"));
   commandInterfaceInit();
 
-  if(latitude == 0 && longitude == 0) {
+  Serial.println(F("Send first keep-alive to server..."));
+  httpAliveRequest();
+  lastAliveMs = millis();
+  Serial.println(F("Keep-alive sent"));
+
+  if(getLatitude() == 0 && getLongitude() == 0) {
     Serial.println(F("No position available, waiting for GPS from phone App"));
     do {
       commandInterfaceTick();
-    } while(latitude == 0 && longitude == 0);
+    } while(getLatitude() == 0 && getLongitude() == 0);
     Serial.print(F("New position: lat:"));
-    Serial.print(latitude);
+    Serial.print(getLatitude());
     Serial.print(F(" lon:"));
-    Serial.println(longitude);
+    Serial.println(getLongitude());
   }
 
   Serial.println(F("Init seismometer and calibrate"));
@@ -86,7 +105,6 @@ void setup() {
 }
 
 void loop() {
-
   // Update NTP (if necessary)
   updateNTP();
 
@@ -94,14 +112,18 @@ void loop() {
 
   // Calling alive every 14 minutes
   if(millis() - lastAliveMs >= 1000 * 60 * 14) {
+    Serial.println(F("Keepalive"));
     httpAliveRequest();
     lastAliveMs = millis();
   }
 
   // Detection
-  // TODO: check if we need to delay measurements by 60 seconds
-  if(millis() - lastSeismoMs >= 60) {
-    seismometerTick();
-    lastSeismoMs = millis();
+  seismometerTick();
+  if(millis() - lastProbeMs >= 1000) {
+    lastProbeMs = millis();
+    setProbeSpeedStatistic(probeCount);
+    probeCount = 0;
   }
+  probeCount++;
 }
+

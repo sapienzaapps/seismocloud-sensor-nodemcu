@@ -1,23 +1,9 @@
 
-AcceleroMMA7361 accelero;
+#ifndef __SEISMOMETER_H
+#define __SEISMOMETER_H
 
-void seismometerInit() {
-  // Start with standard PIN assignments
-  accelero.begin();
+void seismometerInit();
+void seismometerTick();
 
-  accelero.setSensitivity(HIGH);
 
-  accelero.calibrate();
-}
-
-void seismometerTick() {
-
-  int accelVector = accelero.getTotalVector();
-
-  if(accelVector > 0.3) {
-    // QUAKE
-    httpQuakeRequest();
-    delay(1000 * 5);
-  }
-}
-
+#endif
