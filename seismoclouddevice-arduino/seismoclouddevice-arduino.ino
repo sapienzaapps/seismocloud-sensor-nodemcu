@@ -1,18 +1,3 @@
-// ********** CONFIGURABLE PART
-
-// assign a MAC address for the ethernet controller.
-// fill in your address here:
-byte ethernetMac[] = {
-//  0, 0, 0, 0, 0, 0
-  0x02, 0xAB, 0xCD, 0x02, 0xAB, 0xCD
-};
-
-
-// ********** END CONFIGURABLE PART
-
-// DO NOT EDIT BEYOND THIS LINE WHEN CONFIGURING DEVICE
-// (unless you're contibuting ;-) )
-
 
 #include <SPI.h>
 #include <Ethernet.h>
@@ -32,13 +17,17 @@ void setup() {
 
   Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
 
-  if(isZero(ethernetMac, 6)) {
-    Serial.println(F("No MAC Address configured - please edit sketch file"));
-    while(true);
-  }
-
   // Check config and set UUID and lat/lon
   loadConfig();
+
+  byte ethernetMac[6];
+  getMACAddress(ethernetMac);
+
+  if(isZero(ethernetMac, 6)) {
+    Serial.println(F("No MAC Address configured - generating a new one"));
+    generateMACAddress(ethernetMac);
+  }
+
 
   if(isZero(getUuidNumber(), 16)) {
     byte uuidNumber[16];

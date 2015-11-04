@@ -10,6 +10,5 @@
 
 1. Download the source code
 2. Open project in Arduino IDE
-3. Edit MAC Address in main sketch
-4. Compile and upload in your Arduino Board
+3. Compile and upload in your Arduino Board
 

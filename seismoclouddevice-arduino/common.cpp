@@ -1,10 +1,10 @@
 
 #include "common.h"
 
-#define EEPROM_BASE_ADDR 0
-
 // UUID
 byte uuidNumber[16] = { 0 };
+
+byte ethernetMac[6] = { 0 };
 
 float latitude = 0;
 float longitude = 0;
@@ -28,7 +28,7 @@ void initEEPROM() {
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
 
-  for (int i = 6 ; i < 6+16+4+4; i++) {
+  for (int i = 6 ; i < 6+16+4+4+6; i++) {
     EEPROM.write(i, 0);
   }
 }
@@ -57,7 +57,17 @@ void loadConfig() {
       lat[i] = EEPROM.read(26+i);
     }
     memcpy(&latitude, lat, 4);
-    
+
+    // Load MAC Address
+    for (int i = 0; i < 6; i++) {
+      ethernetMac[i] = EEPROM.read(30+i);
+    }
+  }
+}
+
+void _saveMACAddress() {
+  for (int i = 0; i < 6; i++) {
+    EEPROM.write(30+i, ethernetMac[i]);
   }
 }
 
@@ -122,5 +132,20 @@ uint32_t getProbeSpeedStatistic() {
   return probeSpeedStat;
 }
 
+void generateMACAddress(byte *mac) {
+  *(mac+0) = 0x06; // LAA
+  *(mac+1) = (byte)(rand() % 256);
+  *(mac+2) = (byte)(rand() % 256);
+  *(mac+3) = (byte)(rand() % 256);
+  *(mac+4) = (byte)(rand() % 256);
+  *(mac+5) = (byte)(rand() % 256);
+
+  memcpy(ethernetMac, mac, 6);
+  _saveMACAddress();
+}
+
+void getMACAddress(byte* mac) {
+  memcpy(mac, ethernetMac, 6);
+}
 
 

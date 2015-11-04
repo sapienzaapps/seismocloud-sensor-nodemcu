@@ -30,6 +30,7 @@ void commandInterfaceTick() {
     unsigned long uptime = getUNIXTime() - getBootTime();
     byte* uuidNumber = getUuidNumber();
     uint32_t probeSpeed = getProbeSpeedStatistic();
+    float freeramkb = freeMemory()/1024.0;
 
     float longitude = 0;
     float latitude = 0;
@@ -70,6 +71,7 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 40, &uptime, 4);
         memcpy(udpPacketBuffer + 44, &unixTimeM, 4);
         memcpy(udpPacketBuffer + 48, "1.00", 4);
+        memcpy(udpPacketBuffer + 52, &freeramkb, 4);
         memcpy(udpPacketBuffer + 65, "uno", 3);
         memcpy(udpPacketBuffer + 69, "MMA7361", 7);
         memcpy(udpPacketBuffer + 77, &probeSpeed, 4);

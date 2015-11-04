@@ -13,6 +13,7 @@
 #include "httpclient.h"
 #include "CommandInterface.h"
 #include "seismometer.h"
+#include "MemoryFree.h"
 
 void setUuidNumber(byte* uuid);
 byte* getUuidNumber();
@@ -22,8 +23,10 @@ unsigned long getBootTime();
 void setBootTime(unsigned long);
 void setLatitude(float l);
 void setLongitude(float l);
+void getMACAddress(byte* mac);
 void loadConfig();
 void setProbeSpeedStatistic(uint32_t);
 uint32_t getProbeSpeedStatistic();
+void generateMACAddress(byte* mac);
 
 #endif
