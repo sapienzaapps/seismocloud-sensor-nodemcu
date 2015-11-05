@@ -15,8 +15,6 @@
 #include "seismometer.h"
 #include "MemoryFree.h"
 
-void setUuidNumber(byte* uuid);
-byte* getUuidNumber();
 float getLatitude();
 float getLongitude();
 unsigned long getBootTime();

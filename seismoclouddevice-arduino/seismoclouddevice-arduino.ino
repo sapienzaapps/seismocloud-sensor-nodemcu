@@ -17,30 +17,19 @@ void setup() {
 
   Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
 
-  // Check config and set UUID and lat/lon
+  // Check config, load MAC and lat/lon
   loadConfig();
 
   byte ethernetMac[6];
   getMACAddress(ethernetMac);
 
   if(isZero(ethernetMac, 6)) {
-    Serial.println(F("No MAC Address configured - generating a new one"));
+    Serial.print(F("No MAC Address configured - generating a new one: "));
     generateMACAddress(ethernetMac);
-  }
-
-
-  if(isZero(getUuidNumber(), 16)) {
-    byte uuidNumber[16];
-    TrueRandom.uuid(uuidNumber);
-    // Save UUID
-    setUuidNumber(uuidNumber);
-    Serial.print(F("No device id - generating a new one: "));
-    printUuid(uuidNumber);
-    Serial.println("");
+    Serial.println(macToString(ethernetMac).c_str());
   } else {
-    Serial.print(F("Using device id: "));
-    printUuid(getUuidNumber());
-    Serial.println("");
+    Serial.print(F("Configured MAC Address: "));
+    Serial.println(macToString(ethernetMac).c_str());
   }
 
   // give the ethernet module time to boot up:

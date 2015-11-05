@@ -16,65 +16,61 @@ void commandInterfaceTick() {
     // read the packet into packetBufffer
     cmdsock.read(udpPacketBuffer, PACKET_SIZE);
 
-    if(udpPacketBuffer[0] != 'S' || udpPacketBuffer[1] != 'E' || udpPacketBuffer[2] != 'I' || udpPacketBuffer[3] != 'S' && udpPacketBuffer[4] != 'M' && udpPacketBuffer[5] != 'O') {
+    if(memcmp("INGV\0", udpPacketBuffer, 5) != 0) {
       Serial.println(F("Invalid magic, dropping packet"));
-      return;
-    }
-    if(udpPacketBuffer[6] != PROTOCOL_VERSION) {
-      Serial.println(F("Invalid protocol version, dropping packet"));
       return;
     }
 
     bool reboot = false;
     unsigned long unixTimeM = getUNIXTime();
     unsigned long uptime = getUNIXTime() - getBootTime();
-    byte* uuidNumber = getUuidNumber();
+    byte macaddress[6] = { 0 };
+    getMACAddress(macaddress);
     uint32_t probeSpeed = getProbeSpeedStatistic();
     float freeramkb = freeMemory()/1024.0;
 
     float longitude = 0;
     float latitude = 0;
 
-    switch(udpPacketBuffer[7]) {
+    switch(udpPacketBuffer[5]) {
       case PKTTYPE_DISCOVERY:
         // Reply to discovery
-        udpPacketBuffer[7] = PKTTYPE_DISCOVERY_REPLY;
+        udpPacketBuffer[5] = PKTTYPE_DISCOVERY_REPLY;
 
-        // Copy uuidNumber
-        memcpy(udpPacketBuffer + 8, uuidNumber, 16);
+        memcpy(udpPacketBuffer + 6, macaddress, 6);
         
-        memcpy(udpPacketBuffer + 24, "1.00", 4);
-        memcpy(udpPacketBuffer + 28, "uno", 3);
+        memcpy(udpPacketBuffer + 12, "1.00", 4);
+        memcpy(udpPacketBuffer + 16, "uno", 3);
         break;
       case PKYTYPE_PING:
         // Reply to ping
-        udpPacketBuffer[7] = PKYTYPE_PONG;
+        udpPacketBuffer[5] = PKYTYPE_PONG;
         break;
       case PKTTYPE_SENDGPS:
         // Get coords
-        udpPacketBuffer[7] = PKTTYPE_OK;
+        udpPacketBuffer[5] = PKTTYPE_OK;
 
-        memcpy(&latitude, udpPacketBuffer + 24, 4);
-        memcpy(&longitude, udpPacketBuffer + 28, 4);
+        memcpy(&latitude, udpPacketBuffer + 12, 4);
+        memcpy(&longitude, udpPacketBuffer + 16, 4);
         
         break;
       case PKTTYPE_REBOOT:
         // Reboot
         // Reply with OK
-        udpPacketBuffer[7] = PKTTYPE_OK;
+        udpPacketBuffer[5] = PKTTYPE_OK;
         reboot = true;
         break;
       case PKTTYPE_GETINFO:
-        udpPacketBuffer[7] = PKTTYPE_GETINFO_REPLY;
+        udpPacketBuffer[5] = PKTTYPE_GETINFO_REPLY;
 
-        memcpy(udpPacketBuffer + 8, uuidNumber, 16);
-        memcpy(udpPacketBuffer + 40, &uptime, 4);
-        memcpy(udpPacketBuffer + 44, &unixTimeM, 4);
-        memcpy(udpPacketBuffer + 48, "1.00", 4);
-        memcpy(udpPacketBuffer + 52, &freeramkb, 4);
-        memcpy(udpPacketBuffer + 65, "uno", 3);
-        memcpy(udpPacketBuffer + 69, "MMA7361", 7);
-        memcpy(udpPacketBuffer + 77, &probeSpeed, 4);
+        memcpy(udpPacketBuffer + 6, macaddress, 6);
+        memcpy(udpPacketBuffer + 28, &uptime, 4);
+        memcpy(udpPacketBuffer + 32, &unixTimeM, 4);
+        memcpy(udpPacketBuffer + 36, "1.00", 4);
+        memcpy(udpPacketBuffer + 40, &freeramkb, 4);
+        memcpy(udpPacketBuffer + 53, "uno", 3);
+        memcpy(udpPacketBuffer + 57, "MMA7361", 7);
+        memcpy(udpPacketBuffer + 65, &probeSpeed, 4);
 
         break;
       default:

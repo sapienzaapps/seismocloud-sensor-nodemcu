@@ -1,9 +1,6 @@
 
 #include "common.h"
 
-// UUID
-byte uuidNumber[16] = { 0 };
-
 byte ethernetMac[6] = { 0 };
 
 float latitude = 0;
@@ -28,7 +25,7 @@ void initEEPROM() {
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
 
-  for (int i = 6 ; i < 6+16+4+4+6; i++) {
+  for (int i = 6 ; i < 6+4+4+6; i++) {
     EEPROM.write(i, 0);
   }
 }
@@ -39,11 +36,6 @@ void loadConfig() {
     initEEPROM();
   } else {
     
-    // Load UUID
-    for (int i = 0; i < 16; i++) {
-      uuidNumber[i] = EEPROM.read(i+6);
-    }
-
     // Longitude
     byte lon[4];
     for (int i = 0; i < 4; i++) {
@@ -68,19 +60,6 @@ void loadConfig() {
 void _saveMACAddress() {
   for (int i = 0; i < 6; i++) {
     EEPROM.write(30+i, ethernetMac[i]);
-  }
-}
-
-byte* getUuidNumber() {
-  return uuidNumber;
-}
-
-void setUuidNumber(byte* uuid) {
-  memcpy(uuidNumber, uuid, 16);
-  
-  // Save UUID
-  for (int i = 0; i < 16; i++) {
-    EEPROM.write(i+6, uuidNumber[i]);
   }
 }
 

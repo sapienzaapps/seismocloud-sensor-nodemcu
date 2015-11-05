@@ -6,9 +6,9 @@
 void httpQuakeRequest() {
   String postVars = String("deviceid=");
   
-  char uuidstring[36+1] = { 0 };
-  prepareUuid(getUuidNumber(), uuidstring);
-  postVars += uuidstring;
+  byte macaddress[6];
+  getMACAddress(macaddress);
+  postVars += macToString(macaddress);
   
   postVars += "&tsstart=";
   postVars += getUNIXTime();
@@ -19,9 +19,9 @@ void httpQuakeRequest() {
 void httpAliveRequest() {
   String postVars = String("deviceid=");
   
-  char uuidstring[36+1] = { 0 };
-  prepareUuid(getUuidNumber(), uuidstring);
-  postVars += uuidstring;
+  byte macaddress[6];
+  getMACAddress(macaddress);
+  postVars += macToString(macaddress);
   
   // TODO: parametrized version and model
   postVars += "&model=uno&version=1.00&lat=" + String(getLatitude()) + "&lon=" + String(getLongitude());

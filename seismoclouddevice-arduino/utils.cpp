@@ -18,33 +18,3 @@ bool isZero(byte* buf, int bufsize) {
   return ret;
 }
 
-void prepareUuid(byte* uuidNumber, char* buf) {
-  int i,bufpos=0;
-  for (i=0; i<16; i++) {
-    if (i==4 || i==6 || i==8 || i==10) {
-      buf[bufpos] = '-';
-      bufpos++;
-    }
-    snprintf(buf+bufpos, 3, "%02.2x", uuidNumber[i]);
-    bufpos += 2;
-  }
-}
-
-void printUuid(byte* uuidNumber) {
-  int i;
-  for (i=0; i<16; i++) {
-    if (i==4 || i==6 || i==8 || i==10) Serial.print("-");
-    printHex(uuidNumber[i]);
-  }
-}
-
-void printHex(byte number) {
-  int topDigit = number >> 4;
-  int bottomDigit = number & 0x0f;
-  // Print high hex digit
-  Serial.print( "0123456789ABCDEF"[topDigit] );
-  // Low hex digit
-  Serial.print( "0123456789ABCDEF"[bottomDigit] );
-}
-
-
