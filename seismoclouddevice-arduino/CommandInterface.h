@@ -3,8 +3,7 @@
 #define __COMMANDINTERFACE_H
 
 #define CMD_INTERFACE_PORT 62001
-#define PACKET_SIZE 264
-#define PROTOCOL_VERSION 1
+#define PACKET_SIZE 252
 
 typedef enum {
   PKTTYPE_DISCOVERY = 1,
