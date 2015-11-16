@@ -52,6 +52,13 @@ void commandInterfaceTick() {
 
         memcpy(&latitude, udpPacketBuffer + 12, 4);
         memcpy(&longitude, udpPacketBuffer + 16, 4);
+        reverse4bytes((byte*)&latitude);
+        reverse4bytes((byte*)&longitude);
+        
+        Serial.print(F("Settings GPS coordinates: lat "));
+        Serial.print(latitude);
+        Serial.print(F(" lon "));
+        Serial.println(longitude);
         
         break;
       case PKTTYPE_REBOOT:
@@ -74,6 +81,7 @@ void commandInterfaceTick() {
 
         break;
       default:
+        Serial.println(F("Unknown command"));
         // Unknown packet or invalid command
         return;
     }

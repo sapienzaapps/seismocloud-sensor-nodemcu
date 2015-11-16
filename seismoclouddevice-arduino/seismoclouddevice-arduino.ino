@@ -41,6 +41,11 @@ void setup() {
   Serial.print(F("My IP address: "));
   Serial.println(Ethernet.localIP());
 
+  Serial.print("GPS Lat: ");
+  Serial.print(getLatitude());
+  Serial.print(" - Lon: ");
+  Serial.println(getLongitude());
+
   Serial.println(F("Updating NTP Time"));
   do {
     updateNTP();

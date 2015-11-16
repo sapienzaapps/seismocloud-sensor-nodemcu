@@ -18,11 +18,14 @@ void seismometerTick() {
 
   int accelVector = accelero.getTotalVector();
 
-  if(accelVector > 0.3) {
+  // TODO: better checking
+  if(accelVector > 250) {
     // QUAKE
-    //Serial.println("QUAKE");
-    //httpQuakeRequest();
-    //delay(1000 * 5);
+    Serial.print("QUAKE: ");
+    Serial.println(accelVector);
+    httpQuakeRequest();
+    delay(1000 * 5);
+    Serial.println("QUAKE Timeout END");
   }
 }
 

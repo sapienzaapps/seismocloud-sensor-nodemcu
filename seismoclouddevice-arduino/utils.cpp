@@ -18,3 +18,12 @@ bool isZero(byte* buf, int bufsize) {
   return ret;
 }
 
+void reverse4bytes(byte* memory) {
+  byte val[4];
+  memcpy(&val, memory, 4);
+  memcpy(memory+0, &val[3], 1);
+  memcpy(memory+1, &val[2], 1);
+  memcpy(memory+2, &val[1], 1);
+  memcpy(memory+3, &val[0], 1);
+}
+
