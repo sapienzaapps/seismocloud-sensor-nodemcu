@@ -41,11 +41,6 @@ void setup() {
   Serial.print(F("My IP address: "));
   Serial.println(Ethernet.localIP());
 
-  Serial.print("GPS Lat: ");
-  Serial.print(getLatitude());
-  Serial.print(" - Lon: ");
-  Serial.println(getLongitude());
-
   Serial.println(F("Updating NTP Time"));
   do {
     updateNTP();
@@ -72,11 +67,13 @@ void setup() {
     do {
       commandInterfaceTick();
     } while(getLatitude() == 0 && getLongitude() == 0);
-    Serial.print(F("New position: lat:"));
-    Serial.print(getLatitude());
-    Serial.print(F(" lon:"));
-    Serial.println(getLongitude());
+    Serial.print(F("New position: "));
   }
+  
+  Serial.print(F("GPS Latitude: "));
+  Serial.print(getLatitude());
+  Serial.print(F(" - Longitude: "));
+  Serial.println(getLongitude());
 
   Serial.println(F("Init seismometer and calibrate"));
   seismometerInit();
