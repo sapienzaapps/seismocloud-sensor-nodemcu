@@ -17,6 +17,8 @@
 #include "MemoryFree.h"
 
 float getLatitude();
+String getLatitudeAsString();
+String getLongitudeAsString();
 float getLongitude();
 unsigned long getBootTime();
 void setBootTime(unsigned long);

@@ -12,7 +12,7 @@ void httpQuakeRequest() {
   
   postVars += "&tsstart=";
   postVars += getUNIXTime();
-  postVars += "&lat=" + String(getLatitude()) + "&lon=" + String(getLongitude());
+  postVars += "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
   httpRequest(DEFAULTHOST, 80, "/seismocloud/terremoto.php", postVars);
 }
 
@@ -24,7 +24,7 @@ void httpAliveRequest() {
   postVars += macToString(macaddress);
   
   // TODO: parametrized version and model
-  postVars += "&model=uno&version=1.00&lat=" + String(getLatitude()) + "&lon=" + String(getLongitude());
+  postVars += "&model=uno&version=1.00&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
   httpRequest(DEFAULTHOST, 80, "/seismocloud/alive.php", postVars);
 }
 

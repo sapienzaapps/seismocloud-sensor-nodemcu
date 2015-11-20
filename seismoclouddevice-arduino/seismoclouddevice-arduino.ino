@@ -22,7 +22,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-
+  
   Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
 
   // Check config, load MAC and lat/lon
@@ -90,9 +90,9 @@ void setup() {
   }
   
   Serial.print(F("GPS Latitude: "));
-  Serial.print(getLatitude());
+  Serial.print(getLatitudeAsString());
   Serial.print(F(" - Longitude: "));
-  Serial.println(getLongitude());
+  Serial.println(getLongitudeAsString());
 
   Serial.println(F("Init seismometer and calibrate"));
   seismometerInit();

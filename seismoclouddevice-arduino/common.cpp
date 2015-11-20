@@ -127,4 +127,26 @@ void getMACAddress(byte* mac) {
   memcpy(mac, ethernetMac, 6);
 }
 
+void ftoa(char* buf, int m, float fnum) {
+  int num = (int)fnum;
+  fnum -= num;
+  int decimals = (int)(fnum*10000.0);
+  snprintf(buf, m, "%i.%04i", num, decimals);
+}
+
+String getLatitudeAsString() {
+  char v[11];
+  memset(v, 0, 11);
+  ftoa(v, 10, latitude);
+  return String(v);
+}
+
+String getLongitudeAsString() {
+  char v[10+1];
+  memset(v, 0, 10+1);
+  ftoa(v, 10, longitude);
+  return String(v);
+}
+
+
 
