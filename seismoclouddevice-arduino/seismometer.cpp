@@ -12,6 +12,8 @@ void seismometerInit() {
   accelero.calibrate();
 
   accelero.setAveraging(10);
+
+  Serial.println();
 }
 
 void seismometerTick() {
@@ -19,13 +21,15 @@ void seismometerTick() {
   int accelVector = accelero.getTotalVector();
 
   // TODO: better checking
-  if(accelVector > 250) {
+  if(accelVector > 150) {
+    LED::red(true);
     // QUAKE
     Serial.print("QUAKE: ");
     Serial.println(accelVector);
     httpQuakeRequest();
-    delay(1000 * 5);
+    delay(5000);
     Serial.println("QUAKE Timeout END");
+    LED::red(false);
   }
 }
 

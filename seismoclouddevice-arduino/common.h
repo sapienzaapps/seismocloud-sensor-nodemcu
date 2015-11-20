@@ -5,6 +5,7 @@
 #include <Ethernet.h>
 #include <EEPROM.h>
 
+#include "LED.h"
 #include "TrueRandom.h"
 #include "SoftReset.h"
 #include "AcceleroMMA7361.h"
