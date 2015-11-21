@@ -27,7 +27,7 @@ void commandInterfaceTick() {
     byte macaddress[6] = { 0 };
     getMACAddress(macaddress);
     uint32_t probeSpeed = getProbeSpeedStatistic();
-    float freeramkb = freeMemory()/1024.0;
+    uint32_t freeramkb = freeMemory();
 
     float longitude = 0;
     float latitude = 0;
