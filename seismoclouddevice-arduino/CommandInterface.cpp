@@ -28,6 +28,10 @@ void commandInterfaceTick() {
     getMACAddress(macaddress);
     uint32_t probeSpeed = getProbeSpeedStatistic();
     uint32_t freeramkb = freeMemory();
+    float latency = 0;
+    if(udpPacketBuffer[5] == PKTTYPE_GETINFO) {
+      latency = tcpLatency();
+    }
 
     float longitude = 0;
     float latitude = 0;
@@ -75,6 +79,7 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 32, &unixTimeM, 4);
         memcpy(udpPacketBuffer + 36, "1.00", 4);
         memcpy(udpPacketBuffer + 40, &freeramkb, 4);
+        memcpy(udpPacketBuffer + 44, &latency, 4);
         memcpy(udpPacketBuffer + 53, "uno", 3);
         memcpy(udpPacketBuffer + 57, "MMA7361", 7);
         memcpy(udpPacketBuffer + 65, &probeSpeed, 4);

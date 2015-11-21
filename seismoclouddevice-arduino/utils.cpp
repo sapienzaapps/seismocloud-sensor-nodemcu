@@ -27,3 +27,12 @@ void reverse4bytes(byte* memory) {
   memcpy(memory+3, &val[0], 1);
 }
 
+unsigned long tcpLatency() {
+  unsigned long starts = millis();
+  EthernetClient client;
+  // if there's a successful connection:
+  int cresult = client.connect(DEFAULTHOST, 80);
+  client.stop();
+  return millis() - starts;
+}
+
