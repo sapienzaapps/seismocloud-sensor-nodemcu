@@ -1,4 +1,4 @@
-# NOT READY FOR PRODUCTION USE
+# BETA: NOT READY FOR PRODUCTION
 
 # Arduino/Genuino sketch
 
