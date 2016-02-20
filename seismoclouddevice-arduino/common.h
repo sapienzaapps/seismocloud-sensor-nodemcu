@@ -16,6 +16,7 @@
 #include "seismometer.h"
 #include "MemoryFree.h"
 
+void checkEEPROM();
 float getLatitude();
 String getLatitudeAsString();
 String getLongitudeAsString();

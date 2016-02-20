@@ -25,6 +25,8 @@ void setup() {
   
   Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
 
+  checkEEPROM();
+
   // Check config, load MAC and lat/lon
   loadConfig();
 
