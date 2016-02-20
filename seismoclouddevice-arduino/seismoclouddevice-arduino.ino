@@ -4,10 +4,6 @@
 #include <EEPROM.h>
 #include "common.h"
 
-#define LED_RED     3
-#define LED_YELLOW  2
-#define LED_GREEN   5
-
 unsigned long lastAliveMs = 0;
 unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
@@ -48,9 +44,19 @@ void setup() {
   Serial.println(F("Enabling Ethernet link..."));
   Ethernet.begin(ethernetMac);
   
-  // print the Ethernet board/shield's IP address:
-  Serial.print(F("My IP address: "));
-  Serial.println(Ethernet.localIP());
+  // Check Ethernet link
+  if(Ethernet.localIP() == INADDR_NONE) {
+    Serial.println(F("Ethernet failed to load"));
+    while(true) {
+      LED::green(true);
+      LED::red(true);
+      LED::yellow(true);
+      delay(400);
+    }
+  } else {
+    Serial.print(F("My IP address: "));
+    Serial.println(Ethernet.localIP());
+  }
 
   Serial.println(F("Updating NTP Time"));
   do {
@@ -72,7 +78,6 @@ void setup() {
   Serial.println(F("Send first keep-alive to server..."));
   httpAliveRequest();
   lastAliveMs = millis();
-  Serial.println(F("Keep-alive sent"));
 
   if(getLatitude() == 0 && getLongitude() == 0) {
     LED::green(false);

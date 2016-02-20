@@ -8,7 +8,6 @@ uint8_t LED::redLedPin;
 uint8_t LED::blinkingLed = 0;
 unsigned long LED::lastBlink;
 bool LED::lastBlinkStatus;
-bool LED::ledAnimation = false;
 
 void LED::init(uint8_t greenLedPin, uint8_t yellowLedPin, uint8_t redLedPin) {
   LED::greenLedPin = greenLedPin;
@@ -67,12 +66,4 @@ void LED::tick() {
 }
 
 void LED::dispose() { }
-
-void LED::setLedAnimation(bool b) {
-  ledAnimation = b;
-}
-
-bool LED::getLedAnimation() {
-  return ledAnimation;
-}
 
