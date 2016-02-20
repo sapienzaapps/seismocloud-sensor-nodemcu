@@ -30,5 +30,7 @@ void loadConfig();
 void setProbeSpeedStatistic(uint32_t);
 uint32_t getProbeSpeedStatistic();
 void generateMACAddress(byte* mac);
+String getVersionAsString();
+bool readParameter(char* cfg, char* tag, char* into, int maxn);
 
 #endif

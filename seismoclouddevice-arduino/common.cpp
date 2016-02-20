@@ -163,5 +163,41 @@ String getLongitudeAsString() {
   return String(v);
 }
 
+String getVersionAsString() {
+  return "1.10";
+}
+
+
+
+bool readParameter(char* cfg, char* tag, char* into, int maxn) {
+  memset(into, 0, maxn);
+  bool ret = false;
+  char *sep = cfg;
+  do {
+    if(strlen(sep) == 0) {
+      break;
+    }
+    if(strncmp(tag, sep, strlen(tag)) == 0) {
+      ret = true;
+      int valuesize = 0;
+      char* value = strchr(sep, ':') + 1;
+      char* next = strchr(sep, '|');
+      if(next != NULL) {
+        valuesize = (next - value) - 1;
+      } else {
+        valuesize = strlen(value);
+      }
+      for(int i=0; i < maxn && i < valuesize; i++) {
+        into[i] = value[i];
+      }
+    }
+    sep = strchr(sep, '|');
+    if(sep == NULL) {
+      break;
+    }
+    sep++;
+  } while(sep != NULL);
+  return ret;
+}
 
 

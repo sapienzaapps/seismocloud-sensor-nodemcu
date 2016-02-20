@@ -4,6 +4,9 @@
 
 void seismometerInit();
 void seismometerTick();
-
+void firstTimeThresholdCalculation();
+void setSigmaIter(double i);
+double getSigmaIter();
+void resetLastPeriod();
 
 #endif

@@ -23,10 +23,16 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   
-  Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
+  Serial.print(F("Booting SeismoCloudDevice-Arduino sketch version "));
+  Serial.println(getVersionAsString());
 
   checkEEPROM();
 
+  Serial.println(F("Init seismometer and calibrate"));
+  seismometerInit();
+  firstTimeThresholdCalculation();
+
+  Serial.println(F("Loading config"));
   // Check config, load MAC and lat/lon
   loadConfig();
 
@@ -95,9 +101,6 @@ void setup() {
   Serial.print(getLatitudeAsString());
   Serial.print(F(" - Longitude: "));
   Serial.println(getLongitudeAsString());
-
-  Serial.println(F("Init seismometer and calibrate"));
-  seismometerInit();
 
   Serial.print(F("Boot completed at "));
   printUNIXTime();
