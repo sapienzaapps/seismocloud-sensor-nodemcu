@@ -8,7 +8,22 @@ float longitude = 0;
 unsigned long bootTime = 0;
 uint32_t probeSpeedStat = 0;
 
-bool checkEEPROM() {
+void checkEEPROM() {
+  EEPROM.write(0, 'S');
+  EEPROM.write(1, 'E');
+
+  if(!EEPROM.read(0) == 'S' || !EEPROM.read(1) == 'E') {
+    Serial.println(F("EEPROM failed"));
+    while(true) {
+      LED::green(false);
+      LED::red(true);
+      LED::yellow(true);
+      delay(200);
+    }
+  }
+}
+
+bool validateEEPROM() {
   return EEPROM.read(0) == 'S'
     && EEPROM.read(1) == 'E'
     && EEPROM.read(2) == 'I'
@@ -31,7 +46,7 @@ void initEEPROM() {
 }
 
 void loadConfig() {
-  bool cfg = checkEEPROM();
+  bool cfg = validateEEPROM();
   if(!cfg) {
     initEEPROM();
   } else {

@@ -25,6 +25,7 @@ LEDs can be in these different states:
 * **Yellow ONLY - blinking**: no position available - initialize Seismometer with Android/iOS App
 * **Green + Yellow + Red**: software is loading
 * **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
+* **Yellow + Red - ALL blinking**: EEPROM failed
 
 ### LED pins
 
