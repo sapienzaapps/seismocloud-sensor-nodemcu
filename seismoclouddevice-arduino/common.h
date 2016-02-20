@@ -5,6 +5,11 @@
 #include <Ethernet.h>
 #include <EEPROM.h>
 
+#define LED_RED     3
+#define LED_YELLOW  2
+#define LED_GREEN   5
+#define VERSION     "1.10"
+
 #include "LED.h"
 #include "TrueRandom.h"
 #include "SoftReset.h"

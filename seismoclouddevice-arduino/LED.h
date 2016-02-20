@@ -46,12 +46,6 @@ public:
   static void tick();
 
   /**
-   * Set if global LED animation
-   * @param s True if animation should run, false will set LED to previous status
-   */
-  static void setLedAnimation(bool s);
-
-  /**
    * Check if LED animation is running
    * @return True if LED animation is running, false otherwise
    */

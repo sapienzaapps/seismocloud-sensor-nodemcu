@@ -18,7 +18,7 @@ void checkEEPROM() {
       LED::green(false);
       LED::red(true);
       LED::yellow(true);
-      delay(200);
+      delay(400);
     }
   }
 }
@@ -164,10 +164,8 @@ String getLongitudeAsString() {
 }
 
 String getVersionAsString() {
-  return "1.10";
+  return VERSION;
 }
-
-
 
 bool readParameter(char* cfg, char* tag, char* into, int maxn) {
   memset(into, 0, maxn);

@@ -77,7 +77,7 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 6, macaddress, 6);
         memcpy(udpPacketBuffer + 28, &uptime, 4);
         memcpy(udpPacketBuffer + 32, &unixTimeM, 4);
-        memcpy(udpPacketBuffer + 36, "1.00", 4);
+        memcpy(udpPacketBuffer + 36, VERSION, 4);
         memcpy(udpPacketBuffer + 40, &freeramkb, 4);
         memcpy(udpPacketBuffer + 44, &latency, 4);
         memcpy(udpPacketBuffer + 53, "uno", 3);
