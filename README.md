@@ -8,6 +8,13 @@
 * Arduino/Genuino board (Arduino Uno with Ethernet Shield or Arduino Ethernet)
 * MMA7361 Accelerometer
 
+## Network requirements
+
+If you have any firewall in your network, please allow these ports:
+
+* TCP: 80, 443
+* UDP: 123
+
 ## How to build
 
 1. Download the source code
