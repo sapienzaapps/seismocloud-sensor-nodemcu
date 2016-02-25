@@ -33,16 +33,22 @@ bool validateEEPROM() {
 }
 
 void initEEPROM() {
+  LED::green(false);
+  LED::red(true);
+  LED::yellow(false);
+  
+  for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
+  }
+  
   EEPROM.write(0, 'S');
   EEPROM.write(1, 'E');
   EEPROM.write(2, 'I');
   EEPROM.write(3, 'S');
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
-
-  for (int i = 6 ; i < 6+4+4+6; i++) {
-    EEPROM.write(i, 0);
-  }
+  
+  LED::red(false);
 }
 
 void loadConfig() {
@@ -126,19 +132,22 @@ uint32_t getProbeSpeedStatistic() {
   return probeSpeedStat;
 }
 
-void generateMACAddress(byte *mac) {
-  *(mac+0) = 0x06; // LAA
-  *(mac+1) = (byte)(rand() % 256);
-  *(mac+2) = (byte)(rand() % 256);
-  *(mac+3) = (byte)(rand() % 256);
-  *(mac+4) = (byte)(rand() % 256);
-  *(mac+5) = (byte)(rand() % 256);
-
-  memcpy(ethernetMac, mac, 6);
+void generateMACAddress() {
+  randomSeed(analogRead(A5));
+  
+  *(ethernetMac+0) = 0x06; // LAA
+  *(ethernetMac+1) = (byte)random(0, 255);
+  *(ethernetMac+2) = (byte)random(0, 255);
+  *(ethernetMac+3) = (byte)random(0, 255);
+  *(ethernetMac+4) = (byte)random(0, 255);
+  *(ethernetMac+5) = (byte)random(0, 255);
   _saveMACAddress();
 }
 
 void getMACAddress(byte* mac) {
+  if (ethernetMac[0] == 0) {
+    generateMACAddress();
+  }
   memcpy(mac, ethernetMac, 6);
 }
 

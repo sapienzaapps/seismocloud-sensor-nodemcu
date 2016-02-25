@@ -93,6 +93,7 @@ void firstTimeThresholdCalculation() {
     addValueToAvgVar(accelero.getTotalVector());
   }
   setSigmaIter(getSigmaIter());
+  
   Serial.print(F("First time AVG, VAR and Threshold:"));
   Serial.print(getLastPeriodAVG());
   Serial.print(" ");

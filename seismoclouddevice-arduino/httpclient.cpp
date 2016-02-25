@@ -107,7 +107,7 @@ void httpRequest(char* host, unsigned short port, char* path, String postVars, c
     Serial.print(" ");
     Serial.println(cresult);
 
-    ShowSockStatus();
+    //ShowSockStatus();
   }
   if(client.connected()) {
     client.stop();

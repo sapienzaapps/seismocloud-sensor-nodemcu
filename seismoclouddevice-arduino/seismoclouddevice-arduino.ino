@@ -9,22 +9,24 @@ unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
 
 void setup() {
-  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
-  LED::green(true);
-  LED::red(true);
-  LED::yellow(true);
   // start serial port:
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   
-  Serial.print(F("Booting SeismoCloudDevice-Arduino sketch version "));
+  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
+  LED::startupBlink();
+  LED::green(false);
+  LED::red(false);
+  LED::yellow(false);
+
+  Serial.print(F("SeismoCloud-Arduino version "));
   Serial.println(getVersionAsString());
 
   checkEEPROM();
 
-  Serial.println(F("Init seismometer and calibrate"));
+  Serial.println(F("Init seismometer"));
   seismometerInit();
   firstTimeThresholdCalculation();
 
@@ -35,19 +37,13 @@ void setup() {
   byte ethernetMac[6];
   getMACAddress(ethernetMac);
 
-  if(isZero(ethernetMac, 6)) {
-    Serial.print(F("No MAC Address configured - generating a new one: "));
-    generateMACAddress(ethernetMac);
-    Serial.println(macToString(ethernetMac).c_str());
-  } else {
-    Serial.print(F("Configured MAC Address: "));
-    Serial.println(macToString(ethernetMac).c_str());
-  }
+  Serial.print(F("MAC Address: "));
+  Serial.println(macToString(ethernetMac).c_str());
 
   // give the ethernet module time to boot up:
   delay(1000);
 
-  Serial.println(F("Enabling Ethernet link..."));
+  Serial.println(F("Enabling Ethernet"));
   Ethernet.begin(ethernetMac);
   
   // Check Ethernet link
@@ -65,23 +61,24 @@ void setup() {
   }
 
   Serial.println(F("Updating NTP Time"));
+
   do {
     updateNTP();
     setBootTime(getUNIXTime());
     if(getBootTime() == 0) {
-      Serial.println(F("NTP update failed, retrying in 5 seconds..."));
+      Serial.println(F("NTP failed, retrying in 5s"));
       delay(5 * 1000);
     }
   } while(getBootTime() == 0);
 
-  Serial.print(F("Local time is "));
+  Serial.print(F("Local time: "));
   printUNIXTime();
   Serial.println();
 
-  Serial.println(F("Init command interface"));
+  Serial.println(F("Init cmd interface"));
   commandInterfaceInit();
 
-  Serial.println(F("Send first keep-alive to server..."));
+  Serial.println(F("Send keep-alive"));
   httpAliveRequest();
   lastAliveMs = millis();
 
@@ -90,21 +87,20 @@ void setup() {
     LED::red(false);
     LED::yellow(false);
     LED::setLedBlinking(LED_YELLOW);
-    Serial.println(F("No position available, waiting for GPS from phone App"));
+
+    Serial.println(F("No position set, waiting GPS from phone"));
     do {
       commandInterfaceTick();
       LED::tick();
     } while(getLatitude() == 0 && getLongitude() == 0);
-    Serial.print(F("New position: "));
     LED::clearLedBlinking();
     LED::green(true);
     LED::red(true);
     LED::yellow(true);
   }
   
-  Serial.print(F("GPS Latitude: "));
-  Serial.print(getLatitudeAsString());
-  Serial.print(F(" - Longitude: "));
+  Serial.println(F("GPS: "));
+  Serial.println(getLatitudeAsString());
   Serial.println(getLongitudeAsString());
 
   Serial.print(F("Boot completed at "));
@@ -123,14 +119,14 @@ void loop() {
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
-    Serial.print(F("Keepalive sent at "));
+    Serial.print(F("Keepalive at "));
     printUNIXTime();
     Serial.println();
     
     httpAliveRequest();
     lastAliveMs = millis();
     
-    Serial.print(F("Keepalive ACK at "));
+    Serial.print(F("ACK at "));
     printUNIXTime();
     Serial.println();
   }

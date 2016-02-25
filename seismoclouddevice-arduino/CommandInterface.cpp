@@ -17,21 +17,21 @@ void commandInterfaceTick() {
     cmdsock.read(udpPacketBuffer, PACKET_SIZE);
 
     if(memcmp("INGV\0", udpPacketBuffer, 5) != 0) {
-      Serial.println(F("Invalid magic, dropping packet"));
       return;
     }
 
     bool reboot = false;
-    unsigned long unixTimeM = getUNIXTime();
-    unsigned long uptime = getUNIXTime() - getBootTime();
     byte macaddress[6] = { 0 };
     getMACAddress(macaddress);
+    /*
+    unsigned long unixTimeM = getUNIXTime();
+    unsigned long uptime = getUNIXTime() - getBootTime();
     uint32_t probeSpeed = getProbeSpeedStatistic();
     uint32_t freeramkb = freeMemory();
     float latency = 0;
     if(udpPacketBuffer[5] == PKTTYPE_GETINFO) {
       latency = tcpLatency();
-    }
+    }*/
 
     float longitude = 0;
     float latitude = 0;
@@ -43,7 +43,7 @@ void commandInterfaceTick() {
 
         memcpy(udpPacketBuffer + 6, macaddress, 6);
         
-        memcpy(udpPacketBuffer + 12, "1.00", 4);
+        memcpy(udpPacketBuffer + 12, getVersionAsString().c_str(), 4);
         memcpy(udpPacketBuffer + 16, "uno", 3);
         break;
       case PKYTYPE_PING:
@@ -59,11 +59,6 @@ void commandInterfaceTick() {
         reverse4bytes((byte*)&latitude);
         reverse4bytes((byte*)&longitude);
         
-        Serial.print(F("Settings GPS coordinates: lat "));
-        Serial.print(latitude);
-        Serial.print(F(" lon "));
-        Serial.println(longitude);
-        
         break;
       case PKTTYPE_REBOOT:
         // Reboot
@@ -71,7 +66,7 @@ void commandInterfaceTick() {
         udpPacketBuffer[5] = PKTTYPE_OK;
         reboot = true;
         break;
-      case PKTTYPE_GETINFO:
+/*      case PKTTYPE_GETINFO:
         udpPacketBuffer[5] = PKTTYPE_GETINFO_REPLY;
 
         memcpy(udpPacketBuffer + 6, macaddress, 6);
@@ -84,9 +79,14 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 57, "MMA7361", 7);
         memcpy(udpPacketBuffer + 65, &probeSpeed, 4);
 
+        break;*/
+#ifdef RESET_ENABLED
+      case PKTTYPE_RESET:
+        initEEPROM();
+        reboot = true;
         break;
+#endif
       default:
-        Serial.println(F("Unknown command"));
         // Unknown packet or invalid command
         return;
     }
