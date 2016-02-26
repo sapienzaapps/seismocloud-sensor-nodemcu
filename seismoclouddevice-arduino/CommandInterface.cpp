@@ -17,7 +17,6 @@ void commandInterfaceTick() {
     cmdsock.read(udpPacketBuffer, PACKET_SIZE);
 
     if(memcmp("INGV\0", udpPacketBuffer, 5) != 0) {
-      Serial.println(F("Invalid magic, dropping packet"));
       return;
     }
 
@@ -43,7 +42,7 @@ void commandInterfaceTick() {
 
         memcpy(udpPacketBuffer + 6, macaddress, 6);
         
-        memcpy(udpPacketBuffer + 12, "1.00", 4);
+        memcpy(udpPacketBuffer + 12, getVersionAsString().c_str(), 4);
         memcpy(udpPacketBuffer + 16, "uno", 3);
         break;
       case PKYTYPE_PING:
@@ -58,11 +57,6 @@ void commandInterfaceTick() {
         memcpy(&longitude, udpPacketBuffer + 16, 4);
         reverse4bytes((byte*)&latitude);
         reverse4bytes((byte*)&longitude);
-        
-        Serial.print(F("Settings GPS coordinates: lat "));
-        Serial.print(latitude);
-        Serial.print(F(" lon "));
-        Serial.println(longitude);
         
         break;
       case PKTTYPE_REBOOT:
@@ -85,8 +79,13 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 65, &probeSpeed, 4);
 
         break;
+#ifdef RESET_ENABLED
+      case PKTTYPE_RESET:
+        initEEPROM();
+        reboot = true;
+        break;
+#endif
       default:
-        Serial.println(F("Unknown command"));
         // Unknown packet or invalid command
         return;
     }

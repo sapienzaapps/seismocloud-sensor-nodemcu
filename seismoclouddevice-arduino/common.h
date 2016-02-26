@@ -10,8 +10,9 @@
 #define LED_GREEN   5
 #define VERSION     "1.10"
 
+//#define RESET_ENABLED
+
 #include "LED.h"
-#include "TrueRandom.h"
 #include "SoftReset.h"
 #include "AcceleroMMA7361.h"
 #include "ntp.h"
@@ -21,6 +22,7 @@
 #include "seismometer.h"
 #include "MemoryFree.h"
 
+void initEEPROM();
 void checkEEPROM();
 float getLatitude();
 String getLatitudeAsString();
@@ -34,6 +36,6 @@ void getMACAddress(byte* mac);
 void loadConfig();
 void setProbeSpeedStatistic(uint32_t);
 uint32_t getProbeSpeedStatistic();
-void generateMACAddress(byte* mac);
+String getVersionAsString();
 
 #endif

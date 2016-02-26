@@ -17,7 +17,8 @@ typedef enum {
   PKTTYPE_SETSYSLOG = 9,
   PKTTYPE_REBOOT = 10,
   PKTTYPE_GETINFO = 11,
-  PKTTYPE_GETINFO_REPLY = 12
+  PKTTYPE_GETINFO_REPLY = 12,
+  PKTTYPE_RESET = 13
 } PacketType;
 
 void commandInterfaceInit();

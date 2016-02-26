@@ -9,17 +9,18 @@ unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
 
 void setup() {
-  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
-  LED::green(true);
-  LED::red(true);
-  LED::yellow(true);
   // start serial port:
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
+  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
+  LED::green(true);
+  LED::red(true);
+  LED::yellow(true);
   
-  Serial.println(F("Booting SeismoCloudDevice-Arduino sketch"));
+  Serial.println(F("SeismoCloud-Arduino version "));
+  Serial.println(getVersionAsString());
 
   checkEEPROM();
 
@@ -29,19 +30,13 @@ void setup() {
   byte ethernetMac[6];
   getMACAddress(ethernetMac);
 
-  if(isZero(ethernetMac, 6)) {
-    Serial.print(F("No MAC Address configured - generating a new one: "));
-    generateMACAddress(ethernetMac);
-    Serial.println(macToString(ethernetMac).c_str());
-  } else {
-    Serial.print(F("Configured MAC Address: "));
-    Serial.println(macToString(ethernetMac).c_str());
-  }
+  Serial.print(F("MAC Address: "));
+  Serial.println(macToString(ethernetMac).c_str());
 
   // give the ethernet module time to boot up:
   delay(1000);
 
-  Serial.println(F("Enabling Ethernet link..."));
+  Serial.println(F("Enabling Ethernet"));
   Ethernet.begin(ethernetMac);
   
   // Check Ethernet link
@@ -63,7 +58,7 @@ void setup() {
     updateNTP();
     setBootTime(getUNIXTime());
     if(getBootTime() == 0) {
-      Serial.println(F("NTP update failed, retrying in 5 seconds..."));
+      Serial.println(F("NTP update failed, retrying in 5s"));
       delay(5 * 1000);
     }
   } while(getBootTime() == 0);
@@ -89,7 +84,6 @@ void setup() {
       commandInterfaceTick();
       LED::tick();
     } while(getLatitude() == 0 && getLongitude() == 0);
-    Serial.print(F("New position: "));
     LED::clearLedBlinking();
     LED::green(true);
     LED::red(true);

@@ -8,16 +8,6 @@ String macToString(const byte* mac) {
   return String(buf);
 }
 
-bool isZero(byte* buf, int bufsize) {
-  bool ret = true;
-  for(int i=0; i < bufsize && ret; i++) {
-    if(buf[i] != 0) {
-      ret = false;
-    }
-  }
-  return ret;
-}
-
 void reverse4bytes(byte* memory) {
   byte val[4];
   memcpy(&val, memory, 4);
