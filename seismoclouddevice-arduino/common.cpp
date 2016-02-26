@@ -47,10 +47,7 @@ void initEEPROM() {
   EEPROM.write(3, 'S');
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
-
-  for (int i = 6 ; i < 6+4+4+6; i++) {
-    EEPROM.write(i, 0);
-  }
+  
   LED::red(false);
 }
 
