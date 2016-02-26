@@ -13,7 +13,7 @@ void httpQuakeRequest() {
   postVars += "&tsstart=";
   postVars += getUNIXTime();
   postVars += "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
-  httpRequest(DEFAULTHOST, 80, "/seismocloud/terremoto.php", postVars);
+  httpRequest(DEFAULTHOST, 80, "/seismocloud/terremoto.php", postVars, NULL, 0);
 }
 
 void httpAliveRequest() {
@@ -22,13 +22,24 @@ void httpAliveRequest() {
   byte macaddress[6];
   getMACAddress(macaddress);
   postVars += macToString(macaddress);
+  char reply[512];
+  memset(reply, 0, 512);
   
-  // TODO: parametrized version and model
-  postVars += "&model=uno&version=1.00&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
-  httpRequest(DEFAULTHOST, 80, "/seismocloud/alive.php", postVars);
+  // TODO: parametrized model
+  postVars += "&model=uno&version=" + getVersionAsString() + "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
+  httpRequest(DEFAULTHOST, 80, "/seismocloud/alive.php", postVars, reply, 512);
+
+  char buf[10];
+  bool pex = readParameter(reply, "sigma", buf, 10);
+  if(pex) {
+    setSigmaIter(atoi(buf));
+  } else {
+    setSigmaIter(getSigmaIter());
+  }
+  resetLastPeriod();
 }
 
-void httpRequest(char* host, unsigned short port, char* path, String postVars) {
+void httpRequest(char* host, unsigned short port, char* path, String postVars, char* reply, int replymax) {
   EthernetClient client;
   // if there's a successful connection:
   int cresult = client.connect(host, port);
@@ -63,12 +74,18 @@ void httpRequest(char* host, unsigned short port, char* path, String postVars) {
       // Read reply
       bool headerPass = false;
       char buf[256+1];
+      int replypointer = 0;
       while(client.available()) {
         memset(buf, 0, 256+1);
         int r = readLine(&client, buf, 256);
         if(r < -1) break;
         if(headerPass) {
-          // TODO: Read body
+          if(reply != NULL) {
+            if(replypointer + r > replymax) {
+              r = replymax - replypointer;
+            }
+            memcpy(reply, buf, r);
+          }
         } else if(r != 0) {
           // TODO: Read header
         } else {
@@ -116,9 +133,7 @@ int readLine(EthernetClient *client, char* buf, int bufmax) {
   return (readError ? -1 : i);
 }
 
-
-void ShowSockStatus()
-{
+void ShowSockStatus() {
  Serial.println();
  for (int i = 0; i < MAX_SOCK_NUM; i++) {
    Serial.print(F("Socket#"));

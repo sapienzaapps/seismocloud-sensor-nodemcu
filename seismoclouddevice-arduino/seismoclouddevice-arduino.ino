@@ -24,6 +24,11 @@ void setup() {
 
   checkEEPROM();
 
+  Serial.println(F("Init seismometer and calibrate"));
+  seismometerInit();
+  firstTimeThresholdCalculation();
+
+  Serial.println(F("Loading config"));
   // Check config, load MAC and lat/lon
   loadConfig();
 
@@ -94,9 +99,6 @@ void setup() {
   Serial.print(getLatitudeAsString());
   Serial.print(F(" - Longitude: "));
   Serial.println(getLongitudeAsString());
-
-  Serial.println(F("Init seismometer and calibrate"));
-  seismometerInit();
 
   Serial.print(F("Boot completed at "));
   printUNIXTime();
