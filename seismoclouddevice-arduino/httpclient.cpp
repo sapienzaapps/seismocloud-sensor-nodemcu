@@ -24,7 +24,7 @@ void httpAliveRequest() {
   postVars += macToString(macaddress);
   
   // TODO: parametrized version and model
-  postVars += "&model=uno&version=1.00&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
+  postVars += "&model=uno&version=" + getVersionAsString() + "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
   httpRequest(DEFAULTHOST, 80, "/seismocloud/alive.php", postVars);
 }
 
