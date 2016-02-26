@@ -8,7 +8,7 @@
 #define LED_RED     3
 #define LED_YELLOW  2
 #define LED_GREEN   5
-#define VERSION     "1.10"
+#define VERSION     "1.20"
 
 //#define RESET_ENABLED
 
