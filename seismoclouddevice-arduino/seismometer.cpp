@@ -2,11 +2,11 @@
 #include "common.h"
 
 AcceleroMMA7361 accelero;
-double lastPeriodAvg = 0;
-double lastPeriodSQM = 0;
+double partialAvg = 0;
+double partialStdDev = 0;
 unsigned int elements = 0;
-double quakeThreshold = 0.3;
-double sigmaIter = 1;
+double quakeThreshold = 1;
+double sigmaIter = 3.0;
 
 void addValueToAvgVar(double val);
 
@@ -26,10 +26,11 @@ void seismometerInit() {
 void seismometerTick() {
 
   int accelVector = accelero.getTotalVector();
+  bool overThreshold = accelVector > quakeThreshold;
 
   addValueToAvgVar(accelVector);
 
-  if(accelVector > quakeThreshold) {
+  if(overThreshold) {
     LED::red(true);
     // QUAKE
     Serial.print(F("QUAKE: "));
@@ -45,60 +46,36 @@ double getQuakeThreshold() {
   return quakeThreshold;
 }
 
-double getLastPeriodAVG() {
-  return lastPeriodAvg;
+double getCurrentAVG() {
+  return partialAvg;
 }
 
-double getLastPeriodVAR() {
-  return lastPeriodSQM / elements;
+double getCurrentSTDDEV() {
+  return sqrt(partialStdDev / (elements - 1));
 }
 
-// TODO: read from alive.php
 void setSigmaIter(double i) {
-  double newquakeThreshold = getLastPeriodAVG() + (getLastPeriodVAR() * i);
-  if(newquakeThreshold != NAN) {
-    Serial.print(F("Attempting to set quake threshold to "));
-    Serial.print(newquakeThreshold);
-    Serial.print(F(" (old "));
-    Serial.print(quakeThreshold);
-    Serial.print(F(") iter "));
-    Serial.print(i);
-    Serial.print(F(" elem "));
-    Serial.println(elements);
-    sigmaIter = i;
-    quakeThreshold = newquakeThreshold;
-  }
+  sigmaIter = i;
 }
 
 void addValueToAvgVar(double val) {
-  double precAvg = lastPeriodAvg;
-
   elements++;
-  lastPeriodAvg = precAvg + ((val - precAvg)/elements);
-  lastPeriodSQM = lastPeriodSQM + ((val - precAvg)*(val - lastPeriodAvg));
+  double delta = val - partialAvg;
+  partialAvg += delta / elements;
+  partialStdDev += delta * (val - partialAvg);
+  if (elements > 1) {
+    quakeThreshold = partialAvg + (getCurrentSTDDEV() * getSigmaIter());
+  }
 }
 
 void resetLastPeriod() {
-  lastPeriodAvg = 0;
-  lastPeriodSQM = 0;
+  partialAvg = 0;
+  partialStdDev = 0;
   elements = 0;
 }
 
 double getSigmaIter() {
   return sigmaIter;
-}
-
-void firstTimeThresholdCalculation() {
-  for(int i=0; i < 200; i++) {
-    addValueToAvgVar(accelero.getTotalVector());
-  }
-  setSigmaIter(getSigmaIter());
-  Serial.print(F("First time AVG, VAR and Threshold:"));
-  Serial.print(getLastPeriodAVG());
-  Serial.print(" ");
-  Serial.print(getLastPeriodVAR());
-  Serial.print(" ");
-  Serial.println(quakeThreshold);
 }
 
 
