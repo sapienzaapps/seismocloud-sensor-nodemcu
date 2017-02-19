@@ -13,7 +13,7 @@ void httpQuakeRequest() {
   postVars += "&tsstart=";
   postVars += getUNIXTime();
   postVars += "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
-  httpRequest(DEFAULTHOST, 80, "/seismocloud/terremoto.php", postVars, NULL, 0);
+  httpRequest(DEFAULTHOST, DEFAULTPORT, "/seismocloud/terremoto.php", postVars, NULL, 0);
 }
 
 void httpAliveRequest() {
@@ -23,12 +23,12 @@ void httpAliveRequest() {
   getMACAddress(macaddress);
   postVars += macToString(macaddress);
 
-  char reply[512];
-  memset(reply, 0, 512);
+  char reply[64];
+  memset(reply, 0, 64);
   
   // TODO: parametrized model
   postVars += "&model=uno&version=" + getVersionAsString() + "&lat=" + getLatitudeAsString() + "&lon=" + getLongitudeAsString();
-  httpRequest(DEFAULTHOST, 80, "/seismocloud/alive.php", postVars, reply, 512);
+  httpRequest(DEFAULTHOST, DEFAULTPORT, "/seismocloud/alive.php", postVars, reply, 64);
 
   char buf[10];
   bool pex = readParameter(reply, "sigma", buf, 10);
@@ -71,7 +71,9 @@ void httpRequest(char* host, unsigned short port, char* path, String postVars, c
     unsigned long connms = millis();
 
     while(!client.available() && millis() - connms < 10*1000);
-    if(client.available()) {
+    if(replymax <= 0) {
+      // Do nothing
+    } else if(client.available()) {
       // Read reply
       bool headerPass = false;
       char buf[256+1];

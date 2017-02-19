@@ -26,20 +26,20 @@ void seismometerInit() {
 void seismometerTick() {
 
   int accelVector = accelero.getTotalVector();
-  bool overThreshold = accelVector > quakeThreshold;
-
-  addValueToAvgVar(accelVector);
-
-  if(overThreshold) {
+  
+  if(accelVector > quakeThreshold) {
     LED::red(true);
     // QUAKE
     Serial.print(F("QUAKE: "));
-    Serial.println(accelVector);
+    Serial.print(accelVector);
+    Serial.print(F(" > "));
+    Serial.println(quakeThreshold);
     httpQuakeRequest();
     delay(5000);
     Serial.println(F("QUAKE Timeout END"));
     LED::red(false);
   }
+  addValueToAvgVar(accelVector);
 }
 
 double getQuakeThreshold() {
