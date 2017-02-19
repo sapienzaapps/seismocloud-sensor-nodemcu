@@ -26,9 +26,8 @@ void setup() {
 
   checkEEPROM();
 
-  Serial.println(F("Init seismometer"));
+  Serial.println(F("Init seismometer and calibrate"));
   seismometerInit();
-  firstTimeThresholdCalculation();
 
   Serial.println(F("Loading config"));
   // Check config, load MAC and lat/lon
