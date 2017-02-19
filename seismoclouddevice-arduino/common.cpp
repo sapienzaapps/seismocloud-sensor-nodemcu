@@ -141,7 +141,6 @@ void generateMACAddress() {
   *(ethernetMac+3) = (byte)random(0, 255);
   *(ethernetMac+4) = (byte)random(0, 255);
   *(ethernetMac+5) = (byte)random(0, 255);
-  
   _saveMACAddress();
 }
 
@@ -207,3 +206,5 @@ bool readParameter(char* cfg, char* tag, char* into, int maxn) {
   } while(sep != NULL);
   return ret;
 }
+
+

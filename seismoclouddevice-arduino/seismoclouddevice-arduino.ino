@@ -14,16 +14,23 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
-  LED::green(true);
-  LED::red(true);
-  LED::yellow(true);
   
-  Serial.println(F("SeismoCloud-Arduino version "));
+  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
+  LED::startupBlink();
+  LED::green(false);
+  LED::red(false);
+  LED::yellow(false);
+
+  Serial.print(F("SeismoCloud-Arduino version "));
   Serial.println(getVersionAsString());
 
   checkEEPROM();
 
+  Serial.println(F("Init seismometer"));
+  seismometerInit();
+  firstTimeThresholdCalculation();
+
+  Serial.println(F("Loading config"));
   // Check config, load MAC and lat/lon
   loadConfig();
 
@@ -54,23 +61,24 @@ void setup() {
   }
 
   Serial.println(F("Updating NTP Time"));
+
   do {
     updateNTP();
     setBootTime(getUNIXTime());
     if(getBootTime() == 0) {
-      Serial.println(F("NTP update failed, retrying in 5s"));
+      Serial.println(F("NTP failed, retrying in 5s"));
       delay(5 * 1000);
     }
   } while(getBootTime() == 0);
 
-  Serial.print(F("Local time is "));
+  Serial.print(F("Local time: "));
   printUNIXTime();
   Serial.println();
 
-  Serial.println(F("Init command interface"));
+  Serial.println(F("Init cmd interface"));
   commandInterfaceInit();
 
-  Serial.println(F("Send first keep-alive to server..."));
+  Serial.println(F("Send keep-alive"));
   httpAliveRequest();
   lastAliveMs = millis();
 
@@ -79,6 +87,7 @@ void setup() {
     LED::red(false);
     LED::yellow(false);
     LED::setLedBlinking(LED_YELLOW);
+
     Serial.println(F("No position available, waiting for GPS from phone App"));
     do {
       commandInterfaceTick();
@@ -90,13 +99,9 @@ void setup() {
     LED::yellow(true);
   }
   
-  Serial.print(F("GPS Latitude: "));
-  Serial.print(getLatitudeAsString());
-  Serial.print(F(" - Longitude: "));
+  Serial.println(F("GPS: "));
+  Serial.println(getLatitudeAsString());
   Serial.println(getLongitudeAsString());
-
-  Serial.println(F("Init seismometer and calibrate"));
-  seismometerInit();
 
   Serial.print(F("Boot completed at "));
   printUNIXTime();
@@ -114,14 +119,14 @@ void loop() {
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
-    Serial.print(F("Keepalive sent at "));
+    Serial.print(F("Keepalive at "));
     printUNIXTime();
     Serial.println();
     
     httpAliveRequest();
     lastAliveMs = millis();
     
-    Serial.print(F("Keepalive ACK at "));
+    Serial.print(F("ACK at "));
     printUNIXTime();
     Serial.println();
   }

@@ -21,16 +21,17 @@ void commandInterfaceTick() {
     }
 
     bool reboot = false;
-    unsigned long unixTimeM = getUNIXTime();
-    unsigned long uptime = getUNIXTime() - getBootTime();
     byte macaddress[6] = { 0 };
     getMACAddress(macaddress);
+    /*
+    unsigned long unixTimeM = getUNIXTime();
+    unsigned long uptime = getUNIXTime() - getBootTime();
     uint32_t probeSpeed = getProbeSpeedStatistic();
     uint32_t freeramkb = freeMemory();
     float latency = 0;
     if(udpPacketBuffer[5] == PKTTYPE_GETINFO) {
       latency = tcpLatency();
-    }
+    }*/
 
     float longitude = 0;
     float latitude = 0;
@@ -65,7 +66,7 @@ void commandInterfaceTick() {
         udpPacketBuffer[5] = PKTTYPE_OK;
         reboot = true;
         break;
-      case PKTTYPE_GETINFO:
+/*      case PKTTYPE_GETINFO:
         udpPacketBuffer[5] = PKTTYPE_GETINFO_REPLY;
 
         memcpy(udpPacketBuffer + 6, macaddress, 6);
@@ -78,7 +79,7 @@ void commandInterfaceTick() {
         memcpy(udpPacketBuffer + 57, "MMA7361", 7);
         memcpy(udpPacketBuffer + 65, &probeSpeed, 4);
 
-        break;
+        break;*/
 #ifdef RESET_ENABLED
       case PKTTYPE_RESET:
         initEEPROM();
