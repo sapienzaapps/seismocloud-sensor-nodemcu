@@ -1,5 +1,7 @@
 # BETA: NOT READY FOR PRODUCTION
 
+Please mind that this version will not self-upgrade - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
+
 # Arduino/Genuino sketch
 
 ## Requirements
@@ -17,7 +19,7 @@ If you have any firewall in your network, please allow these ports:
 
 ## How to build
 
-1. Download the source code
+1. Download the source code (for stable releases, please checkout latest git tag)
 2. Open project in Arduino IDE
 3. Compile and upload in your Arduino Board
 
