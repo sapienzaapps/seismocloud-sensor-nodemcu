@@ -21,6 +21,8 @@
 
 #include "AcceleroMMA7361.h"
 
+#ifdef IS_ARDUINO
+
 /// constructor
 AcceleroMMA7361::AcceleroMMA7361()
 {
@@ -371,3 +373,6 @@ int AcceleroMMA7361::getTotalVector()
 {
   return sqrt(square(_mapMMA7361G(getXRaw())) + square(_mapMMA7361G(getYRaw())) + square(_mapMMA7361G(getZRaw())));
 }
+
+#endif
+

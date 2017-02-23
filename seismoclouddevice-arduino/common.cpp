@@ -34,10 +34,16 @@ void initEEPROM() {
   LED::green(false);
   LED::red(true);
   LED::yellow(false);
-  
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
+
+  #if IS_ARDUINO
+  for (int i = 0 ; i < EEPROM.length(); i++) {
     EEPROM.write(i, 0);
   }
+  #else
+  for (int i = 0 ; i < 100; i++) {
+    EEPROM.write(i, 0);
+  }
+  #endif
   
   EEPROM.write(0, 'S');
   EEPROM.write(1, 'E');
@@ -109,7 +115,11 @@ uint32_t getProbeSpeedStatistic() {
 #endif
 
 void generateMACAddress() {
+#ifdef IS_ARDUINO
   randomSeed(analogRead(A5));
+#else
+  randomSeed(analogRead(A0));
+#endif
   
   *(ethernetMac+0) = 0x06; // LAA
   *(ethernetMac+1) = (byte)random(0, 255);
@@ -235,7 +245,7 @@ void printUNIXTime() {
   Serial.print(buf);
 }
 
-
+#ifdef IS_ARDUINO
 /* Copyright (C) 2012 by Victor Aprea <victor.aprea@wickeddevice.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -268,4 +278,5 @@ void wdt_init(void)
 
     return;
 }
+#endif
 

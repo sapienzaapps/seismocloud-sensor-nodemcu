@@ -3,12 +3,16 @@
  * You can find user-configurable switch into  common.h
  * Puoi trovare alcune configurazioni di compilazione in  common.h
  */
- 
+
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
 #include <PubSubClient.h>
 #include "common.h"
+#ifdef IS_ESP
+#include <Wire.h>
+void(* soft_restart) (void) = 0;
+#endif
 
 unsigned long lastAliveMs = 0;
 
@@ -23,12 +27,14 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  
+
+#ifdef IS_ARDUINO
   LED::init(LED_GREEN, LED_YELLOW, LED_RED);
   LED::startupBlink();
   LED::green(false);
   LED::red(false);
   LED::yellow(false);
+#endif
 
   Serial.print(F("SeismoCloud-Arduino version "));
   Serial.println(VERSION);
@@ -101,6 +107,12 @@ void setup() {
 }
 
 void loop() {
+  /*
+   * If ESP reboots and not resuming, use:
+   * if (millis () >= 28800000) {
+   *   soft_restart();
+   * }
+   */
   commandInterfaceTick();
   LED::tick();
 

@@ -42,6 +42,9 @@
 #ifndef AcceleroMMA7361_h
 #define AcceleroMMA7361_h
 
+#include "common.h"
+#ifdef IS_ARDUINO
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
 #else
@@ -93,4 +96,8 @@ class AcceleroMMA7361
     boolean _sleep;
     boolean _sensi;
 };
+
 #endif
+
+#endif
+

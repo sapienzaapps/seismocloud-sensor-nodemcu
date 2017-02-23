@@ -24,8 +24,20 @@
 
 #define VERSION     "1.20"
 
-#include "LED.h"
+#ifndef ESP8266
+#define IS_ARDUINO
+#else
+#define IS_ESP
+#endif
+
+#ifdef IS_ARDUINO
 #include "AcceleroMMA7361.h"
+#else
+#include "MPU6050.h"
+#define min(X,Y) ((X)<(Y) ? (X) : (Y))
+#endif
+
+#include "LED.h"
 #include "CommandInterface.h"
 #include "seismometer.h"
 #include "api.h"
@@ -38,6 +50,7 @@ void getMACAddress(byte* mac);
 const char* getDeviceId();
 void loadConfig();
 
+#ifdef IS_ARDUINO
 #include <avr/wdt.h>
 
 #define soft_restart()        \
@@ -48,6 +61,7 @@ do                          \
     {                       \
     }                       \
 } while(0)
+#endif
 
 void reverse4bytes(byte* memory);
 void printUNIXTime();
