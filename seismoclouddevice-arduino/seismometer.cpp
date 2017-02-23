@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "api.h"
 
 AcceleroMMA7361 accelero;
 double partialAvg = 0;
@@ -34,7 +35,7 @@ void seismometerTick() {
     Serial.print(accelVector);
     Serial.print(F(" > "));
     Serial.println(quakeThreshold);
-    httpQuakeRequest();
+    apiQuake();
     delay(5000);
     Serial.println(F("QUAKE Timeout END"));
     LED::red(false);

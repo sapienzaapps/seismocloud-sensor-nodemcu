@@ -1,8 +1,25 @@
 
+/** 
+ *  Configurazione utente: qui è possibile personalizzare alcuni aspetti
+ *  User configuration: here you can customize some things
+ */
+
+#define LED_RED     3
+#define LED_YELLOW  2
+#define LED_GREEN   5
+
+/**
+ * Fine parte configurabile
+ * End config section
+ */
+
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
+#include <PubSubClient.h>
+
 #include "common.h"
+#include "api.h"
 
 unsigned long lastAliveMs = 0;
 unsigned long lastProbeMs = 0;
@@ -37,7 +54,7 @@ void setup() {
   getMACAddress(ethernetMac);
 
   Serial.print(F("MAC Address: "));
-  Serial.println(macToString(ethernetMac).c_str());
+  Serial.println(getDeviceId());
 
   // give the ethernet module time to boot up:
   delay(1000);
@@ -59,16 +76,22 @@ void setup() {
     Serial.println(Ethernet.localIP());
   }
 
-  Serial.println(F("Updating NTP Time"));
+  apiConnect();
 
-  do {
-    updateNTP();
+  Serial.println(F("Updating Time"));
+
+  //do {
+    apiTimeReq();
+    // TODO: add timeout
+    while(getUNIXTime() == 0) {
+      apiTick();
+    }
     setBootTime(getUNIXTime());
-    if(getBootTime() == 0) {
-      Serial.println(F("NTP failed, retrying in 5s"));
+    /*if(getBootTime() == 0) {
+      Serial.println(F("Time update failed, retrying in 5s"));
       delay(5 * 1000);
     }
-  } while(getBootTime() == 0);
+  } while(getBootTime() == 0);*/
 
   Serial.print(F("Local time: "));
   printUNIXTime();
@@ -78,7 +101,7 @@ void setup() {
   commandInterfaceInit();
 
   Serial.println(F("Send keep-alive"));
-  httpAliveRequest();
+  apiAlive();
   lastAliveMs = millis();
 
   if(getLatitude() == 0 && getLongitude() == 0) {
@@ -110,11 +133,10 @@ void setup() {
 }
 
 void loop() {
-  // Update NTP (if necessary)
-  updateNTP();
-
   commandInterfaceTick();
   LED::tick();
+
+  apiTick();
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
@@ -122,12 +144,8 @@ void loop() {
     printUNIXTime();
     Serial.println();
     
-    httpAliveRequest();
+    apiAlive();
     lastAliveMs = millis();
-    
-    Serial.print(F("ACK at "));
-    printUNIXTime();
-    Serial.println();
   }
 
   // Detection

@@ -2,6 +2,7 @@
 #include "common.h"
 
 byte ethernetMac[6] = { 0 };
+char deviceid[13] = { 0 };
 
 float latitude = 0;
 float longitude = 0;
@@ -51,6 +52,11 @@ void initEEPROM() {
   LED::red(false);
 }
 
+void _updateMacStr() {
+  memset(deviceid, 0, 13);
+  snprintf(deviceid, 12, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+}
+
 void loadConfig() {
   bool cfg = validateEEPROM();
   if(!cfg) {
@@ -75,6 +81,7 @@ void loadConfig() {
     for (int i = 0; i < 6; i++) {
       ethernetMac[i] = EEPROM.read(30+i);
     }
+    _updateMacStr();
   }
 }
 
@@ -147,8 +154,13 @@ void generateMACAddress() {
 void getMACAddress(byte* mac) {
   if (ethernetMac[0] == 0) {
     generateMACAddress();
+    _updateMacStr();
   }
   memcpy(mac, ethernetMac, 6);
+}
+
+const char* getDeviceId() {
+  return deviceid;
 }
 
 void ftoa(char* buf, int m, float fnum) {
@@ -175,36 +187,4 @@ String getLongitudeAsString() {
 String getVersionAsString() {
   return String(VERSION);
 }
-
-bool readParameter(char* cfg, char* tag, char* into, int maxn) {
-  memset(into, 0, maxn);
-  bool ret = false;
-  char *sep = cfg;
-  do {
-    if(strlen(sep) == 0) {
-      break;
-    }
-    if(strncmp(tag, sep, strlen(tag)) == 0) {
-      ret = true;
-      int valuesize = 0;
-      char* value = strchr(sep, ':') + 1;
-      char* next = strchr(sep, '|');
-      if(next != NULL) {
-        valuesize = (next - value) - 1;
-      } else {
-        valuesize = strlen(value);
-      }
-      for(int i=0; i < maxn && i < valuesize; i++) {
-        into[i] = value[i];
-      }
-    }
-    sep = strchr(sep, '|');
-    if(sep == NULL) {
-      break;
-    }
-    sep++;
-  } while(sep != NULL);
-  return ret;
-}
-
 

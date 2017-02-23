@@ -4,23 +4,17 @@
 
 #include <Ethernet.h>
 #include <EEPROM.h>
+#include <PubSubClient.h>
 
-#define LED_RED     3
-#define LED_YELLOW  2
-#define LED_GREEN   5
 #define VERSION     "1.20"
-
-//#define RESET_ENABLED
+// #define RESET_ENABLED
 
 #include "LED.h"
-#include "SoftReset.h"
 #include "AcceleroMMA7361.h"
-#include "ntp.h"
 #include "utils.h"
-#include "httpclient.h"
 #include "CommandInterface.h"
 #include "seismometer.h"
-#include "MemoryFree.h"
+#include "api.h"
 
 void initEEPROM();
 void checkEEPROM();
@@ -33,10 +27,10 @@ void setBootTime(unsigned long);
 void setLatitude(float l);
 void setLongitude(float l);
 void getMACAddress(byte* mac);
+const char* getDeviceId();
 void loadConfig();
 void setProbeSpeedStatistic(uint32_t);
 uint32_t getProbeSpeedStatistic();
 String getVersionAsString();
-bool readParameter(char* cfg, char* tag, char* into, int maxn);
 
 #endif
