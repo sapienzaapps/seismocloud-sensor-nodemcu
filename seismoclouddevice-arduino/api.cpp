@@ -28,8 +28,8 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
        * Offset       Byte     Desc
        * 1            4        Sigma (IEEE 754)
        */
-      double sigma;
-      memset(&sigma, payload+1, 4);
+      float sigma;
+      memcpy(&sigma, payload+1, 4);
       setSigmaIter(sigma);
       Serial.print(F("Setting sigma to "));
       Serial.println(sigma);
