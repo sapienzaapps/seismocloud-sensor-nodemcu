@@ -16,9 +16,7 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
 
   switch (payload[0]) {
     case API_TIMERESP:
-      memset(apiBuffer, 0, API_BUFFER_SIZE);
-      memcpy(&apiBuffer, payload+2, payload[1]);
-      lastNTPTime = atol(apiBuffer);
+      memcpy(&lastNTPTime, payload+1, 4);
       Serial.println(lastNTPTime);
       lastNTPMillis = millis();
       break;
