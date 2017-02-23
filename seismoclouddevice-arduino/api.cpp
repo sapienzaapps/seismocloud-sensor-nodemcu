@@ -115,8 +115,6 @@ void apiAlive() {
    * #          len(mod)  device model
    * #          1         version length
    * #          len(ver)  version as ASCII string
-   * #          4         latitude (IEEE 754 float)
-   * #          4         longitude (IEEE 754 float)
    * 
    */
   memset(apiBuffer, 0, API_BUFFER_SIZE);
@@ -143,12 +141,12 @@ void apiAlive() {
   j += strlen(VERSION);
 
   // Lat&lon
-  float l = getLatitude();
+  /*float l = getLatitude();
   memcpy(apiBuffer+j, &l, 4);
   j += 4;
   l = getLongitude();
   memcpy(apiBuffer+j, &l, 4);
-  j += 4;
+  j += 4;*/
   
   mqttClient.publish("server", apiBuffer, j);
 }
@@ -166,12 +164,12 @@ void apiQuake() {
   j += strlen(getDeviceId());
 
   // Lat&lon
-  float l = getLatitude();
+  /*float l = getLatitude();
   memcpy(apiBuffer+j, &l, 4);
   j += 4;
   l = getLongitude();
   memcpy(apiBuffer+j, &l, 4);
-  j += 4;
+  j += 4;*/
   
   mqttClient.publish("server", apiBuffer, j);
 }

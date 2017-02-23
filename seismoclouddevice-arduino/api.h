@@ -1,4 +1,7 @@
 
+#ifndef __API_H
+#define __API_H
+
 #include "common.h"
 
 #define API_KEEPALIVE   1
@@ -14,3 +17,5 @@ void apiTimeReq();
 unsigned long getUNIXTime();
 void apiTick();
 
+
+#endif

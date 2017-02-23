@@ -1,29 +1,21 @@
 
-/** 
- *  Configurazione utente: qui è possibile personalizzare alcuni aspetti
- *  User configuration: here you can customize some things
- */
-
-#define LED_RED     3
-#define LED_YELLOW  2
-#define LED_GREEN   5
-
 /**
- * Fine parte configurabile
- * End config section
+ * You can find user-configurable switch into  common.h
+ * Puoi trovare alcune configurazioni di compilazione in  common.h
  */
-
+ 
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
 #include <PubSubClient.h>
-
 #include "common.h"
-#include "api.h"
 
 unsigned long lastAliveMs = 0;
+
+#ifdef DEBUG
 unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
+#endif
 
 void setup() {
   // start serial port:
@@ -39,7 +31,7 @@ void setup() {
   LED::yellow(false);
 
   Serial.print(F("SeismoCloud-Arduino version "));
-  Serial.println(getVersionAsString());
+  Serial.println(VERSION);
 
   checkEEPROM();
 
@@ -65,12 +57,9 @@ void setup() {
   // Check Ethernet link
   if(Ethernet.localIP() == INADDR_NONE) {
     Serial.println(F("Ethernet failed to load"));
-    while(true) {
-      LED::green(true);
-      LED::red(true);
-      LED::yellow(true);
-      delay(400);
-    }
+    delay(2000);
+    soft_restart();
+    while(true);
   } else {
     Serial.print(F("My IP address: "));
     Serial.println(Ethernet.localIP());
@@ -80,18 +69,19 @@ void setup() {
 
   Serial.println(F("Updating Time"));
 
-  //do {
-    apiTimeReq();
-    // TODO: add timeout
-    while(getUNIXTime() == 0) {
-      apiTick();
-    }
-    setBootTime(getUNIXTime());
-    /*if(getBootTime() == 0) {
-      Serial.println(F("Time update failed, retrying in 5s"));
-      delay(5 * 1000);
-    }
-  } while(getBootTime() == 0);*/
+  apiTimeReq();
+  for(int i=0; i < 200 && getUNIXTime() == 0; i++) {
+    apiTick();
+    delay(100);
+  }
+  if (getUNIXTime() == 0) {
+    Serial.println(F("Timeout updating time, reboot"));
+    delay(2000);
+    soft_restart();
+    while(true);
+  }
+  
+  setBootTime(getUNIXTime());
 
   Serial.print(F("Local time: "));
   printUNIXTime();
@@ -104,29 +94,7 @@ void setup() {
   apiAlive();
   lastAliveMs = millis();
 
-  if(getLatitude() == 0 && getLongitude() == 0) {
-    LED::green(false);
-    LED::red(false);
-    LED::yellow(false);
-    LED::setLedBlinking(LED_YELLOW);
-
-    Serial.println(F("No position available, waiting for GPS from phone App"));
-    do {
-      commandInterfaceTick();
-      LED::tick();
-    } while(getLatitude() == 0 && getLongitude() == 0);
-    LED::clearLedBlinking();
-    LED::green(true);
-    LED::red(true);
-    LED::yellow(true);
-  }
-  
-  Serial.println(F("GPS: "));
-  Serial.println(getLatitudeAsString());
-  Serial.println(getLongitudeAsString());
-
-  Serial.print(F("Boot completed at "));
-  printUNIXTime();
+  Serial.println(F("Boot completed"));
   Serial.println();
   LED::startupBlink();
   LED::green(true);
@@ -150,11 +118,13 @@ void loop() {
 
   // Detection
   seismometerTick();
+#ifdef DEBUG
   if(millis() - lastProbeMs >= 1000) {
     lastProbeMs = millis();
     setProbeSpeedStatistic(probeCount);
     probeCount = 0;
   }
   probeCount++;
+#endif
 }
 

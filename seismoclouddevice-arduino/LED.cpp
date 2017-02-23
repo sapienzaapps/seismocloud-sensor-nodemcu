@@ -65,5 +65,4 @@ void LED::tick() {
   }
 }
 
-void LED::dispose() { }
 
