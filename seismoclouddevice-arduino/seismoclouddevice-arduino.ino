@@ -35,6 +35,7 @@ uint32_t probeCount = 0;
 #endif
 
 // TODO: https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
+// TODO: use internal LED for status?
 
 void setup() {
   // start serial port:
