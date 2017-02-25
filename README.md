@@ -1,51 +1,36 @@
 # BETA: NOT READY FOR PRODUCTION
 
-Please mind that this version will not self-upgrade - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
+Please mind that this version will not self-upgrade yet - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
 
-# Arduino/Genuino sketch
+# Arduino/Genuino/NodeMCU/ESP8266 sketch
 
-## Requirements
+You can use this sketch for Arduino/Genuino or NodeMCU/ESP8266 boards.
+
+## Hardware: assemble an Arduino/Genuino
+
+### Requirements
 
 * Arduino/Genuino IDE
 * Arduino/Genuino board (Arduino Uno with Ethernet Shield or Arduino Ethernet)
 * MMA7361 Accelerometer
+* (optionals) 3 LEDs (red-green-yellow) with 3 resistors
 
-## Network requirements
+### LEDs
 
-If you have any firewall in your network, please allow these ports:
+Remember to put a resistor with LED (after/before is not really important) to limit
+current flowing, otherwise you may damage the Arduino board.
 
-* TCP: 80, 443
-* UDP: 123
-
-## How to build
-
-1. Download the source code (for stable releases, please checkout latest git tag)
-2. Open project in Arduino IDE
-3. Compile and upload in your Arduino Board
-
-# Hardware
-## LEDs
-
-LEDs can be in these different states:
-
-* **Green**: device is ready
-* **Green + Yellow**: device is ready but there is an issue connecting to SeismoCloud APIs
-* **Green + Red (only for about 5 seconds)**: shake detected
-* **Yellow ONLY - blinking**: no position available - initialize Seismometer with Android/iOS App
-* **Green + Yellow + Red**: software is loading
-* **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
-* **Green + Yellow + Red - ALL blinking slow**: network init failed
-* **Yellow + Red - ALL blinking**: EEPROM failed
-
-### LED pins
+By default, LED pins are:
 
 * Pin 2 : Yellow
 * Pin 5 : Green
 * Pin 3 : Red
 
-Please note that some pins are reserved to Ethernet (SPI). If you use different boards (eg. Arduino Yun, etc), please refer to Arduino documentation. You can change LED pin numbers into main sketch file (`seismoclouddevice-arduino.ino`).
+You can change LED pins into `common.h`. Note that some pins are reserved to Ethernet (SPI).
 
-## Link Accelerometer MMA7361 to Arduino
+If you use different boards (eg. Arduino Yun, etc), please refer to Arduino documentation.
+
+### Accelerometer MMA7361
 
 Link these pins from Accelerometer MMA7361 to Arduino board:
 
@@ -57,3 +42,52 @@ Link these pins from Accelerometer MMA7361 to Arduino board:
 * Z: A2
 
 Loop back **3v3** pin to **SLP** on Accelerometer.
+
+## Hardware: assemble a NodeMCU/ESP8266
+
+### Requirements for NodeMCU/ESP8266
+
+* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
+	* Open *Preferences* window (from *File* menu)
+	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
+	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select your ESP8266 board from *Tools* > *Board* menu after installation).
+* ESP8266 board
+* MPU6050 Accelerometer
+
+### Accelerometer MPU6050
+
+Link these pins from Accelerometer MPU6050 to Arduino board:
+
+* 3v3: 3v3
+* GND: GND
+* SDA: D4
+* SCL: D5
+
+## Software
+
+### Network requirements
+
+If you have any firewall in your network, please allow these ports:
+
+* TCP: 8883 (outgoing)
+
+### Build and upload code
+
+1. Download the source code (for stable releases, please checkout latest git tag)
+2. Open project in Arduino IDE
+3. Choose the right **Port** and **Board** into **Tools** menu
+4. Compile and upload (2nd button below menus) in your board
+5. Open SeismoCloud app and register your device. Enjoy!
+
+### LED status description (Arduino-only)
+
+LEDs can be in these different states:
+
+* **Green**: device is ready
+* **Green + Yellow**: device is ready but there is an issue connecting to SeismoCloud APIs
+* **Green + Red (only for about 5 seconds)**: shake detected
+* **Yellow ONLY - blinking**: no position available - initialize Seismometer with Android/iOS App
+* **Green + Yellow + Red**: software is loading
+* **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
+* **Green + Yellow + Red - ALL blinking slow**: network init failed
+* **Yellow + Red - ALL blinking**: EEPROM failed

@@ -35,15 +35,15 @@ void initEEPROM() {
   LED::red(true);
   LED::yellow(false);
 
-  #if IS_ARDUINO
+#ifdef IS_ARDUINO
   for (int i = 0 ; i < EEPROM.length(); i++) {
     EEPROM.write(i, 0);
   }
-  #else
+#else
   for (int i = 0 ; i < 100; i++) {
     EEPROM.write(i, 0);
   }
-  #endif
+#endif
   
   EEPROM.write(0, 'S');
   EEPROM.write(1, 'E');
