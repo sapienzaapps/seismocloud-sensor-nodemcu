@@ -5,13 +5,26 @@
  */
 
 #include <SPI.h>
-#include <Ethernet.h>
 #include <EEPROM.h>
 #include <PubSubClient.h>
 #include "common.h"
+
+#ifdef IS_ARDUINO
+#include <Ethernet.h>
+#else
 #ifdef IS_ESP
 #include <Wire.h>
-void(* soft_restart) (void) = 0;
+//ESP8266 Core WiFi Library
+#include <ESP8266WiFi.h>
+//Local DNS Server used for redirecting all requests to the configuration portal
+#include <DNSServer.h>
+//Local WebServer used to serve the configuration portal
+#include <ESP8266WebServer.h>
+//https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+#include <WiFiManager.h>
+#else
+#error "Unsupported platform"
+#endif
 #endif
 
 unsigned long lastAliveMs = 0;
@@ -21,9 +34,11 @@ unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
 #endif
 
+// TODO: https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
+
 void setup() {
   // start serial port:
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
@@ -48,6 +63,7 @@ void setup() {
   // Check config, load MAC and lat/lon
   loadConfig();
 
+#ifdef IS_ARDUINO
   byte ethernetMac[6];
   getMACAddress(ethernetMac);
 
@@ -70,7 +86,13 @@ void setup() {
     Serial.print(F("My IP address: "));
     Serial.println(Ethernet.localIP());
   }
-
+#else
+#ifdef IS_ESP
+  NodeMCU::begin();
+#else
+#error "Unknown platform - ethernet section"
+#endif
+#endif
   apiConnect();
 
   Serial.println(F("Updating Time"));

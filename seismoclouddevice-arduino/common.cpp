@@ -130,6 +130,12 @@ void generateMACAddress() {
   _saveMACAddress();
 }
 
+void setMACAddress(byte* mac) {
+  memcpy(ethernetMac, mac, 6);
+  _updateMacStr();
+  _saveMACAddress();
+}
+
 void getMACAddress(byte* mac) {
   if (ethernetMac[0] == 0) {
     generateMACAddress();

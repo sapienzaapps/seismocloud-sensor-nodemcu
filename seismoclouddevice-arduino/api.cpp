@@ -1,7 +1,15 @@
 
 #include "api.h"
 
+#ifdef IS_ARDUINO
 EthernetClient ethernetClient;
+#else
+#ifdef IS_ESP
+WiFiClient ethernetClient;
+#else
+#error "Unknown platform"
+#endif
+#endif
 PubSubClient mqttClient(ethernetClient);
 
 #define API_BUFFER_SIZE 100

@@ -10,7 +10,7 @@
 #define LED_YELLOW  2
 #define LED_GREEN   5
 
-//#define DEBUG
+#define DEBUG
 
 /**
  * Fine parte configurabile
@@ -41,12 +41,14 @@
 #include "CommandInterface.h"
 #include "seismometer.h"
 #include "api.h"
+#include "nodemcu.h"
 
 void initEEPROM();
 void checkEEPROM();
 unsigned long getBootTime();
 void setBootTime(unsigned long);
 void getMACAddress(byte* mac);
+void setMACAddress(byte* mac);
 const char* getDeviceId();
 void loadConfig();
 
@@ -61,6 +63,12 @@ do                          \
     {                       \
     }                       \
 } while(0)
+#else
+#ifdef IS_ESP
+#define soft_restart() ESP.restart()
+#else
+#error "Unknown platform - reboot"
+#endif
 #endif
 
 void reverse4bytes(byte* memory);

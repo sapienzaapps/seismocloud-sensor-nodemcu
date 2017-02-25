@@ -2,13 +2,38 @@
 
 Please mind that this version will not self-upgrade yet - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
 
-# Arduino/Genuino/NodeMCU/ESP8266 sketch
+SeismoCloud project: http://www.seismocloud.com
 
-You can use this sketch for Arduino/Genuino or NodeMCU/ESP8266 boards.
+# Supported boards
+
+* Arduino/Genuino Uno (with Ethernet Shield)
+* Arduino Ethernet
+* Arduino MEGA2560 (with Ethernet Shield)
+* ESP8266 (NodeMCU devkit)
+
+## Hardware: assemble a NodeMCU/ESP8266
+
+### Requirements for NodeMCU/ESP8266
+
+* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
+	* Open *Preferences* window (from *File* menu)
+	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
+	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select your ESP8266 board from *Tools* > *Board* menu after installation).
+* ESP8266 board
+* MPU6050 Accelerometer
+
+### Accelerometer MPU6050
+
+Link these pins from Accelerometer MPU6050 to Arduino board:
+
+* 3v3: 3v3
+* GND: GND
+* SDA: D4
+* SCL: D5
 
 ## Hardware: assemble an Arduino/Genuino
 
-### Requirements
+### Requirements for Arduino/Genuino
 
 * Arduino/Genuino IDE
 * Arduino/Genuino board (Arduino Uno with Ethernet Shield or Arduino Ethernet)
@@ -42,26 +67,6 @@ Link these pins from Accelerometer MMA7361 to Arduino board:
 * Z: A2
 
 Loop back **3v3** pin to **SLP** on Accelerometer.
-
-## Hardware: assemble a NodeMCU/ESP8266
-
-### Requirements for NodeMCU/ESP8266
-
-* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
-	* Open *Preferences* window (from *File* menu)
-	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
-	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select your ESP8266 board from *Tools* > *Board* menu after installation).
-* ESP8266 board
-* MPU6050 Accelerometer
-
-### Accelerometer MPU6050
-
-Link these pins from Accelerometer MPU6050 to Arduino board:
-
-* 3v3: 3v3
-* GND: GND
-* SDA: D4
-* SCL: D5
 
 ## Software
 
