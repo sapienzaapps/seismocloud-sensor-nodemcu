@@ -1,15 +1,15 @@
 # BETA: NOT READY FOR PRODUCTION
 
-Please mind that this version will not self-upgrade yet - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
-
 SeismoCloud project: http://www.seismocloud.com
 
 # Supported boards
 
+* ESP8266 (NodeMCU devkit)
 * Arduino/Genuino Uno (with Ethernet Shield)
 * Arduino Ethernet
 * Arduino MEGA2560 (with Ethernet Shield)
-* ESP8266 (NodeMCU devkit)
+
+Please mind that Arduino cannot update itself, so its use is discouraged in non-lab projects. If you plan to build place-and-forget devices please use **NodeMCU** or **Raspberry PI/Galileo** version: https://github.com/sapienzaapps/galileo-terremoti
 
 ## Hardware: assemble a NodeMCU/ESP8266
 
@@ -36,11 +36,27 @@ Link these pins from Accelerometer MPU6050 to Arduino board:
 ### Requirements for Arduino/Genuino
 
 * Arduino/Genuino IDE
-* Arduino/Genuino board (Arduino Uno with Ethernet Shield or Arduino Ethernet)
+* Arduino/Genuino board (Arduino Uno with Ethernet Shield with SD-reader or Arduino Ethernet with SD-reader)
 * MMA7361 Accelerometer
-* (optionals) 3 LEDs (red-green-yellow) with 3 resistors
+* (optional) 3 LEDs (red-green-yellow) with 3 resistors
+* (optional; strongly recommended) Arduino ISP and SD-card (any size >= 10 MB)
 
-### LEDs
+We recommend to buy Arduinos on official website https://store.arduino.cc
+
+### Accelerometer MMA7361
+
+Link these pins from Accelerometer MMA7361 to Arduino board:
+
+* Vin: 5v
+* GND: GND
+* SEL: GND
+* X: A0
+* Y: A1
+* Z: A2
+
+Loop back **3v3** pin to **SLP** on Accelerometer.
+
+### (optional) LEDs
 
 Remember to put a resistor with LED (after/before is not really important) to limit
 current flowing, otherwise you may damage the Arduino board.
@@ -55,18 +71,9 @@ You can change LED pins into `common.h`. Note that some pins are reserved to Eth
 
 If you use different boards (eg. Arduino Yun, etc), please refer to Arduino documentation.
 
-### Accelerometer MMA7361
+### Burning a new bootloader with Arduino ISP for self-upgrade
 
-Link these pins from Accelerometer MMA7361 to Arduino board:
-
-* Vin: 5v
-* GND: GND
-* SEL: GND
-* X: A0
-* Y: A1
-* Z: A2
-
-Loop back **3v3** pin to **SLP** on Accelerometer.
+TODO: avr_boot
 
 ## Software
 
