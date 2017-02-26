@@ -20,7 +20,9 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   switch (payload[0]) {
     case API_TIMERESP:
       memcpy(&lastNTPTime, payload+1, 4);
+#ifdef DEBUG
       Serial.println(lastNTPTime);
+#endif
       lastNTPMillis = millis();
       break;
     case API_CFG:
@@ -32,8 +34,10 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
       float sigma;
       memcpy(&sigma, payload+1, 4);
       setSigmaIter(sigma);
+#ifdef DEBUG
       Serial.print(F("Setting sigma to "));
       Serial.println(sigma);
+#endif
       resetLastPeriod();
       break;
     default:

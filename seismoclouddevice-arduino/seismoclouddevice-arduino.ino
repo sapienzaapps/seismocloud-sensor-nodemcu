@@ -51,7 +51,9 @@ void setup() {
   
   // Check Ethernet link
   if(Ethernet.localIP() == INADDR_NONE) {
+#ifdef DEBUG
     Serial.println(F("Ethernet failed to load"));
+#endif
     delay(2000);
     soft_restart();
     while(true);

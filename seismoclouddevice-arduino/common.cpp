@@ -10,7 +10,9 @@ void checkEEPROM() {
   EEPROM.write(1, 'E');
 
   if(!EEPROM.read(0) == 'S' || !EEPROM.read(1) == 'E') {
+#ifdef DEBUG
     Serial.println(F("EEPROM failed"));
+#endif
     while(true) {
       LED::green(false);
       LED::red(true);
@@ -210,10 +212,9 @@ void printUNIXTime() {
   uint8_t smonth = month + 1;  // jan is month 1  
   uint8_t day = time + 1;     // day of month
 
-  char buf[50];
-  memset(buf, 0, 50);
-  snprintf(buf, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
-  Serial.print(buf);
+  memset(buffer, 0, 50);
+  snprintf(buffer, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
+  Serial.print((char*)buffer);
 }
 #endif
 
