@@ -2,9 +2,8 @@
 #include "common.h"
 
 byte ethernetMac[6] = { 0 };
-char deviceid[13] = { 0 };
 
-unsigned long bootTime = 0;
+byte buffer[BUFFER_SIZE];
 
 void checkEEPROM() {
   EEPROM.write(0, 'S');
@@ -59,9 +58,12 @@ void initEEPROM() {
   LED::red(false);
 }
 
-void _updateMacStr() {
-  memset(deviceid, 0, 13);
-  snprintf(deviceid, 12, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+void getDeviceId(byte* dest) {
+  getDeviceId((char*) dest);
+}
+
+void getDeviceId(char* dest) {
+  snprintf(dest, 12, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
 }
 
 void loadConfig() {
@@ -73,7 +75,12 @@ void loadConfig() {
     for (int i = 0; i < 6; i++) {
       ethernetMac[i] = EEPROM.read(30+i);
     }
-    _updateMacStr();
+  }
+}
+
+void printMACAddress() {
+  for (int i=0; i < 6; i++) {
+    Serial.print(ethernetMac[i], HEX);
   }
 }
 
@@ -81,14 +88,6 @@ void _saveMACAddress() {
   for (int i = 0; i < 6; i++) {
     EEPROM.write(30+i, ethernetMac[i]);
   }
-}
-
-unsigned long getBootTime() {
-  return bootTime;
-}
-
-void setBootTime(unsigned long bootTimeMs) {
-  bootTime = bootTimeMs;
 }
 
 #ifdef DEBUG
@@ -121,37 +120,13 @@ void generateMACAddress() {
 
 void setMACAddress(byte* mac) {
   memcpy(ethernetMac, mac, 6);
-  _updateMacStr();
   _saveMACAddress();
 }
 
-void getMACAddress(byte* mac) {
+void checkMACAddress() {
   if (ethernetMac[0] == 0) {
     generateMACAddress();
-    _updateMacStr();
   }
-  memcpy(mac, ethernetMac, 6);
-}
-
-const char* getDeviceId() {
-  return deviceid;
-}
-
-void ftoa(char* buf, int m, float fnum) {
-  int num = (int)fnum;
-  fnum -= num;
-  int decimals = (int)(fnum*10000.0);
-  snprintf(buf, m, "%i.%04i", num, decimals);
-}
-
-
-void reverse4bytes(byte* memory) {
-  byte val[4];
-  memcpy(&val, memory, 4);
-  memcpy(memory+0, &val[3], 1);
-  memcpy(memory+1, &val[2], 1);
-  memcpy(memory+2, &val[1], 1);
-  memcpy(memory+3, &val[0], 1);
 }
 
 /*
@@ -180,6 +155,7 @@ void reverse4bytes(byte* memory) {
   1.4  5  Sep 2014 - compatibility with Arduino 1.5.7
 */
 
+#ifdef DEBUG
 #define LEAP_YEAR(Y) ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
 static const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31}; // API starts months from 1, this array starts from 0
 
@@ -239,6 +215,7 @@ void printUNIXTime() {
   snprintf(buf, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
   Serial.print(buf);
 }
+#endif
 
 #ifdef IS_ARDUINO
 /* Copyright (C) 2012 by Victor Aprea <victor.aprea@wickeddevice.com>
@@ -274,4 +251,60 @@ void wdt_init(void)
     return;
 }
 #endif
+
+
+MyRingBuffer::MyRingBuffer(unsigned int size)
+{
+  _size = size;
+  // add one char to terminate the string
+  ringBuf = new char[size+1];
+  ringBufEnd = &ringBuf[size];
+  init();
+}
+
+MyRingBuffer::~MyRingBuffer() {}
+
+void MyRingBuffer::reset()
+{
+  ringBufP = ringBuf;
+}
+
+void MyRingBuffer::init()
+{
+  ringBufP = ringBuf;
+  memset(ringBuf, 0, _size+1);
+}
+
+void MyRingBuffer::push(char c)
+{
+  *ringBufP = c;
+  ringBufP++;
+  if (ringBufP>=ringBufEnd)
+    ringBufP = ringBuf;
+}
+
+bool MyRingBuffer::endsWith(const char* str)
+{
+  int findStrLen = strlen(str);
+
+  // b is the start position into the ring buffer
+  char* b = ringBufP-findStrLen;
+  if(b < ringBuf)
+    b = b + _size;
+
+  char *p1 = (char*)&str[0];
+  char *p2 = p1 + findStrLen;
+
+  for(char *p=p1; p<p2; p++)
+  {
+    if(*p != *b)
+      return false;
+
+    b++;
+    if (b == ringBufEnd)
+      b=ringBuf;
+  }
+
+  return true;
+}
 

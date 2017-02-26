@@ -9,8 +9,6 @@ WiFiClient ethernetClient;
 #endif
 PubSubClient mqttClient(ethernetClient);
 
-#define API_BUFFER_SIZE 100
-byte apiBuffer[API_BUFFER_SIZE];
 unsigned long lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
 
@@ -53,22 +51,22 @@ unsigned long getUNIXTime() {
 
 boolean apiConnect() {
   // Will message for disconnection
-  memset(apiBuffer, 0, API_BUFFER_SIZE);
+  memset(buffer, 0, BUFFER_SIZE);
   byte j = 0;
-  apiBuffer[j] = API_DISCONNECT;
+  buffer[j] = API_DISCONNECT;
   j++;
 
   // Device ID
-  apiBuffer[j] = strlen(getDeviceId());
+  buffer[j] = 12;
   j++;
-  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
-  j += strlen(getDeviceId());
+  getDeviceId(buffer+j);
+  j += 12;
 
   // END Will message
   
   mqttClient.setServer("ingv-mqtt.netsplit.it", 61883);
   mqttClient.setCallback(apiCallback);
-  mqttClient.connect(getDeviceId(), "test1", "test1", "server", 0, 0, (char*)apiBuffer);
+  mqttClient.connect((char*)(buffer+2), "test1", "test1", "server", 0, 0, (char*)buffer);
   
 #ifdef DEBUG
     switch(mqttClient.state()) {
@@ -106,9 +104,9 @@ boolean apiConnect() {
 #endif
   
   if (mqttClient.state() == MQTT_CONNECTED) {
-    memset(apiBuffer, 0, API_BUFFER_SIZE);
-    snprintf((char*)apiBuffer, API_BUFFER_SIZE, "device/%s", getDeviceId());
-    mqttClient.subscribe((char*)apiBuffer);
+    memset(buffer, 0, BUFFER_SIZE);
+    snprintf((char*)buffer, BUFFER_SIZE, "device/%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+    mqttClient.subscribe((char*)buffer);
     return true;
   } else {
     return false;
@@ -135,64 +133,63 @@ void apiAlive() {
    * #          len(ver)  version as ASCII string
    * 
    */
-  memset(apiBuffer, 0, API_BUFFER_SIZE);
+  memset(buffer, 0, BUFFER_SIZE);
   byte j = 0;
-  apiBuffer[j] = API_KEEPALIVE;
+  buffer[j] = API_KEEPALIVE;
   j++;
 
   // Device ID
-  apiBuffer[j] = strlen(getDeviceId());
+  buffer[j] = 12;
   j++;
-  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
-  j += strlen(getDeviceId());
+  getDeviceId(buffer+j);
+  j += 12;
 
   // Model
-  apiBuffer[j] = strlen(MODEL);
+  buffer[j] = strlen(MODEL);
   j++;
-  memcpy(apiBuffer+j, MODEL, strlen(MODEL));
+  memcpy(buffer+j, MODEL, strlen(MODEL));
   j += 3;
 
   // Version
-  apiBuffer[j] = strlen(VERSION);
+  buffer[j] = strlen(VERSION);
   j++;
-  memcpy(apiBuffer+j, VERSION, strlen(VERSION));
+  memcpy(buffer+j, VERSION, strlen(VERSION));
   j += strlen(VERSION);
   
-  mqttClient.publish("server", apiBuffer, j, false);
+  mqttClient.publish("server", buffer, j, false);
 }
 
 void apiQuake() {
-  memset(apiBuffer, 0, API_BUFFER_SIZE);
+  memset(buffer, 0, BUFFER_SIZE);
   byte j = 0;
-  apiBuffer[j] = API_QUAKE;
+  buffer[j] = API_QUAKE;
   j++;
 
   // Device ID
-  apiBuffer[j] = strlen(getDeviceId());
+  buffer[j] = 12;
   j++;
-  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
-  j += strlen(getDeviceId());
+  getDeviceId(buffer+j);
+  j += 12;
   
-  mqttClient.publish("server", apiBuffer, j, false);
+  mqttClient.publish("server", buffer, j, false);
 }
 
 void apiTimeReq() {
   byte j = 0;
-  apiBuffer[j] = API_TIMEREQ;
+  buffer[j] = API_TIMEREQ;
   j++;
 
   // Device ID
-  apiBuffer[j] = strlen(getDeviceId());
+  buffer[j] = 12;
   j++;
-  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
-  j += strlen(getDeviceId());
+  getDeviceId(buffer+j);
+  j += 12;
   
-  mqttClient.publish("server", apiBuffer, j, false);
+  mqttClient.publish("server", buffer, j, false);
 }
 
 
 // LAN discovery
-byte udpPacketBuffer[PACKET_SIZE];
 EthernetUDP cmdsock;
 
 void commandInterfaceInit() {
@@ -204,25 +201,22 @@ void commandInterfaceTick() {
   if(cmdsock.available()) {
     
     // read the packet into packetBufffer
-    cmdsock.read(udpPacketBuffer, PACKET_SIZE);
+    cmdsock.read(buffer, BUFFER_SIZE);
 
-    if(memcmp("INGV\0", udpPacketBuffer, 5) != 0 || udpPacketBuffer[5] != PKTTYPE_DISCOVERY) {
+    if(memcmp("INGV\0", buffer, 5) != 0 || buffer[5] != PKTTYPE_DISCOVERY) {
       return;
     }
 
-    byte macaddress[6] = { 0 };
-    getMACAddress(macaddress);
-
     // Reply to discovery
-    udpPacketBuffer[5] = PKTTYPE_DISCOVERY_REPLY;
+    buffer[5] = PKTTYPE_DISCOVERY_REPLY;
 
-    memcpy(udpPacketBuffer + 6, macaddress, 6);
+    memcpy(buffer + 6, ethernetMac, 6);
     
-    memcpy(udpPacketBuffer + 12, VERSION, min(strlen(VERSION), 4));
-    memcpy(udpPacketBuffer + 16, MODEL, min(strlen(MODEL), 8));
+    memcpy(buffer + 12, VERSION, min(strlen(VERSION), 4));
+    memcpy(buffer + 16, MODEL, min(strlen(MODEL), 8));
     
     cmdsock.beginPacket(cmdsock.remoteIP(), cmdsock.remotePort());
-    cmdsock.write(udpPacketBuffer, PACKET_SIZE);
+    cmdsock.write(buffer, 24);
     cmdsock.endPacket();
     cmdsock.flush();
   }

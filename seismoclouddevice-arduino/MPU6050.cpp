@@ -2,9 +2,9 @@
 #include "MPU6050.h"
 #ifdef IS_ESP
 
-int16_t IX, IY, IZ, AcX, AcY, AcZ, Tmp;
+int16_t AcX, AcY, AcZ, Tmp;
 double iX, iY, iZ, X, Y, Z;
-double AccelerationFactor = 0.20 / 32768.0; // Assuming +/- 16G.
+#define AccelerationFactor (0.20/32768.0) // Assuming +/- 16G.
 
 AcceleroMPU6050::AcceleroMPU6050() {
 }
@@ -24,14 +24,14 @@ void AcceleroMPU6050::calibrate() {
   Wire.endTransmission(false);
   Wire.requestFrom((uint8_t)MPU_ADDRESS, (size_t)8, true); // request a total of 8 registers
 
-  IX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  IY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  IZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
   Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
 
-  iX = IX * AccelerationFactor;
-  iY = IY * AccelerationFactor;
-  iZ = IZ * AccelerationFactor;
+  iX = AcX * AccelerationFactor;
+  iY = AcY * AccelerationFactor;
+  iZ = AcZ * AccelerationFactor;
 }
 
 int AcceleroMPU6050::getTotalVector() {

@@ -1,23 +1,5 @@
 
-#include <SPI.h>
-#include <EEPROM.h>
-#include <PubSubClient.h>
 #include "common.h"
-
-#ifdef IS_ARDUINO
-#include <Ethernet.h>
-#endif
-#ifdef IS_ESP
-#include <Wire.h>
-//ESP8266 Core WiFi Library
-#include <ESP8266WiFi.h>
-//Local DNS Server used for redirecting all requests to the configuration portal
-#include <DNSServer.h>
-//Local WebServer used to serve the configuration portal
-#include <ESP8266WebServer.h>
-//https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-#include <WiFiManager.h>
-#endif
 
 unsigned long lastAliveMs = 0;
 
@@ -26,42 +8,46 @@ unsigned long lastProbeMs = 0;
 uint32_t probeCount = 0;
 #endif
 
-// TODO: https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
-
 void setup() {
   // start serial port:
   Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
 
   LED::init(LED_GREEN, LED_YELLOW, LED_RED);
   LED::startupBlink();
 
+#ifdef DEBUG
   Serial.print(F("SeismoCloud-Arduino version "));
   Serial.println(VERSION);
+#endif
 
   checkEEPROM();
 
+#ifdef DEBUG
   Serial.println(F("Init seismometer and calibrate"));
+#endif
   seismometerInit();
 
+#ifdef DEBUG
   Serial.println(F("Loading config"));
+#endif
   // Check config, load MAC and lat/lon
   loadConfig();
 
 #ifdef IS_ARDUINO
-  byte ethernetMac[6];
-  getMACAddress(ethernetMac);
+  checkMACAddress();
 
+#ifdef DEBUG
   Serial.print(F("MAC Address: "));
-  Serial.println(getDeviceId());
+#endif
+  printMACAddress();
 
   // give the ethernet module time to boot up:
   delay(1000);
 
+#ifdef DEBUG
   Serial.println(F("Enabling Ethernet"));
-  Ethernet.begin(ethernetMac);
+#endif
+  Ethernet.begin(buffer);
   
   // Check Ethernet link
   if(Ethernet.localIP() == INADDR_NONE) {
@@ -70,8 +56,10 @@ void setup() {
     soft_restart();
     while(true);
   } else {
+#ifdef DEBUG
     Serial.print(F("My IP address: "));
     Serial.println(Ethernet.localIP());
+#endif
   }
 #endif
 #ifdef IS_ESP
@@ -79,7 +67,9 @@ void setup() {
 #endif
   apiConnect();
 
+#ifdef DEBUG
   Serial.println(F("Updating Time"));
+#endif
 
   apiTimeReq();
   for(int i=0; i < 200 && getUNIXTime() == 0; i++) {
@@ -87,27 +77,35 @@ void setup() {
     delay(100);
   }
   if (getUNIXTime() == 0) {
+#ifdef DEBUG
     Serial.println(F("Timeout updating time, reboot"));
+#endif
     delay(2000);
     soft_restart();
     while(true);
   }
-  
-  setBootTime(getUNIXTime());
 
+#ifdef DEBUG
   Serial.print(F("Local time: "));
   printUNIXTime();
   Serial.println();
+#endif
 
+#ifdef DEBUG
   Serial.println(F("Init cmd interface"));
+#endif
   commandInterfaceInit();
 
+#ifdef DEBUG
   Serial.println(F("Send keep-alive"));
+#endif
   apiAlive();
   lastAliveMs = millis();
 
+#ifdef DEBUG
   Serial.println(F("Boot completed"));
   Serial.println();
+#endif
   LED::startupBlink();
   LED::green(true);
 }
@@ -120,10 +118,12 @@ void loop() {
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
+#ifdef DEBUG
     Serial.print(F("Keepalive at "));
     printUNIXTime();
     Serial.println();
-    
+#endif
+
     apiAlive();
     lastAliveMs = millis();
   }

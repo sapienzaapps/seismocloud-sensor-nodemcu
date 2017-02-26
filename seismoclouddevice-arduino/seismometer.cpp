@@ -16,20 +16,7 @@ double sigmaIter = 3.0;
 void addValueToAvgVar(double val);
 
 void seismometerInit() {
-#ifdef IS_ARDUINO
-  // Start with standard PIN assignments
-  accelero.begin(6, 7, 8, 9, A0, A1, A2);
-
-  accelero.setSensitivity(HIGH);
-
-  accelero.calibrate();
-
-  accelero.setAveraging(10);
-
-  Serial.println();
-#else
   accelero.begin();
-#endif
 }
 
 void seismometerTick() {

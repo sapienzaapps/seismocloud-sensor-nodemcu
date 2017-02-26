@@ -4,16 +4,16 @@ SeismoCloud project: http://www.seismocloud.com
 
 # Supported boards
 
-* ESP8266 (NodeMCU 1.0 devkit with ESP-12E module)
+* NodeMCU 1.0 devkit (with ESP-12E module - ESP8266)
 * Arduino/Genuino Uno (with Ethernet Shield)
 * Arduino Ethernet
-* Arduino MEGA2560 (with Ethernet Shield)
+* Arduino MEGA2560 (with Ethernet Shield) - untested
 
 Please mind that Arduino cannot update itself, so its use is discouraged in non-lab projects. If you plan to build place-and-forget devices please use **NodeMCU** or **Raspberry PI/Galileo** version: https://github.com/sapienzaapps/galileo-terremoti
 
-## Hardware: assemble a NodeMCU/ESP8266
+## Hardware: assemble a NodeMCU
 
-### Requirements for NodeMCU/ESP8266
+### Requirements for NodeMCU
 
 * Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
 	* Open *Preferences* window (from *File* menu)
@@ -48,7 +48,8 @@ By default, LED pins are:
 ### Requirements for Arduino/Genuino
 
 * Arduino/Genuino IDE
-* Arduino/Genuino board (Arduino Uno with Ethernet Shield with SD-reader or Arduino Ethernet with SD-reader)
+* Arduino/Genuino board (see *Supported board* chapter)
+* WizNet-compatible Ethernet shield (with SD reader)
 * MMA7361 Accelerometer
 * (optional) 3 LEDs (red-green-yellow) with 3 resistors
 * (optional; strongly recommended) Arduino ISP and SD-card (any size >= 10 MB)
