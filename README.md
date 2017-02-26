@@ -99,7 +99,7 @@ If you have any firewall in your network, please allow these ports:
 4. Compile and upload (2nd button below menus) in your board
 5. Open SeismoCloud app and register your device. Enjoy!
 
-### LED status description (Arduino-only)
+### LED status description
 
 LEDs can be in these different states:
 
