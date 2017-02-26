@@ -14,13 +14,13 @@ void checkEEPROM() {
     Serial.println(F("EEPROM failed"));
 #endif
     while(true) {
-      LED::green(false);
-      LED::red(true);
-      LED::yellow(true);
+      LED_green(false);
+      LED_red(true);
+      LED_yellow(true);
       delay(400);
-      LED::green(false);
-      LED::red(false);
-      LED::yellow(false);
+      LED_green(false);
+      LED_red(false);
+      LED_yellow(false);
       delay(400);
     }
   }
@@ -36,9 +36,9 @@ bool validateEEPROM() {
 }
 
 void initEEPROM() {
-  LED::green(false);
-  LED::red(true);
-  LED::yellow(false);
+  LED_green(false);
+  LED_red(true);
+  LED_yellow(false);
 
 #ifdef IS_ARDUINO
   for (int i = 0 ; i < EEPROM.length(); i++) {
@@ -57,7 +57,7 @@ void initEEPROM() {
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
   
-  LED::red(false);
+  LED_red(false);
 }
 
 void getDeviceId(byte* dest) {

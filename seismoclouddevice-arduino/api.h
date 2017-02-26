@@ -22,12 +22,9 @@ void apiTick();
 
 // LAN discovery APIs
 #define CMD_INTERFACE_PORT  62001
-#define PACKET_SIZE         50
 
-typedef enum {
-  PKTTYPE_DISCOVERY = 1,
-  PKTTYPE_DISCOVERY_REPLY = 2
-} PacketType;
+#define PKTTYPE_DISCOVERY        1
+#define PKTTYPE_DISCOVERY_REPLY  2
 
 void commandInterfaceInit();
 void commandInterfaceTick();

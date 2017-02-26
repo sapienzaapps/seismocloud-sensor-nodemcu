@@ -24,7 +24,7 @@ void seismometerTick() {
   int accelVector = accelero.getTotalVector();
   
   if(accelVector > quakeThreshold) {
-    LED::red(true);
+    LED_red(true);
     // QUAKE
 #ifdef DEBUG
     Serial.print(F("QUAKE: "));
@@ -37,7 +37,7 @@ void seismometerTick() {
 #ifdef DEBUG
     Serial.println(F("QUAKE Timeout END"));
 #endif
-    LED::red(false);
+    LED_red(false);
   }
   addValueToAvgVar(accelVector);
 }

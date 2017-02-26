@@ -28,7 +28,7 @@
 #endif
 #endif
 
-#define DEBUG
+// #define DEBUG
 
 // #define DONT_UPDATE
 

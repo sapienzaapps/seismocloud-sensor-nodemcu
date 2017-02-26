@@ -1,71 +1,38 @@
 
-#include <Arduino.h>
 #include "common.h"
 
-uint8_t LED::greenLedPin;
-uint8_t LED::yellowLedPin;
-uint8_t LED::redLedPin;
-uint8_t LED::blinkingLed = 0;
-unsigned long LED::lastBlink;
-bool LED::lastBlinkStatus;
-
-void LED::init(uint8_t greenLedPin, uint8_t yellowLedPin, uint8_t redLedPin) {
-  LED::greenLedPin = greenLedPin;
-  LED::yellowLedPin = yellowLedPin;
-  LED::redLedPin = redLedPin;
-
-  pinMode(greenLedPin, OUTPUT);
-  pinMode(yellowLedPin, OUTPUT);
-  pinMode(redLedPin, OUTPUT);
+void LED_init() {
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
 }
 
-void LED::green(bool isOn) {
-   digitalWrite(greenLedPin, (isOn ? HIGH : LOW));
+void LED_green(bool isOn) {
+   digitalWrite(LED_GREEN, (isOn ? HIGH : LOW));
 }
 
-void LED::red(bool isOn) {
-  digitalWrite(redLedPin, (isOn ? HIGH : LOW));
+void LED_red(bool isOn) {
+  digitalWrite(LED_RED, (isOn ? HIGH : LOW));
 }
 
-void LED::yellow(bool isOn) {
-  digitalWrite(yellowLedPin, (isOn ? HIGH : LOW));
+void LED_yellow(bool isOn) {
+  digitalWrite(LED_YELLOW, (isOn ? HIGH : LOW));
 }
 
-void LED::setLedBlinking(uint8_t pin) {
-  lastBlinkStatus = LOW;
-  lastBlink = 0;
-  if(pin == greenLedPin || pin == redLedPin || pin == yellowLedPin) {
-    blinkingLed = pin;
-  }
-}
-
-void LED::clearLedBlinking() {
-  digitalWrite(blinkingLed, LOW);
-  blinkingLed = 0;
-}
-
-void LED::startupBlink() {
+void LED_startupBlink() {
   for(int i=0; i < 10; i++) {
-    LED::green(true);
-    LED::red(true);
-    LED::yellow(true);
+    LED_green(true);
+    LED_red(true);
+    LED_yellow(true);
     delay(50);
-    LED::green(false);
-    LED::red(false);
-    LED::yellow(false);
+    LED_green(false);
+    LED_red(false);
+    LED_yellow(false);
     delay(50);
   }
-  LED::green(false);
-  LED::red(false);
-  LED::yellow(false);
-}
-
-void LED::tick() {
-  if(blinkingLed != 0 && millis() - lastBlink >= 500) {
-    lastBlinkStatus = (lastBlinkStatus == HIGH ? LOW : HIGH);
-    digitalWrite(blinkingLed, lastBlinkStatus);
-    lastBlink = millis();
-  }
+  LED_green(false);
+  LED_red(false);
+  LED_yellow(false);
 }
 
 

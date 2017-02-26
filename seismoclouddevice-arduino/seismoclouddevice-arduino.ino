@@ -12,8 +12,8 @@ void setup() {
   // start serial port:
   Serial.begin(115200);
 
-  LED::init(LED_GREEN, LED_YELLOW, LED_RED);
-  LED::startupBlink();
+  LED_init();
+  LED_startupBlink();
 
 #ifdef DEBUG
   Serial.print(F("SeismoCloud-Arduino version "));
@@ -108,13 +108,12 @@ void setup() {
   Serial.println(F("Boot completed"));
   Serial.println();
 #endif
-  LED::startupBlink();
-  LED::green(true);
+  LED_startupBlink();
+  LED_green(true);
 }
 
 void loop() {
   commandInterfaceTick();
-  LED::tick();
 
   apiTick();
 
