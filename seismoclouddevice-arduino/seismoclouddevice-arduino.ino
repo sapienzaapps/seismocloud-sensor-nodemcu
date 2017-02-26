@@ -11,7 +11,7 @@
 
 #ifdef IS_ARDUINO
 #include <Ethernet.h>
-#else
+#endif
 #ifdef IS_ESP
 #include <Wire.h>
 //ESP8266 Core WiFi Library
@@ -22,9 +22,6 @@
 #include <ESP8266WebServer.h>
 //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <WiFiManager.h>
-#else
-#error "Unsupported platform"
-#endif
 #endif
 
 unsigned long lastAliveMs = 0;
@@ -35,7 +32,6 @@ uint32_t probeCount = 0;
 #endif
 
 // TODO: https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
-// TODO: use internal LED for status?
 
 void setup() {
   // start serial port:
@@ -44,13 +40,8 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
-#ifdef IS_ARDUINO
   LED::init(LED_GREEN, LED_YELLOW, LED_RED);
   LED::startupBlink();
-  LED::green(false);
-  LED::red(false);
-  LED::yellow(false);
-#endif
 
   Serial.print(F("SeismoCloud-Arduino version "));
   Serial.println(VERSION);
@@ -87,12 +78,9 @@ void setup() {
     Serial.print(F("My IP address: "));
     Serial.println(Ethernet.localIP());
   }
-#else
+#endif
 #ifdef IS_ESP
   NodeMCU::begin();
-#else
-#error "Unknown platform - ethernet section"
-#endif
 #endif
   apiConnect();
 
@@ -130,12 +118,6 @@ void setup() {
 }
 
 void loop() {
-  /*
-   * If ESP reboots and not resuming, use:
-   * if (millis () >= 28800000) {
-   *   soft_restart();
-   * }
-   */
   commandInterfaceTick();
   LED::tick();
 

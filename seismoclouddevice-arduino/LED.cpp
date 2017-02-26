@@ -55,6 +55,9 @@ void LED::startupBlink() {
     LED::yellow(false);
     delay(50);
   }
+  LED::green(false);
+  LED::red(false);
+  LED::yellow(false);
 }
 
 void LED::tick() {

@@ -17,6 +17,10 @@ void checkEEPROM() {
       LED::red(true);
       LED::yellow(true);
       delay(400);
+      LED::green(false);
+      LED::red(false);
+      LED::yellow(false);
+      delay(400);
     }
   }
 }
@@ -65,21 +69,6 @@ void loadConfig() {
   if(!cfg) {
     initEEPROM();
   } else {
-    
-    // Longitude
-    /*byte lon[4];
-    for (int i = 0; i < 4; i++) {
-      lon[i] = EEPROM.read(22+i);
-    }
-    memcpy(&longitude, lon, 4);
-    
-    // Latitude
-    byte lat[4];
-    for (int i = 0; i < 4; i++) {
-      lat[i] = EEPROM.read(26+i);
-    }
-    memcpy(&latitude, lat, 4);*/
-
     // Load MAC Address
     for (int i = 0; i < 6; i++) {
       ethernetMac[i] = EEPROM.read(30+i);

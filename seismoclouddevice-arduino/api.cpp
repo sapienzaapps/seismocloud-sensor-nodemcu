@@ -3,12 +3,9 @@
 
 #ifdef IS_ARDUINO
 EthernetClient ethernetClient;
-#else
+#endif
 #ifdef IS_ESP
 WiFiClient ethernetClient;
-#else
-#error "Unknown platform"
-#endif
 #endif
 PubSubClient mqttClient(ethernetClient);
 
@@ -39,6 +36,7 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
       setSigmaIter(sigma);
       Serial.print(F("Setting sigma to "));
       Serial.println(sigma);
+      resetLastPeriod();
       break;
     default:
       break;
@@ -111,16 +109,6 @@ void apiTick() {
 }
 
 void apiAlive() {
-/*
-  char buf[10];
-  bool pex = readParameter(reply, "sigma", buf, 10);
-  if(pex) {
-    setSigmaIter(atoi(buf));
-  } else {
-    setSigmaIter(getSigmaIter());
-  }
-  resetLastPeriod();
-*/
   /**
    * Keep alive message format:
    * Position   Size      Value
@@ -145,9 +133,9 @@ void apiAlive() {
   j += strlen(getDeviceId());
 
   // Model
-  apiBuffer[j] = 3;
+  apiBuffer[j] = strlen(MODEL);
   j++;
-  strcpy(apiBuffer+j, "uno");
+  strcpy(apiBuffer+j, MODEL);
   j += 3;
 
   // Version
@@ -155,14 +143,6 @@ void apiAlive() {
   j++;
   strcpy(apiBuffer+j, VERSION);
   j += strlen(VERSION);
-
-  // Lat&lon
-  /*float l = getLatitude();
-  memcpy(apiBuffer+j, &l, 4);
-  j += 4;
-  l = getLongitude();
-  memcpy(apiBuffer+j, &l, 4);
-  j += 4;*/
   
   mqttClient.publish("server", apiBuffer, j);
 }
@@ -178,14 +158,6 @@ void apiQuake() {
   j++;
   strcpy(apiBuffer+j, getDeviceId());
   j += strlen(getDeviceId());
-
-  // Lat&lon
-  /*float l = getLatitude();
-  memcpy(apiBuffer+j, &l, 4);
-  j += 4;
-  l = getLongitude();
-  memcpy(apiBuffer+j, &l, 4);
-  j += 4;*/
   
   mqttClient.publish("server", apiBuffer, j);
 }
@@ -202,5 +174,43 @@ void apiTimeReq() {
   j += strlen(getDeviceId());
   
   mqttClient.publish("server", apiBuffer, j);
+}
+
+
+// LAN discovery
+byte udpPacketBuffer[PACKET_SIZE];
+EthernetUDP cmdsock;
+
+void commandInterfaceInit() {
+  cmdsock.begin(62001);
+}
+
+void commandInterfaceTick() {
+  int packetSize = cmdsock.parsePacket();
+  if(cmdsock.available()) {
+    
+    // read the packet into packetBufffer
+    cmdsock.read(udpPacketBuffer, PACKET_SIZE);
+
+    if(memcmp("INGV\0", udpPacketBuffer, 5) != 0 || udpPacketBuffer[5] != PKTTYPE_DISCOVERY) {
+      return;
+    }
+
+    byte macaddress[6] = { 0 };
+    getMACAddress(macaddress);
+
+    // Reply to discovery
+    udpPacketBuffer[5] = PKTTYPE_DISCOVERY_REPLY;
+
+    memcpy(udpPacketBuffer + 6, macaddress, 6);
+    
+    memcpy(udpPacketBuffer + 12, VERSION, min(strlen(VERSION), 4));
+    memcpy(udpPacketBuffer + 16, MODEL, min(strlen(MODEL), 8));
+    
+    cmdsock.beginPacket(cmdsock.remoteIP(), cmdsock.remotePort());
+    cmdsock.write(udpPacketBuffer, PACKET_SIZE);
+    cmdsock.endPacket();
+    cmdsock.flush();
+  }
 }
 

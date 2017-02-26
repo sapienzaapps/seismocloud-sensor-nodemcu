@@ -4,7 +4,7 @@ SeismoCloud project: http://www.seismocloud.com
 
 # Supported boards
 
-* ESP8266 (NodeMCU devkit)
+* ESP8266 (NodeMCU 1.0 devkit with ESP-12E module)
 * Arduino/Genuino Uno (with Ethernet Shield)
 * Arduino Ethernet
 * Arduino MEGA2560 (with Ethernet Shield)
@@ -18,18 +18,30 @@ Please mind that Arduino cannot update itself, so its use is discouraged in non-
 * Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
 	* Open *Preferences* window (from *File* menu)
 	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
-	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select your ESP8266 board from *Tools* > *Board* menu after installation).
-* ESP8266 board
+	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select *NodeMCU 1.0 (ESP-12E)* board from *Tools* > *Board* menu after installation).
+* NodeMCU 1.0 devkit board with ESP-12E module
 * MPU6050 Accelerometer
+* (optional) 3 LEDs (red-green-yellow) with 3 resistors
 
 ### Accelerometer MPU6050
 
-Link these pins from Accelerometer MPU6050 to Arduino board:
+Link these pins from Accelerometer MPU6050 to NodeMCU board:
 
 * 3v3: 3v3
 * GND: GND
-* SDA: D4
-* SCL: D5
+* SDA: D1
+* SCL: D2
+
+### (optional) LEDs
+
+Remember to put a resistor with LED (after/before is not really important) to limit
+current flowing, otherwise you may damage the NodeMCU board.
+
+By default, LED pins are:
+
+* Pin D0 : Yellow
+* Pin D3 : Green
+* Pin D4 : Red
 
 ## Hardware: assemble an Arduino/Genuino
 
@@ -66,10 +78,6 @@ By default, LED pins are:
 * Pin 2 : Yellow
 * Pin 5 : Green
 * Pin 3 : Red
-
-You can change LED pins into `common.h`. Note that some pins are reserved to Ethernet (SPI).
-
-If you use different boards (eg. Arduino Yun, etc), please refer to Arduino documentation.
 
 ### Burning a new bootloader with Arduino ISP for self-upgrade
 

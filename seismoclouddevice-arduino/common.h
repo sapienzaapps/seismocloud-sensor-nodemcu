@@ -1,34 +1,54 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-/** 
- *  Configurazione utente: qui è possibile personalizzare alcuni aspetti
- *  User configuration: here you can customize some things
- */
+#include <Arduino.h>
+#ifdef ARDUINO_AVR_UNO
+#define IS_ARDUINO
+#define MODEL "uno"
+#else
 
-#define LED_RED     3
-#define LED_YELLOW  2
-#define LED_GREEN   5
+#ifdef ESP8266
+#define IS_ESP
+#define MODEL "esp8266"
+#else
+
+#ifdef ARDUINO_AVR_MEGA2560
+#define IS_ARDUINO
+#define MODEL "mega2560"
+#else
+
+#ifdef ARDUINO_AVR_ETHERNET
+#define IS_ARDUINO
+#define MODEL "uno-e"
+#else
+
+#error "Unsupported platform"
+#endif
+#endif
+#endif
+#endif
 
 #define DEBUG
 
-/**
- * Fine parte configurabile
- * End config section
- */
+#ifdef IS_ARDUINO
+// Configurazione LED per Arduino
+#define LED_RED     3
+#define LED_YELLOW  2
+#define LED_GREEN   5
+#else
+#ifdef IS_ESP
+// Configurazione LED per NodeMCU/ESP8266
+#define LED_RED     D0
+#define LED_YELLOW  D3
+#define LED_GREEN   D4
+#endif
+#endif
 
-#include <Arduino.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
 #include <PubSubClient.h>
 
 #define VERSION     "1.20"
-
-#ifndef ESP8266
-#define IS_ARDUINO
-#else
-#define IS_ESP
-#endif
 
 #ifdef IS_ARDUINO
 #include "AcceleroMMA7361.h"
@@ -38,7 +58,6 @@
 #endif
 
 #include "LED.h"
-#include "CommandInterface.h"
 #include "seismometer.h"
 #include "api.h"
 #include "nodemcu.h"

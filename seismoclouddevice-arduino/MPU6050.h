@@ -7,7 +7,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define MPU_ADDRESS 0x68
+#define MPU_ADDRESS   0x68
+#define WIRE_SDA      4
+#define WIRE_SCL      5
 
 class AcceleroMPU6050
 {

@@ -1,5 +1,6 @@
 
 #include "nodemcu.h"
+#ifdef IS_ESP
 
 void NodeMCU::begin() {
 #ifdef DEBUG
@@ -28,3 +29,4 @@ void NodeMCU::begin() {
 #endif
 }
 
+#endif

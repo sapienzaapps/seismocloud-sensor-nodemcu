@@ -10,7 +10,7 @@ AcceleroMPU6050::AcceleroMPU6050() {
 }
 
 void AcceleroMPU6050::begin() {
-  Wire.begin(4, 5); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
+  Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x6B);  // PWR_MGMT_1 register
   Wire.write(0);     // set to zero (wakes up the MPU-6050)

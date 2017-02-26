@@ -15,10 +15,5 @@ class NodeMCU {
     static void begin();
 };
 
-
-
-
-
-
 #endif
 #endif
