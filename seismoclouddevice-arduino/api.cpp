@@ -10,7 +10,7 @@ WiFiClient ethernetClient;
 PubSubClient mqttClient(ethernetClient);
 
 #define API_BUFFER_SIZE 100
-char apiBuffer[API_BUFFER_SIZE];
+byte apiBuffer[API_BUFFER_SIZE];
 unsigned long lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
 
@@ -52,9 +52,23 @@ unsigned long getUNIXTime() {
 }
 
 boolean apiConnect() {
+  // Will message for disconnection
+  memset(apiBuffer, 0, API_BUFFER_SIZE);
+  byte j = 0;
+  apiBuffer[j] = API_DISCONNECT;
+  j++;
+
+  // Device ID
+  apiBuffer[j] = strlen(getDeviceId());
+  j++;
+  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
+  j += strlen(getDeviceId());
+
+  // END Will message
+  
   mqttClient.setServer("ingv-mqtt.netsplit.it", 61883);
   mqttClient.setCallback(apiCallback);
-  mqttClient.connect(getDeviceId(), "test1", "test1");
+  mqttClient.connect(getDeviceId(), "test1", "test1", "server", 0, 0, (char*)apiBuffer);
   
 #ifdef DEBUG
     switch(mqttClient.state()) {
@@ -93,8 +107,8 @@ boolean apiConnect() {
   
   if (mqttClient.state() == MQTT_CONNECTED) {
     memset(apiBuffer, 0, API_BUFFER_SIZE);
-    snprintf(apiBuffer, API_BUFFER_SIZE, "device/%s", getDeviceId());
-    mqttClient.subscribe(apiBuffer);
+    snprintf((char*)apiBuffer, API_BUFFER_SIZE, "device/%s", getDeviceId());
+    mqttClient.subscribe((char*)apiBuffer);
     return true;
   } else {
     return false;
@@ -129,22 +143,22 @@ void apiAlive() {
   // Device ID
   apiBuffer[j] = strlen(getDeviceId());
   j++;
-  strcpy(apiBuffer+j, getDeviceId());
+  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
   j += strlen(getDeviceId());
 
   // Model
   apiBuffer[j] = strlen(MODEL);
   j++;
-  strcpy(apiBuffer+j, MODEL);
+  memcpy(apiBuffer+j, MODEL, strlen(MODEL));
   j += 3;
 
   // Version
   apiBuffer[j] = strlen(VERSION);
   j++;
-  strcpy(apiBuffer+j, VERSION);
+  memcpy(apiBuffer+j, VERSION, strlen(VERSION));
   j += strlen(VERSION);
   
-  mqttClient.publish("server", apiBuffer, j);
+  mqttClient.publish("server", apiBuffer, j, false);
 }
 
 void apiQuake() {
@@ -156,10 +170,10 @@ void apiQuake() {
   // Device ID
   apiBuffer[j] = strlen(getDeviceId());
   j++;
-  strcpy(apiBuffer+j, getDeviceId());
+  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
   j += strlen(getDeviceId());
   
-  mqttClient.publish("server", apiBuffer, j);
+  mqttClient.publish("server", apiBuffer, j, false);
 }
 
 void apiTimeReq() {
@@ -170,10 +184,10 @@ void apiTimeReq() {
   // Device ID
   apiBuffer[j] = strlen(getDeviceId());
   j++;
-  strcpy(apiBuffer+j, getDeviceId());
+  memcpy(apiBuffer+j, getDeviceId(), strlen(getDeviceId()));
   j += strlen(getDeviceId());
   
-  mqttClient.publish("server", apiBuffer, j);
+  mqttClient.publish("server", apiBuffer, j, false);
 }
 
 

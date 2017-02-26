@@ -1,9 +1,4 @@
 
-/**
- * You can find user-configurable switch into  common.h
- * Puoi trovare alcune configurazioni di compilazione in  common.h
- */
-
 #include <SPI.h>
 #include <EEPROM.h>
 #include <PubSubClient.h>
