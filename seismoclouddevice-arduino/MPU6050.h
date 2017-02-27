@@ -8,21 +8,21 @@
 #include <Wire.h>
 
 #define MPU_ADDRESS   0x68
-#define WIRE_SDA      4
-#define WIRE_SCL      5
+#define WIRE_SDA      D1
+#define WIRE_SCL      D2
 
 class AcceleroMPU6050
 {
   public:
     AcceleroMPU6050();
     void begin();
-    int getXAccel();
-    int getYAccel();
-    int getZAccel();
-    int getTotalVector();
+    double getTotalVector();
     void calibrate();
 
 };
+
+
+extern float Tmp;
 
 #endif
 

@@ -65,7 +65,7 @@ void getDeviceId(byte* dest) {
 }
 
 void getDeviceId(char* dest) {
-  snprintf(dest, 12, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+  snprintf(dest, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
 }
 
 void loadConfig() {
@@ -83,7 +83,9 @@ void loadConfig() {
 void printMACAddress() {
   for (int i=0; i < 6; i++) {
     Serial.print(ethernetMac[i], HEX);
+    if (i < 5) Serial.print(":");
   }
+  Serial.println();
 }
 
 void _saveMACAddress() {
@@ -213,7 +215,7 @@ void printUNIXTime() {
   uint8_t day = time + 1;     // day of month
 
   memset(buffer, 0, 50);
-  snprintf(buffer, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
+  snprintf((char*)buffer, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
   Serial.print((char*)buffer);
 }
 #endif

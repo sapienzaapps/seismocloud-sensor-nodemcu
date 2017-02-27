@@ -7,6 +7,6 @@ void seismometerTick();
 void setSigmaIter(double i);
 double getSigmaIter();
 void resetLastPeriod();
-int getCurrentSTDDEV();
+double getCurrentSTDDEV();
 
 #endif

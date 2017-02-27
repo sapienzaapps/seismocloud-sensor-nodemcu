@@ -282,7 +282,7 @@ int AcceleroMMA7361::getOrientation()
 }
 
 /// getTotalVector returns the magnitude of the total acceleration vector as an integer
-int AcceleroMMA7361::getTotalVector() {
+double AcceleroMMA7361::getTotalVector() {
   return sqrt(square(_mapMMA7361G(getXRaw())) + square(_mapMMA7361G(getYRaw())) + square(_mapMMA7361G(getZRaw())));
 }
 

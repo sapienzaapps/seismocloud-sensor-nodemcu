@@ -11,6 +11,7 @@
 #define API_TIMERESP    4
 #define API_CFG         5
 #define API_DISCONNECT  6
+#define API_TEMPERATURE 7
 
 boolean apiConnect();
 void apiAlive();

@@ -39,9 +39,9 @@ current flowing, otherwise you may damage the NodeMCU board.
 
 By default, LED pins are:
 
-* Pin D0 : Yellow
-* Pin D3 : Green
-* Pin D4 : Red
+* Pin D5 : Green
+* Pin D6 : Yellow
+* Pin D7 : Red
 
 ## Hardware: assemble an Arduino/Genuino
 

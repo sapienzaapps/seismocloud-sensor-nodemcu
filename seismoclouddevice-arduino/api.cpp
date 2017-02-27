@@ -21,6 +21,7 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
     case API_TIMERESP:
       memcpy(&lastNTPTime, payload+1, 4);
 #ifdef DEBUG
+      Serial.print(F("Time:"));
       Serial.println(lastNTPTime);
 #endif
       lastNTPMillis = millis();
@@ -68,7 +69,7 @@ boolean apiConnect() {
 
   // END Will message
   
-  mqttClient.setServer("ingv-mqtt.netsplit.it", 61883);
+  mqttClient.setServer("192.0.2.75", 1883);
   mqttClient.setCallback(apiCallback);
   mqttClient.connect((char*)(buffer+2), "test1", "test1", "server", 0, 0, (char*)buffer);
   
@@ -109,8 +110,12 @@ boolean apiConnect() {
   
   if (mqttClient.state() == MQTT_CONNECTED) {
     memset(buffer, 0, BUFFER_SIZE);
-    snprintf((char*)buffer, BUFFER_SIZE, "device/%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
-    mqttClient.subscribe((char*)buffer);
+    snprintf((char*)buffer, BUFFER_SIZE, "device-%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+#ifdef DEBUG
+    Serial.print("Subscribing ");
+    Serial.println((char*)buffer);
+#endif
+    mqttClient.subscribe((char*)buffer, 1);
     return true;
   } else {
     return false;
@@ -152,7 +157,7 @@ void apiAlive() {
   buffer[j] = strlen(MODEL);
   j++;
   memcpy(buffer+j, MODEL, strlen(MODEL));
-  j += 3;
+  j += strlen(MODEL);
 
   // Version
   buffer[j] = strlen(VERSION);
@@ -161,6 +166,27 @@ void apiAlive() {
   j += strlen(VERSION);
   
   mqttClient.publish("server", buffer, j, false);
+
+#ifdef IS_ESP
+  memset(buffer, 0, BUFFER_SIZE);
+  j = 0;
+  buffer[j] = API_TEMPERATURE;
+  j++;
+
+  // Device ID
+  buffer[j] = 12;
+  j++;
+  getDeviceId(buffer+j);
+  j += 12;
+
+  // Temperature
+  buffer[j] = sizeof(float);
+  j++;
+  memcpy(buffer+j, &Tmp, sizeof(float));
+  j += sizeof(float);
+  
+  mqttClient.publish("server", buffer, j, false);
+#endif
 }
 
 void apiQuake() {

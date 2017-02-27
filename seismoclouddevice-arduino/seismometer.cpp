@@ -3,17 +3,18 @@
 
 #ifdef IS_ARDUINO
 AcceleroMMA7361 accelero;
-#else
+#endif
+#ifdef IS_ESP
 AcceleroMPU6050 accelero;
 #endif
 
-int partialAvg = 0;
-int partialStdDev = 0;
+double partialAvg = 0;
+double partialStdDev = 0;
 unsigned int elements = 0;
-int quakeThreshold = 1;
+double quakeThreshold = 1;
 double sigmaIter = 3.0;
 
-void addValueToAvgVar(int val);
+void addValueToAvgVar(double val);
 
 void seismometerInit() {
   accelero.begin();
@@ -21,8 +22,8 @@ void seismometerInit() {
 
 void seismometerTick() {
 
-  int accelVector = accelero.getTotalVector();
-  
+  double accelVector = accelero.getTotalVector();
+
   if(accelVector > quakeThreshold) {
     LED_red(true);
     // QUAKE
@@ -42,15 +43,15 @@ void seismometerTick() {
   addValueToAvgVar(accelVector);
 }
 
-int getQuakeThreshold() {
+double getQuakeThreshold() {
   return quakeThreshold;
 }
 
-int getCurrentAVG() {
+double getCurrentAVG() {
   return partialAvg;
 }
 
-int getCurrentSTDDEV() {
+double getCurrentSTDDEV() {
   return sqrt(partialStdDev / (elements - 1));
 }
 
@@ -58,9 +59,9 @@ void setSigmaIter(double i) {
   sigmaIter = i;
 }
 
-void addValueToAvgVar(int val) {
+void addValueToAvgVar(double val) {
   elements++;
-  int delta = val - partialAvg;
+  double delta = val - partialAvg;
   partialAvg += delta / elements;
   partialStdDev += delta * (val - partialAvg);
   if (elements > 1) {

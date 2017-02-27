@@ -30,7 +30,7 @@
 
 // #define DEBUG
 
-// #define DONT_UPDATE
+#define DONT_UPDATE
 
 #ifdef IS_ARDUINO
 // Configurazione LED per Arduino
@@ -40,9 +40,9 @@
 #else
 #ifdef IS_ESP
 // Configurazione LED per NodeMCU/ESP8266
-#define LED_RED     D0
-#define LED_YELLOW  D3
-#define LED_GREEN   D4
+#define LED_RED     D7
+#define LED_YELLOW  D6
+#define LED_GREEN   D5
 #endif
 #endif
 

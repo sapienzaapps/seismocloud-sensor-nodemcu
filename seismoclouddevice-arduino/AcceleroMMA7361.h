@@ -80,7 +80,7 @@ class AcceleroMMA7361
     int getYAccel();
     int getZAccel();
     void getAccelXYZ(int *_XAxis, int *_YAxis, int *_ZAxis);
-    int getTotalVector();
+    double getTotalVector();
     void setOffSets(int xOffSet, int yOffSet, int zOffSet);
     void calibrate();                             // only to be executed when Z-axis is oriented to the ground
 // it calculates the offset values by assuming  Z = +1 G ; X and Y  = 0 G
