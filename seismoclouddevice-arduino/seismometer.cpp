@@ -7,13 +7,13 @@ AcceleroMMA7361 accelero;
 AcceleroMPU6050 accelero;
 #endif
 
-double partialAvg = 0;
-double partialStdDev = 0;
+int partialAvg = 0;
+int partialStdDev = 0;
 unsigned int elements = 0;
-double quakeThreshold = 1;
+int quakeThreshold = 1;
 double sigmaIter = 3.0;
 
-void addValueToAvgVar(double val);
+void addValueToAvgVar(int val);
 
 void seismometerInit() {
   accelero.begin();
@@ -42,15 +42,15 @@ void seismometerTick() {
   addValueToAvgVar(accelVector);
 }
 
-double getQuakeThreshold() {
+int getQuakeThreshold() {
   return quakeThreshold;
 }
 
-double getCurrentAVG() {
+int getCurrentAVG() {
   return partialAvg;
 }
 
-double getCurrentSTDDEV() {
+int getCurrentSTDDEV() {
   return sqrt(partialStdDev / (elements - 1));
 }
 
@@ -58,9 +58,9 @@ void setSigmaIter(double i) {
   sigmaIter = i;
 }
 
-void addValueToAvgVar(double val) {
+void addValueToAvgVar(int val) {
   elements++;
-  double delta = val - partialAvg;
+  int delta = val - partialAvg;
   partialAvg += delta / elements;
   partialStdDev += delta * (val - partialAvg);
   if (elements > 1) {

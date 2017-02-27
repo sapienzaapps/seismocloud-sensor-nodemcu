@@ -204,9 +204,9 @@ void AcceleroMMA7361::calibrate() {
   Serial.println(getOrientation());
   Serial.println("Calibrating MMA7361011");
 #endif
-  double sumX = 0;
-  double sumY = 0;
-  double sumZ = 0;
+  long sumX = 0;
+  long sumY = 0;
+  long sumZ = 0;
   for (int i = 0; i < CALIBRATION_ITER; i++) {
     sumX = sumX + getXVolt();
     sumY = sumY + getYVolt();
