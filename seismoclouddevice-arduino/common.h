@@ -28,9 +28,12 @@
 #endif
 #endif
 
-// #define DEBUG
+#define DEBUG
 
+// TODO: Arduino upgrade
+#ifdef IS_ARDUINO
 #define DONT_UPDATE
+#endif
 
 #ifdef IS_ARDUINO
 // Configurazione LED per Arduino
@@ -95,7 +98,7 @@ do                          \
 #include "api.h"
 #include "nodemcu.h"
 
-#define BUFFER_SIZE 50
+#define BUFFER_SIZE 100
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 

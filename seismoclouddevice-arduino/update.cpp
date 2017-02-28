@@ -5,8 +5,14 @@
 
 #ifdef IS_ESP
 // https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
-bool update(char *host, char *path, char *checksum) {
+bool update(char *host, char *path) {
   // Checksum should be into "x-MD5" HTTP header
+#ifdef DEBUG
+  Serial.print("Requesting update from ");
+  Serial.print(host);
+  Serial.print(" path: ");
+  Serial.println(path);
+#endif
   HTTPUpdateResult r = ESPhttpUpdate.update(host, 80, path);
   return r == HTTPUpdateResult::HTTP_UPDATE_OK;
 }
@@ -27,7 +33,7 @@ void selectEthernet() {
   digitalWrite(10, LOW);
 }
 
-bool update(char *host, char *path, char *checksum) {
+bool update(char *host, char *path) {
   bool ret = false;
 
   selectSD();

@@ -5,7 +5,7 @@
 #include "common.h"
 
 #ifndef DONT_UPDATE
-bool update(char *host, char *path, char *checksum);
+bool update(char *host, char *path);
 #endif
 
 #endif

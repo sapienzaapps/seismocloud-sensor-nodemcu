@@ -12,6 +12,7 @@
 #define API_CFG         5
 #define API_DISCONNECT  6
 #define API_TEMPERATURE 7
+#define API_REBOOT      8
 
 boolean apiConnect();
 void apiAlive();
@@ -19,6 +20,7 @@ void apiQuake();
 void apiTimeReq();
 unsigned long getUNIXTime();
 void apiTick();
+void apiDisconnect();
 
 
 // LAN discovery APIs
