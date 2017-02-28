@@ -69,7 +69,7 @@ boolean apiConnect() {
 
   // END Will message
   
-  mqttClient.setServer("192.0.2.75", 1883);
+  mqttClient.setServer("192.168.12.1", 1883);
   mqttClient.setCallback(apiCallback);
   mqttClient.connect((char*)(buffer+2), "test1", "test1", "server", 0, 0, (char*)buffer);
   

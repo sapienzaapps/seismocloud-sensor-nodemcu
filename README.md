@@ -94,11 +94,15 @@ If you have any firewall in your network, please allow these ports:
 
 ### Build and upload code
 
+For NodeMCU, you need to download `WifiManager` library
+
 1. Download the source code (for stable releases, please checkout latest git tag)
 2. Open project in Arduino IDE
 3. Choose the right **Port** and **Board** into **Tools** menu
 4. Compile and upload (2nd button below menus) in your board
-5. Open SeismoCloud app and register your device. Enjoy!
+5. Unplug the board from PC and plug Accelerometer and Leds, then power on the board
+6. For NodeMCU boards, connect to `SeismoCloud` Wi-Fi network and configure Wi-Fi client network parameters. On save, the board reboots and try to connect to Wi-Fi network. If it fails, you can reconnect to `SeismoCloud` network and modify/fix network parameters.
+7. Open SeismoCloud app, connect to the same network of the board and register your device. Enjoy!
 
 ### LED status description
 
