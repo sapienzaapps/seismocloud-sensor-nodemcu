@@ -13,6 +13,8 @@ If you have any firewall in your network, please allow these ports:
 
 * TCP: 1883 (outgoing)
 
+Also, Wi-Fi or Ethernet networks should have a DHCP service running.
+
 # LED status description
 
 LEDs can be in these different states:

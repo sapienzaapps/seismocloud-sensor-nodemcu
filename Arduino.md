@@ -3,6 +3,7 @@
 
 ## Requirements
 
+* Ethernet link
 * Arduino/Genuino IDE
 * Arduino/Genuino UNO board
 * Arduino ISP and SD-card (any size >= 10 MB)
@@ -12,20 +13,7 @@
 
 We recommend to buy Arduinos on official website https://store.arduino.cc
 
-## Accelerometer MMA7361
-
-Link these pins from Accelerometer MMA7361 to Arduino board:
-
-* Vin: 5v
-* GND: GND
-* SEL: GND
-* X: A0
-* Y: A1
-* Z: A2
-
-Loop back **3v3** pin to **SLP** on Accelerometer.
-
-## Burning a new bootloader with Arduino ISP for self-upgrade
+## Step 1: Burning a new bootloader with Arduino ISP for self-upgrade
 
 In order to self-upgrade itself, Arduino must use an SD-card and a custom bootloader.
 
@@ -48,9 +36,26 @@ Steps:
 10. On `Tools > Board` choose `ATmega328/P`
 11. Launch bootloader burn using `Tools > Burn bootloader`
 
-On finish, you can close the IDE, unplug all and build your SeismoCloud sensor! (remember also to follow `Software` instructions)
+On finish, you can close the IDE, unplug ArduinoISP and proceed with next instructions.
 
-## (optional) LEDs
+## Step 2: Ethernet Shield
+
+Plug the ethernet shield. It should be easy.
+
+## Step 3: Accelerometer MMA7361
+
+Link these pins from Accelerometer MMA7361 to Arduino board:
+
+* Vin: 5v
+* GND: GND
+* SEL: GND
+* X: A0
+* Y: A1
+* Z: A2
+
+Loop back **3v3** pin to **SLP** on Accelerometer.
+
+## Step 4: (optional) LEDs
 
 Remember to put a resistor with LED (after/before is not really important) to limit
 current flowing, otherwise you may damage the Arduino board.
@@ -61,14 +66,10 @@ By default, LED pins are:
 * Pin 5 : Green
 * Pin 3 : Red
 
-# Software
-
-## Download sketch into SD-card
-
-After hardware build, you need to setup the software:
+# Step 5: Software
 
 1. Format your SD-card with FAT32 (or FAT16)
-2. Download FIRMWARE.BIN from http://www.seismocloud.com/page.php?id=instr-arduino
-3. Place FIRMWARE.BIN into SD-card
+2. Download `FIRMWARE.BIN` from http://www.seismocloud.com/page.php?id=instr-arduino
+3. Place `FIRMWARE.BIN` into SD-card
 4. Insert SD-card into Arduino Uno and power on.
 5. Open SeismoCloud app, connect to the same network of the board and register your device. Enjoy!
