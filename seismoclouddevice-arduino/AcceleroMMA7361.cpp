@@ -200,10 +200,8 @@ int AcceleroMMA7361::_mapMMA7361G(int value) {
 /// calibrate(): Sets X and Y values via setOffsets to zero. The Z axis will be set to 100 = 1G
 /// WARNING WHEN CALIBRATED YOU HAVE TO MAKE SURE THE Z-AXIS IS PERPENDICULAR WITH THE EARTHS SURFACE
 void AcceleroMMA7361::calibrate() {
-#ifdef DEBUG
-  Serial.println(getOrientation());
-  Serial.println("Calibrating MMA7361011");
-#endif
+  Debugln(getOrientation());
+  Debugln("Calibrating MMA7361011");
   long sumX = 0;
   long sumY = 0;
   long sumZ = 0;
@@ -211,11 +209,9 @@ void AcceleroMMA7361::calibrate() {
     sumX = sumX + getXVolt();
     sumY = sumY + getYVolt();
     sumZ = sumZ + getZVolt();
-#ifdef DEBUG
     if (i % 100 == 0) {
-      Serial.print(".");
+      Debug(".");
     }
-#endif
   }
   if (!_sensi) {
     setOffSets(1672 - sumX / CALIBRATION_ITER, 1671 - sumY / CALIBRATION_ITER, + 1876 - sumZ / CALIBRATION_ITER);
@@ -223,14 +219,10 @@ void AcceleroMMA7361::calibrate() {
     setOffSets(1650 - sumX / CALIBRATION_ITER, 1650 - sumY / CALIBRATION_ITER, + 2450 - sumZ / CALIBRATION_ITER);
   }
   if (abs(getOrientation()) != 3) {
-#ifdef DEBUG
-    Serial.println("unable to calibrate");
-#endif
+    Debugln("unable to calibrate");
     setOffSets(0, 0, 0);
   } else {
-#ifdef DEBUG
-    Serial.println("\nDONE");
-#endif
+    Debugln("\nDONE");
   }
 }
 

@@ -10,9 +10,7 @@ void checkEEPROM() {
   EEPROM.write(1, 'E');
 
   if(!EEPROM.read(0) == 'S' || !EEPROM.read(1) == 'E') {
-#ifdef DEBUG
-    Serial.println(F("EEPROM failed"));
-#endif
+    Debugln(F("EEPROM failed"));
     while(true) {
       LED_green(false);
       LED_red(true);
@@ -80,6 +78,7 @@ void loadConfig() {
   }
 }
 
+#ifdef DEBUG
 void printMACAddress() {
   for (int i=0; i < 6; i++) {
     Serial.print(ethernetMac[i], HEX);
@@ -87,6 +86,7 @@ void printMACAddress() {
   }
   Serial.println();
 }
+#endif
 
 void _saveMACAddress() {
   for (int i = 0; i < 6; i++) {
@@ -131,6 +131,24 @@ void checkMACAddress() {
   if (ethernetMac[0] == 0) {
     generateMACAddress();
   }
+}
+
+void selectSD() {
+#ifdef IS_ARDUINO
+  pinMode(SS_SD_CARD, OUTPUT);
+  pinMode(SS_ETHERNET, OUTPUT);
+  digitalWrite(SS_SD_CARD, LOW);
+  digitalWrite(SS_ETHERNET, HIGH);
+#endif
+}
+
+void selectEthernet() {
+#ifdef IS_ARDUINO
+  pinMode(SS_SD_CARD, OUTPUT);
+  pinMode(SS_ETHERNET, OUTPUT);
+  digitalWrite(SS_SD_CARD, HIGH);
+  digitalWrite(SS_ETHERNET, LOW);
+#endif
 }
 
 /*
@@ -216,7 +234,7 @@ void printUNIXTime() {
 
   memset(buffer, 0, 50);
   snprintf((char*)buffer, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
-  Serial.print((char*)buffer);
+  Debug((char*)buffer);
 }
 #endif
 

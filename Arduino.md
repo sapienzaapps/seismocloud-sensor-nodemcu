@@ -73,3 +73,15 @@ By default, LED pins are:
 3. Place `FIRMWARE.BIN` into SD-card
 4. Insert SD-card into Arduino Uno and power on.
 5. Open SeismoCloud app, connect to the same network of the board and register your device. Enjoy!
+
+# How to build Arduino code
+
+If you want to build Arduino code yourself, you need to use PetitFS version bundled with this repo (just place into `~/Arduino/libraries/`), and modify/fix EthernetClient class (in Arduino_IDE_folder/libraries/Ethernet/src/EthernetClient.cpp) adding these two lines to class constructor:
+
+	randomSeed(analogRead(0));
+	_srcport = 1024 + random(1, 60000);
+
+Note: this issue still present into arduino ide v1.8.1 - see https://github.com/arduino-libraries/Ethernet/issues/10
+
+Please note that if you use `avr_boot` bootloader (Step 1) you won't be able to see debug strings nor upload sketch thru USB (see above to reverse bootloader flash). Also, to enable debugs you need to modify constants into `common.h`
+

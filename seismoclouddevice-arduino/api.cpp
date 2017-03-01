@@ -20,10 +20,8 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   switch (payload[0]) {
     case API_TIMERESP:
       memcpy(&lastNTPTime, payload + 1, 4);
-#ifdef DEBUG
-      Serial.print(F("Time:"));
-      Serial.println(lastNTPTime);
-#endif
+      Debug(F("Time:"));
+      Debugln(lastNTPTime);
       lastNTPMillis = millis();
       break;
     case API_CFG:
@@ -49,14 +47,10 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
           memset(buffer, 0, BUFFER_SIZE);
           memcpy(buffer, payload + 6 + hlen + 1, plen);
           if (update((char*)(payload + 6), (char*)buffer)) {
-#ifdef DEBUG
-            Serial.println(F("Update succeded, reboot"));
-#endif
+            Debugln(F("Update succeded, reboot"));
             soft_restart();
           } else {
-#ifdef DEBUG
-            Serial.println(F("Update failed"));
-#endif
+            Debugln(F("Update failed"));
           }
         }
       }
@@ -65,10 +59,8 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
       float sigma;
       memcpy(&sigma, payload + 1, 4);
       setSigmaIter(sigma);
-#ifdef DEBUG
-      Serial.print(F("Setting sigma to "));
-      Serial.println(sigma);
-#endif
+      Debug(F("Setting sigma to "));
+      Debugln(sigma);
       resetLastPeriod();
       break;
     case API_REBOOT:
@@ -128,34 +120,34 @@ boolean apiConnect() {
 #ifdef DEBUG
   switch (mqttClient.state()) {
     case MQTT_CONNECTION_TIMEOUT:
-      Serial.println(F("[MQTT] Timeout"));
+      Debugln(F("[MQTT] Timeout"));
       break;
     case MQTT_CONNECTION_LOST:
-      Serial.println(F("[MQTT] Connection lost"));
+      Debugln(F("[MQTT] Connection lost"));
       break;
     case MQTT_CONNECT_FAILED:
-      Serial.println(F("[MQTT] Connection failed"));
+      Debugln(F("[MQTT] Connection failed"));
       break;
     case MQTT_DISCONNECTED:
-      Serial.println(F("[MQTT] Disconnected"));
-      break;
-    case MQTT_CONNECTED:
-      Serial.println(F("[MQTT] Connected"));
+      Debugln(F("[MQTT] Disconnected"));
       break;
     case MQTT_CONNECT_BAD_PROTOCOL:
-      Serial.println(F("[MQTT] Bad protocol"));
+      Debugln(F("[MQTT] Bad protocol"));
       break;
     case MQTT_CONNECT_BAD_CLIENT_ID:
-      Serial.println(F("[MQTT] Bad client ID"));
+      Debugln(F("[MQTT] Bad client ID"));
       break;
     case MQTT_CONNECT_UNAVAILABLE:
-      Serial.println(F("[MQTT] Server unavailable"));
+      Debugln(F("[MQTT] Server unavailable"));
       break;
     case MQTT_CONNECT_BAD_CREDENTIALS:
-      Serial.println(F("[MQTT] Bad credentials"));
+      Debugln(F("[MQTT] Bad credentials"));
       break;
     case MQTT_CONNECT_UNAUTHORIZED:
-      Serial.println(F("[MQTT] Unauthorized"));
+      Debugln(F("[MQTT] Unauthorized"));
+      break;
+    case MQTT_CONNECTED:
+      Debugln(F("[MQTT] Connected"));
       break;
   }
 #endif
@@ -163,10 +155,8 @@ boolean apiConnect() {
   if (mqttClient.state() == MQTT_CONNECTED) {
     memset(buffer, 0, BUFFER_SIZE);
     snprintf((char*)buffer, BUFFER_SIZE, "device-%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
-#ifdef DEBUG
-    Serial.print("Subscribing ");
-    Serial.println((char*)buffer);
-#endif
+    Debug("Subscribing ");
+    Debugln((char*)buffer);
     mqttClient.subscribe((char*)buffer, 1);
     return true;
   } else {

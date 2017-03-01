@@ -9,69 +9,62 @@ uint32_t probeCount = 0;
 #endif
 
 void setup() {
+#ifdef DEBUG
   // start serial port:
   Serial.begin(115200);
+#endif
 
   LED_init();
   LED_startupBlink();
 
-#ifdef DEBUG
-  Serial.print(F("SeismoCloud-Arduino version "));
-  Serial.println(VERSION);
-#endif
+  Debug(F("SeismoCloud-Arduino version "));
+  Debugln(VERSION);
 
   checkEEPROM();
 
-#ifdef DEBUG
-  Serial.println(F("Init seismometer and calibrate"));
-#endif
+  // Switching SPI to ethernet
+  selectEthernet();
+
+  Debugln(F("Init seismometer and calibrate"));
   seismometerInit();
 
-#ifdef DEBUG
-  Serial.println(F("Loading config"));
-#endif
+  Debugln(F("Loading config"));
   // Check config, load MAC and lat/lon
   loadConfig();
 
 #ifdef IS_ARDUINO
   checkMACAddress();
 
+  Debug(F("MAC Address: "));
 #ifdef DEBUG
-  Serial.print(F("MAC Address: "));
-#endif
   printMACAddress();
+#endif
 
   // give the ethernet module time to boot up:
   delay(1000);
 
-#ifdef DEBUG
-  Serial.println(F("Enabling Ethernet"));
-#endif
+  Debugln(F("Enabling Ethernet"));
   Ethernet.begin(buffer);
   
   // Check Ethernet link
   if(Ethernet.localIP() == INADDR_NONE) {
-#ifdef DEBUG
-    Serial.println(F("Ethernet failed to load"));
-#endif
+    Debugln(F("Ethernet failed to load"));
     delay(2000);
     soft_restart();
     while(true);
   } else {
-#ifdef DEBUG
-    Serial.print(F("My IP address: "));
-    Serial.println(Ethernet.localIP());
-#endif
+    Debug(F("My IP address: "));
+    Debugln(Ethernet.localIP());
   }
 #endif
 #ifdef IS_ESP
   NodeMCU::begin();
 #endif
-  apiConnect();
+  if (!apiConnect()) {
+    soft_restart();
+  }
 
-#ifdef DEBUG
-  Serial.println(F("Updating Time"));
-#endif
+  Debugln(F("Updating Time"));
 
   apiTimeReq();
   for(int i=0; i < 200 && getUNIXTime() == 0; i++) {
@@ -79,35 +72,27 @@ void setup() {
     delay(100);
   }
   if (getUNIXTime() == 0) {
-#ifdef DEBUG
-    Serial.println(F("Timeout updating time, reboot"));
-#endif
+    Debugln(F("Timeout updating time, reboot"));
     delay(2000);
     soft_restart();
     while(true);
   }
 
+  Debug(F("Local time: "));
 #ifdef DEBUG
-  Serial.print(F("Local time: "));
   printUNIXTime();
-  Serial.println();
 #endif
+  Debugln();
 
-#ifdef DEBUG
-  Serial.println(F("Init cmd interface"));
-#endif
+  Debugln(F("Init cmd interface"));
   commandInterfaceInit();
 
-#ifdef DEBUG
-  Serial.println(F("Send keep-alive"));
-#endif
+  Debugln(F("Send keep-alive"));
   apiAlive();
   lastAliveMs = millis();
 
-#ifdef DEBUG
-  Serial.println(F("Boot completed"));
-  Serial.println();
-#endif
+  Debugln(F("Boot completed"));
+  Debugln();
   LED_startupBlink();
   LED_green(true);
 }
@@ -119,11 +104,11 @@ void loop() {
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
+    Debug(F("Keepalive at "));
 #ifdef DEBUG
-    Serial.print(F("Keepalive at "));
     printUNIXTime();
-    Serial.println();
 #endif
+    Debugln();
 
     apiAlive();
     lastAliveMs = millis();

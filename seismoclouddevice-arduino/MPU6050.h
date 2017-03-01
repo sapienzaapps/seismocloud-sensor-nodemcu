@@ -14,10 +14,9 @@
 class AcceleroMPU6050
 {
   public:
-    AcceleroMPU6050();
-    void begin();
-    double getTotalVector();
-    void calibrate();
+    static void begin();
+    static double getTotalVector();
+    static void calibrate();
 
 };
 

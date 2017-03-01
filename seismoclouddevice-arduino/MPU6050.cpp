@@ -7,9 +7,6 @@ double iX, iY, iZ, X, Y, Z;
 float Tmp;
 #define AccelerationFactor (0.20/32768.0) // Assuming +/- 16G.
 
-AcceleroMPU6050::AcceleroMPU6050() {
-}
-
 void AcceleroMPU6050::begin() {
   Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
   Wire.beginTransmission(MPU_ADDRESS);
@@ -36,19 +33,17 @@ void AcceleroMPU6050::calibrate() {
   iY = AcY * AccelerationFactor;
   iZ = AcZ * AccelerationFactor;
 
-#ifdef DEBUG
-  Serial.println("Calibrated with");
-  Serial.print("X:");
-  Serial.println(iX);
-  Serial.print("Y:");
-  Serial.println(iY);
-  Serial.print("Z:");
-  Serial.println(iZ);
-  Serial.print("Temp:");
-  Serial.println(Tmp);
-  Serial.print("Accel factor: ");
-  Serial.println(AccelerationFactor);
-#endif
+  Debugln("Calibrated with");
+  Debug("X:");
+  Debugln(iX);
+  Debug("Y:");
+  Debugln(iY);
+  Debug("Z:");
+  Debugln(iZ);
+  Debug("Temp:");
+  Debugln(Tmp);
+  Debug("Accel factor: ");
+  Debugln(AccelerationFactor);
 }
 
 double AcceleroMPU6050::getTotalVector() {

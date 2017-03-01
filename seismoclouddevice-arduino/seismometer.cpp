@@ -27,17 +27,13 @@ void seismometerTick() {
   if(accelVector > quakeThreshold) {
     LED_red(true);
     // QUAKE
-#ifdef DEBUG
-    Serial.print(F("QUAKE: "));
-    Serial.print(accelVector);
-    Serial.print(F(" > "));
-    Serial.println(quakeThreshold);
-#endif
+    Debug(F("QUAKE: "));
+    Debug(accelVector);
+    Debug(F(" > "));
+    Debugln(quakeThreshold);
     apiQuake();
     delay(5000);
-#ifdef DEBUG
-    Serial.println(F("QUAKE Timeout END"));
-#endif
+    Debugln(F("QUAKE Timeout END"));
     LED_red(false);
   }
   addValueToAvgVar(accelVector);

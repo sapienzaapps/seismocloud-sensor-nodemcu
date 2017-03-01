@@ -28,12 +28,10 @@
 #endif
 #endif
 
-#define DEBUG
+// #define DONT_UPDATE
 
-// TODO: Arduino upgrade
-#ifdef IS_ARDUINO
-#define DONT_UPDATE
-#endif
+// On Arduino this flag has no effect if you use avr_boot bootloader (for self-update). You should switch to standard bootloader
+// #define DEBUG
 
 #ifdef IS_ARDUINO
 // Configurazione LED per Arduino
@@ -56,18 +54,31 @@
 
 #define VERSION     "1.20"
 
-#ifndef DONT_UPDATE
-#ifdef IS_ARDUINO
-#include <SD.h>
+#ifdef DEBUG
+#define Debug(x) Serial.print(x)
+#define Debugln(x) Serial.println(x)
+#else
+#define Debug(x)
+#define Debugln(x)
 #endif
+
+#ifndef DONT_UPDATE
+
+#ifdef IS_ARDUINO
+#include <PetitFS.h>
+#define SS_SD_CARD   4
+#define SS_ETHERNET 10
+#endif
+
 #include "update.h"
 #endif
 
 #ifdef IS_ARDUINO
 #include "AcceleroMMA7361.h"
 #include <avr/wdt.h>
-
 #define soft_restart()        \
+apiDisconnect();            \
+delay(5000);                \
 do                          \
 {                           \
     wdt_enable(WDTO_15MS);  \
@@ -75,9 +86,6 @@ do                          \
     {                       \
     }                       \
 } while(0)
-#endif
-
-#ifdef IS_ESP
 #endif
 
 #ifdef IS_ESP
@@ -90,7 +98,10 @@ do                          \
 #include "MPU6050.h"
 
 #define min(X,Y) ((X)<(Y) ? (X) : (Y))
-#define soft_restart() ESP.restart()
+#define soft_restart()      \
+apiDisconnect();            \
+delay(5000);                \
+ESP.restart()
 #endif
 
 #include "LED.h"
@@ -98,7 +109,7 @@ do                          \
 #include "api.h"
 #include "nodemcu.h"
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 512
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 
@@ -106,12 +117,14 @@ void initEEPROM();
 void checkEEPROM();
 void checkMACAddress();
 void setMACAddress(byte* mac);
-void printMACAddress();
 void loadConfig();
 void getDeviceId(char* dest);
 void getDeviceId(byte* dest);
+void selectSD();
+void selectEthernet();
 
 #ifdef DEBUG
+void printMACAddress();
 void printUNIXTime();
 void setProbeSpeedStatistic(uint32_t);
 uint32_t getProbeSpeedStatistic();
