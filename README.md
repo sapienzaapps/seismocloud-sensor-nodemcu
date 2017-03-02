@@ -27,3 +27,8 @@ LEDs can be in these different states:
 * **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
 * **Green + Yellow + Red - ALL blinking slow**: network init failed
 * **Yellow + Red - ALL blinking**: EEPROM failed
+
+# License
+
+See `LICENSE` file
+
