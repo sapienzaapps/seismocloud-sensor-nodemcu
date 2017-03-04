@@ -44,7 +44,7 @@ void setup() {
   delay(1000);
 
   Debugln(F("Enabling Ethernet"));
-  Ethernet.begin(buffer);
+  Ethernet.begin(ethernetMac);
   
   // Check Ethernet link
   if(Ethernet.localIP() == INADDR_NONE) {
