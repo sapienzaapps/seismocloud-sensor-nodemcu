@@ -113,9 +113,9 @@ boolean apiConnect() {
 
   // END Will message
 
-  mqttClient.setServer("192.0.2.60", 1883);
+  mqttClient.setServer("mqtt.seismocloud.com", 1883);
   mqttClient.setCallback(apiCallback);
-  mqttClient.connect((char*)(buffer + 2), "test1", "test1", "server", 0, 0, (char*)buffer);
+  mqttClient.connect((char*)(buffer + 2), "embedded", "embedded", "server", 0, 0, (char*)buffer);
 
 #ifdef DEBUG
   switch (mqttClient.state()) {
@@ -262,9 +262,15 @@ void apiTimeReq() {
 
 
 // LAN discovery
+#ifdef IS_ARDUINO
 EthernetUDP cmdsock;
+#endif
+#ifdef IS_ESP
+WiFiUDP cmdsock;
+#endif
 
 void commandInterfaceInit() {
+  Debugln("Command interface init");
   cmdsock.begin(62001);
 }
 
@@ -274,8 +280,10 @@ void commandInterfaceTick() {
 
     // read the packet into packetBufffer
     cmdsock.read(buffer, BUFFER_SIZE);
+    Debugln("New packet received");
 
     if (memcmp("INGV\0", buffer, 5) != 0 || buffer[5] != PKTTYPE_DISCOVERY) {
+      Debugln("Invalid packet");
       return;
     }
 
@@ -291,6 +299,7 @@ void commandInterfaceTick() {
     cmdsock.write(buffer, 24);
     cmdsock.endPacket();
     cmdsock.flush();
+    Debugln("Reply packet sent");
   }
 }
 
