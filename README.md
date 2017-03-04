@@ -1,30 +1,21 @@
-# BETA: NOT READY FOR PRODUCTION
+SeismoCloud project: http://www.seismocloud.com
 
-Please mind that this version will not self-upgrade - if you plan to build place-and-forget devices please use Raspberry PI/Galileo version: https://github.com/sapienzaapps/galileo-terremoti
+# Supported boards
 
-# Arduino/Genuino sketch
+* [NodeMCU 1.0](NodeMCU.md) devkit (with ESP-12E module - ESP8266)
+* [Arduino/Genuino Uno](Arduino.md) (with Ethernet Shield)
 
-## Requirements
+Click on board names to read detailed instructions for hardware and software.
 
-* Arduino/Genuino IDE
-* Arduino/Genuino board (Arduino Uno with Ethernet Shield or Arduino Ethernet)
-* MMA7361 Accelerometer
-
-## Network requirements
+# Network requirements
 
 If you have any firewall in your network, please allow these ports:
 
-* TCP: 80, 443
-* UDP: 123
+* TCP: 1883 (outgoing)
 
-## How to build
+Also, Wi-Fi or Ethernet networks should have a DHCP service running.
 
-1. Download the source code (for stable releases, please checkout latest git tag)
-2. Open project in Arduino IDE
-3. Compile and upload in your Arduino Board
-
-# Hardware
-## LEDs
+# LED status description
 
 LEDs can be in these different states:
 
@@ -37,23 +28,7 @@ LEDs can be in these different states:
 * **Green + Yellow + Red - ALL blinking slow**: network init failed
 * **Yellow + Red - ALL blinking**: EEPROM failed
 
-### LED pins
+# License
 
-* Pin 2 : Yellow
-* Pin 5 : Green
-* Pin 3 : Red
+See `LICENSE` file
 
-Please note that some pins are reserved to Ethernet (SPI). If you use different boards (eg. Arduino Yun, etc), please refer to Arduino documentation. You can change LED pin numbers into main sketch file (`seismoclouddevice-arduino.ino`).
-
-## Link Accelerometer MMA7361 to Arduino
-
-Link these pins from Accelerometer MMA7361 to Arduino board:
-
-* Vin: 5v
-* GND: GND
-* SEL: GND
-* X: A0
-* Y: A1
-* Z: A2
-
-Loop back **3v3** pin to **SLP** on Accelerometer.

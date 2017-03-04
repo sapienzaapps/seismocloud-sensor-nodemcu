@@ -1,7 +1,13 @@
 
 #include "common.h"
 
+#ifdef IS_ARDUINO
 AcceleroMMA7361 accelero;
+#endif
+#ifdef IS_ESP
+AcceleroMPU6050 accelero;
+#endif
+
 double partialAvg = 0;
 double partialStdDev = 0;
 unsigned int elements = 0;
@@ -11,35 +17,26 @@ double sigmaIter = 3.0;
 void addValueToAvgVar(double val);
 
 void seismometerInit() {
-  // Start with standard PIN assignments
-  accelero.begin(6, 7, 8, 9, A0, A1, A2);
-
-  accelero.setSensitivity(HIGH);
-
-  accelero.calibrate();
-
-  accelero.setAveraging(10);
-
-  Serial.println();
+  accelero.begin();
 }
 
 void seismometerTick() {
 
-  int accelVector = accelero.getTotalVector();
-  bool overThreshold = accelVector > quakeThreshold;
+  double accelVector = accelero.getTotalVector();
 
-  addValueToAvgVar(accelVector);
-
-  if(overThreshold) {
-    LED::red(true);
+  if(accelVector > quakeThreshold) {
+    LED_red(true);
     // QUAKE
-    Serial.print(F("QUAKE: "));
-    Serial.println(accelVector);
-    httpQuakeRequest();
+    Debug(F("QUAKE: "));
+    Debug(accelVector);
+    Debug(F(" > "));
+    Debugln(quakeThreshold);
+    apiQuake();
     delay(5000);
-    Serial.println(F("QUAKE Timeout END"));
-    LED::red(false);
+    Debugln(F("QUAKE Timeout END"));
+    LED_red(false);
   }
+  addValueToAvgVar(accelVector);
 }
 
 double getQuakeThreshold() {
