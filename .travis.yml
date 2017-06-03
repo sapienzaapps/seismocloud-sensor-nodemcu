@@ -1,0 +1,16 @@
+language: c
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget --progress=dot http://downloads.arduino.cc/arduino-1.8.1-linux64.tar.xz
+  - tar xf arduino-1.8.1-linux64.tar.xz
+  - sudo mv arduino-1.8.1 /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+install:
+  - ln -s $PWD/PetitFS /usr/local/share/arduino/libraries/PetitFS
+  - arduino --install-library "PubSubClient,WiFiManager"
+  - arduino --pref boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json --install-boards esp8266:esp8266 esp8266
+script:
+  - arduino --verify --verbose-build --board arduino:avr:uno $PWD/seismoclouddevice-arduino/seismoclouddevice-arduino.ino
+  - arduino --verify --verbose-build --board esp8266:esp8266:nodemcuv2 --pref custom_CpuFrequency=nodemcuv2_80 --pref custom_FlashFreq=generic_40 --pref custom_FlashMode=generic_dio --pref custom_FlashSize=nodemcuv2_4M3M $PWD/seismoclouddevice-arduino/seismoclouddevice-arduino.ino
