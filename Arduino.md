@@ -9,9 +9,15 @@
 * Arduino ISP and SD-card (any size >= 10 MB)
 * WizNet-compatible Ethernet shield (with SD reader)
 * MMA7361 Accelerometer
+* Arduino/Genuino IDE libraries: `PubSubClient`
+	* Open *Include Libraries* from *Sketch* menu, and choose *Manage Libraries*
+	* Type `PubSubClient` into search bar, then install it by clicking on *Install* button below
+	* Close window
 * (optional) 3 LEDs (red-green-yellow) with 3 resistors
 
 We recommend to buy Arduinos on official website https://store.arduino.cc
+
+Tested with `Arduino/Genuino IDE 1.8.1` and `PubSubClient 2.6`
 
 ## Step 1: Burning a new bootloader with Arduino ISP for self-upgrade
 
@@ -84,4 +90,3 @@ If you want to build Arduino code yourself, you need to use PetitFS version bund
 Note: this issue still present into arduino ide v1.8.1 - see https://github.com/arduino-libraries/Ethernet/issues/10
 
 Please note that if you use `avr_boot` bootloader (Step 1) you won't be able to see debug strings nor upload sketch thru USB (see above to reverse bootloader flash). Also, to enable debugs you need to modify constants into `common.h`
-
