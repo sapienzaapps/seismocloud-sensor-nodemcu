@@ -13,7 +13,8 @@ Click on board names to read detailed instructions for hardware and software.
 
 If you have any firewall in your network, please allow these ports:
 
-* TCP: 1883 (outgoing)
+* TCP (outgoing): 80, 443, 1883
+* UDP (outgoing): 123
 
 Also, Wi-Fi or Ethernet networks should have a DHCP service running.
 
