@@ -7,7 +7,11 @@ void NodeMCU::begin() {
     Debugln("SeismoCloud");
 
   WiFiManager wifi;
-  wifi.autoConnect("SeismoCloud");
+  wifi.setConfigPortalTimeout(180);
+  bool connected = wifi.autoConnect("SeismoCloud");
+  if (!connected) {
+    ESP.restart();
+  }
 
 #ifdef DEBUG
   memset(buffer, 0, BUFFER_SIZE);
