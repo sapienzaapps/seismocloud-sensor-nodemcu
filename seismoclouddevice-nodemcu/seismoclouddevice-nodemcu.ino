@@ -32,31 +32,6 @@ void setup() {
   // Check config, load MAC and lat/lon
   loadConfig();
 
-#ifdef IS_ARDUINO
-  checkMACAddress();
-
-  Debug(F("MAC Address: "));
-#ifdef DEBUG
-  printMACAddress();
-#endif
-
-  // give the ethernet module time to boot up:
-  delay(1000);
-
-  Debugln(F("Enabling Ethernet"));
-  Ethernet.begin(ethernetMac);
-  
-  // Check Ethernet link
-  if(Ethernet.localIP() == INADDR_NONE) {
-    Debugln(F("Ethernet failed to load"));
-    delay(2000);
-    soft_restart();
-    while(true);
-  } else {
-    Debug(F("My IP address: "));
-    Debugln(Ethernet.localIP());
-  }
-#endif
 #ifdef IS_ESP
   NodeMCU::begin();
 #endif
@@ -125,4 +100,3 @@ void loop() {
   probeCount++;
 #endif
 }
-

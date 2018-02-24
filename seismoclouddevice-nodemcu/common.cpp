@@ -38,23 +38,17 @@ void initEEPROM() {
   LED_red(true);
   LED_yellow(false);
 
-#ifdef IS_ARDUINO
-  for (int i = 0 ; i < EEPROM.length(); i++) {
-    EEPROM.write(i, 0);
-  }
-#else
   for (int i = 0 ; i < 100; i++) {
     EEPROM.write(i, 0);
   }
-#endif
-  
+
   EEPROM.write(0, 'S');
   EEPROM.write(1, 'E');
   EEPROM.write(2, 'I');
   EEPROM.write(3, 'S');
   EEPROM.write(4, 'M');
   EEPROM.write(5, 'O');
-  
+
   LED_red(false);
 }
 
@@ -107,12 +101,8 @@ uint32_t getProbeSpeedStatistic() {
 #endif
 
 void generateMACAddress() {
-#ifdef IS_ARDUINO
-  randomSeed(analogRead(A5));
-#else
   randomSeed(analogRead(A0));
-#endif
-  
+
   *(ethernetMac+0) = 0x06; // LAA
   *(ethernetMac+1) = (byte)random(0, 255);
   *(ethernetMac+2) = (byte)random(0, 255);
@@ -134,21 +124,9 @@ void checkMACAddress() {
 }
 
 void selectSD() {
-#ifdef IS_ARDUINO
-  pinMode(SS_SD_CARD, OUTPUT);
-  pinMode(SS_ETHERNET, OUTPUT);
-  digitalWrite(SS_SD_CARD, LOW);
-  digitalWrite(SS_ETHERNET, HIGH);
-#endif
 }
 
 void selectEthernet() {
-#ifdef IS_ARDUINO
-  pinMode(SS_SD_CARD, OUTPUT);
-  pinMode(SS_ETHERNET, OUTPUT);
-  digitalWrite(SS_SD_CARD, HIGH);
-  digitalWrite(SS_ETHERNET, LOW);
-#endif
 }
 
 /*
@@ -165,7 +143,7 @@ void selectEthernet() {
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  
+
   1.0  6  Jan 2010 - initial release
   1.1  12 Feb 2010 - fixed leap year calculation error
   1.2  1  Nov 2010 - fixed setTime bug (thanks to Korman for this)
@@ -191,24 +169,24 @@ void printUNIXTime() {
   uint32_t time = (uint32_t)unixTime;
   uint8_t second = time % 60;
   time /= 60;
-  
+
   uint8_t minute = time % 60;
   time /= 60;
-  
+
   uint8_t hour = time % 24;
   time /= 24;
-  
+
   uint8_t dayOfWeek = ((time + 4) % 7) + 1;
-  
-  year = 0;  
+
+  year = 0;
   days = 0;
   while((unsigned)(days += (LEAP_YEAR(year) ? 366 : 365)) <= time) {
     year++;
   }
-  
+
   days -= LEAP_YEAR(year) ? 366 : 365;
   time -= days;
-  
+
   days=0;
   month=0;
   monthLength=0;
@@ -222,14 +200,14 @@ void printUNIXTime() {
     } else {
       monthLength = monthDays[month];
     }
-    
+
     if (time >= monthLength) {
       time -= monthLength;
     } else {
         break;
     }
   }
-  uint8_t smonth = month + 1;  // jan is month 1  
+  uint8_t smonth = month + 1;  // jan is month 1
   uint8_t day = time + 1;     // day of month
 
   memset(buffer, 0, 50);
@@ -237,42 +215,6 @@ void printUNIXTime() {
   Debug((char*)buffer);
 }
 #endif
-
-#ifdef IS_ARDUINO
-/* Copyright (C) 2012 by Victor Aprea <victor.aprea@wickeddevice.com>
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
-
-#include <avr/wdt.h>
-
-void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
-// Function Implementation
-void wdt_init(void)
-{
-    MCUSR = 0;
-    wdt_disable();
-
-    return;
-}
-#endif
-
 
 MyRingBuffer::MyRingBuffer(unsigned int size)
 {
@@ -328,4 +270,3 @@ bool MyRingBuffer::endsWith(const char* str)
 
   return true;
 }
-

@@ -2,49 +2,22 @@
 #define __COMMON_H
 
 #include <Arduino.h>
-#ifdef ARDUINO_AVR_UNO
-#define IS_ARDUINO
-#define MODEL "uno"
-#else
 
 #ifdef ESP8266
 #define IS_ESP
 #define MODEL "esp8266"
 #else
 
-#ifdef ARDUINO_AVR_MEGA2560
-#define IS_ARDUINO
-#define MODEL "mega2560"
-#else
-
-#ifdef ARDUINO_AVR_ETHERNET
-#define IS_ARDUINO
-#define MODEL "uno-e"
-#else
-
-#error "Unsupported platform"
-#endif
-#endif
-#endif
 #endif
 
 // #define DONT_UPDATE
-
-// On Arduino this flag has no effect if you use avr_boot bootloader (for self-update). You should switch to standard bootloader
 // #define DEBUG
 
-#ifdef IS_ARDUINO
-// Configurazione LED per Arduino
-#define LED_RED     3
-#define LED_YELLOW  2
-#define LED_GREEN   5
-#else
 #ifdef IS_ESP
 // Configurazione LED per NodeMCU/ESP8266
 #define LED_RED     D7
 #define LED_YELLOW  D6
 #define LED_GREEN   D5
-#endif
 #endif
 
 #include <SPI.h>
@@ -64,28 +37,7 @@
 
 #ifndef DONT_UPDATE
 
-#ifdef IS_ARDUINO
-#include <PetitFS.h>
-#define SS_SD_CARD   4
-#define SS_ETHERNET 10
-#endif
-
 #include "update.h"
-#endif
-
-#ifdef IS_ARDUINO
-#include "AcceleroMMA7361.h"
-#include <avr/wdt.h>
-#define soft_restart()        \
-apiDisconnect();            \
-delay(5000);                \
-do                          \
-{                           \
-    wdt_enable(WDTO_15MS);  \
-    for(;;)                 \
-    {                       \
-    }                       \
-} while(0)
 #endif
 
 #ifdef IS_ESP

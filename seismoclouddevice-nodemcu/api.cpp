@@ -1,9 +1,6 @@
 
 #include "api.h"
 
-#ifdef IS_ARDUINO
-EthernetClient ethernetClient;
-#endif
 #ifdef IS_ESP
 WiFiClient ethernetClient;
 #endif
@@ -262,9 +259,6 @@ void apiTimeReq() {
 
 
 // LAN discovery
-#ifdef IS_ARDUINO
-EthernetUDP cmdsock;
-#endif
 #ifdef IS_ESP
 WiFiUDP cmdsock;
 #endif
@@ -302,4 +296,3 @@ void commandInterfaceTick() {
     Debugln("Reply packet sent");
   }
 }
-

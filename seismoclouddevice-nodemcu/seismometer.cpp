@@ -1,9 +1,6 @@
 
 #include "common.h"
 
-#ifdef IS_ARDUINO
-AcceleroMMA7361 accelero;
-#endif
 #ifdef IS_ESP
 AcceleroMPU6050 accelero;
 #endif
@@ -74,5 +71,3 @@ void resetLastPeriod() {
 double getSigmaIter() {
   return sigmaIter;
 }
-
-
