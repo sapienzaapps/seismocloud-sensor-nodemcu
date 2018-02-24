@@ -12,5 +12,4 @@ install:
   - arduino --install-library "PubSubClient,WiFiManager"
   - arduino --pref boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json --install-boards esp8266:esp8266 esp8266
 script:
-  - arduino --verify --verbose-build --board arduino:avr:uno $PWD/seismoclouddevice-arduino/seismoclouddevice-arduino.ino
   - arduino --verify --verbose-build --board esp8266:esp8266:nodemcuv2 --pref custom_CpuFrequency=nodemcuv2_80 --pref custom_FlashFreq=generic_40 --pref custom_FlashMode=generic_dio --pref custom_FlashSize=nodemcuv2_4M3M $PWD/seismoclouddevice-arduino/seismoclouddevice-arduino.ino
