@@ -17,7 +17,7 @@
 /**
  * Connect to API server
  */
-boolean apiConnect();
+boolean apiConnect(boolean useWebSocket);
 
 /**
  * Send an ALIVE event to API server
