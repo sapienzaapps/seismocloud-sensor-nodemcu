@@ -1,8 +1,10 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+// ************************** PLATFORM AUTODETECTION ****************************
 #include <Arduino.h>
 
+// NodeMCU 12E
 #ifdef ESP8266
 #define IS_ESP
 #define MODEL "esp8266"
@@ -10,15 +12,22 @@
 
 #endif
 
+// ************************ BEGIN CONFIG **************************
+
+// This flag will prevent updates - USE ONLY DURING DEVELOPMENT
 // #define DONT_UPDATE
+
+// On Arduino this flag has no effect if you use avr_boot bootloader (for self-update). You should switch to standard bootloader
 // #define DEBUG
 
 #ifdef IS_ESP
-// Configurazione LED per NodeMCU/ESP8266
+// LED for NodeMCU/ESP8266
 #define LED_RED     D7
 #define LED_YELLOW  D6
 #define LED_GREEN   D5
 #endif
+
+// ************************ END CONFIG **************************
 
 #include <SPI.h>
 #include <EEPROM.h>
@@ -27,6 +36,7 @@
 
 #define VERSION     "1.20"
 
+// ******* DEBUG PART
 #ifdef DEBUG
 #define Debug(x) Serial.print(x)
 #define Debugln(x) Serial.println(x)
@@ -34,11 +44,14 @@
 #define Debug(x)
 #define Debugln(x)
 #endif
+// ******* /DEBUG PART
 
+// ******* UPDATE
 #ifndef DONT_UPDATE
 
 #include "update.h"
 #endif
+// ******* /UPDATE
 
 #ifdef IS_ESP
 #include <Wire.h>                // I2C
@@ -66,14 +79,51 @@ ESP.restart()
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 
+/**
+ * Format EEPROM (you'll lose all data)
+ */
 void initEEPROM();
+
+/**
+ * Check if EEPROM is faulty or not
+ */
 void checkEEPROM();
+
+/**
+ * Check MAC Address - if not present, a new one will be generated
+ */
 void checkMACAddress();
+
+/**
+ * Force a MAC Address
+ */
 void setMACAddress(byte* mac);
+
+/**
+ * Load config from EEPROM if it's valid
+ */
 void loadConfig();
+
+/**
+ * Returns the device ID (as char array)
+ */
 void getDeviceId(char* dest);
+
+/**
+ * Returns the device ID (as byte array)
+ */
 void getDeviceId(byte* dest);
+
+/**
+ * Switch to SD Card
+ * TODO: remove
+ */
 void selectSD();
+
+/**
+ * Switch to Ethernet card
+ * TODO: remove
+ */
 void selectEthernet();
 
 #ifdef DEBUG

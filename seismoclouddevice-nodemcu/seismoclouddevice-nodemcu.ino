@@ -85,8 +85,12 @@ void loop() {
 #endif
     Debugln();
 
+    // Trigger API alive
     apiAlive();
     lastAliveMs = millis();
+
+	// Trigger NTP update
+    apiTimeReq();
   }
 
   // Detection

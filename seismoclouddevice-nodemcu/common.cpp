@@ -6,6 +6,7 @@ byte ethernetMac[6] = { 0 };
 byte buffer[BUFFER_SIZE];
 
 void checkEEPROM() {
+  // TODO: use pseudorandom bytes
   EEPROM.write(0, 'S');
   EEPROM.write(1, 'E');
 

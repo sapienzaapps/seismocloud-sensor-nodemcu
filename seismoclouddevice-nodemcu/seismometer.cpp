@@ -11,7 +11,33 @@ unsigned int elements = 0;
 double quakeThreshold = 1;
 double sigmaIter = 3.0;
 
-void addValueToAvgVar(double val);
+/**
+ * Returns the current quake threshold
+ */
+double getQuakeThreshold() {
+  return quakeThreshold;
+}
+
+/**
+ * Get the current mean (average)
+ */
+double getCurrentAVG() {
+  return partialAvg;
+}
+
+/**
+ * Add a new value to mean and standard deviation values
+ * Knuth mean/avg calculation algorithm
+ */
+void addValueToAvgVar(double val) {
+  elements++;
+  double delta = val - partialAvg;
+  partialAvg += delta / elements;
+  partialStdDev += delta * (val - partialAvg);
+  if (elements > 1) {
+    quakeThreshold = partialAvg + (getCurrentSTDDEV() * getSigmaIter());
+  }
+}
 
 void seismometerInit() {
   accelero.begin();
@@ -36,30 +62,8 @@ void seismometerTick() {
   addValueToAvgVar(accelVector);
 }
 
-double getQuakeThreshold() {
-  return quakeThreshold;
-}
-
-double getCurrentAVG() {
-  return partialAvg;
-}
-
-double getCurrentSTDDEV() {
-  return sqrt(partialStdDev / (elements - 1));
-}
-
 void setSigmaIter(double i) {
   sigmaIter = i;
-}
-
-void addValueToAvgVar(double val) {
-  elements++;
-  double delta = val - partialAvg;
-  partialAvg += delta / elements;
-  partialStdDev += delta * (val - partialAvg);
-  if (elements > 1) {
-    quakeThreshold = partialAvg + (getCurrentSTDDEV() * getSigmaIter());
-  }
 }
 
 void resetLastPeriod() {
@@ -70,4 +74,8 @@ void resetLastPeriod() {
 
 double getSigmaIter() {
   return sigmaIter;
+}
+
+double getCurrentSTDDEV() {
+  return sqrt(partialStdDev / (elements - 1));
 }
