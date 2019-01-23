@@ -21,7 +21,6 @@ LEDs can be in these different states:
 * **Green**: device is ready
 * **Green + Yellow**: device is ready but there is an issue connecting to SeismoCloud APIs
 * **Green + Red (only for about 5 seconds)**: shake detected
-* **Yellow ONLY - blinking**: no position available - initialize Seismometer with Android/iOS App
 * **Green + Yellow + Red**: software is loading
 * **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
 * **Green + Yellow + Red - ALL blinking slow**: network init failed
