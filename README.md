@@ -21,7 +21,6 @@ LEDs can be in these different states:
 * **Green**: device is ready
 * **Green + Yellow**: device is ready but there is an issue connecting to SeismoCloud APIs
 * **Green + Red (only for about 5 seconds)**: shake detected
-* **Yellow ONLY - blinking**: no position available - initialize Seismometer with Android/iOS App
 * **Green + Yellow + Red**: software is loading
 * **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
 * **Green + Yellow + Red - ALL blinking slow**: network init failed
@@ -44,7 +43,7 @@ LEDs can be in these different states:
 * MPU6050 Accelerometer
 * (optional) 3 LEDs (red-green-yellow) with 3 resistors
 
-Tested with `Arduino/Genuino IDE 1.8.1`, `PubSubClient 2.6` and `WiFiManager 0.12.0`
+Tested with `Arduino/Genuino IDE 1.8.10`, board SDK `esp8266 2.6.2`, libraries `PubSubClient 2.7` and `WiFiManager 0.15.0-beta`
 
 ## Step 1: Accelerometer MPU6050
 
