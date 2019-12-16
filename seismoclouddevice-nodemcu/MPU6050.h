@@ -15,7 +15,7 @@ class AcceleroMPU6050
 {
   public:
     static void begin();
-    static double getTotalVector();
+    static double getTotalVector(double *x, double *y, double *z);
     static void calibrate();
 
 };
@@ -26,4 +26,3 @@ extern float Tmp;
 #endif
 
 #endif
-

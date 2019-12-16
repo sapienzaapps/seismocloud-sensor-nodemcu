@@ -34,7 +34,7 @@
 #include <Ethernet.h>
 #include <PubSubClient.h>
 
-#define VERSION     "1.20"
+#define VERSION     "1.30"
 
 // ******* DEBUG PART
 #ifdef DEBUG
@@ -73,11 +73,14 @@ ESP.restart()
 #include "LED.h"
 #include "seismometer.h"
 #include "api.h"
+#include "lan-discovery.h"
 #include "nodemcu.h"
 
 #define BUFFER_SIZE 512
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
+extern char deviceid[13];
+extern bool streamingEnabled;
 
 /**
  * Format EEPROM (you'll lose all data)
@@ -113,18 +116,6 @@ void getDeviceId(char* dest);
  * Returns the device ID (as byte array)
  */
 void getDeviceId(byte* dest);
-
-/**
- * Switch to SD Card
- * TODO: remove
- */
-void selectSD();
-
-/**
- * Switch to Ethernet card
- * TODO: remove
- */
-void selectEthernet();
 
 #ifdef DEBUG
 void printMACAddress();

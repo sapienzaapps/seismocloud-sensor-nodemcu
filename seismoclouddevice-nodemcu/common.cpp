@@ -2,7 +2,8 @@
 #include "common.h"
 
 byte ethernetMac[6] = { 0 };
-
+char deviceid[13] = { 0 };
+bool streamingEnabled = false;
 byte buffer[BUFFER_SIZE];
 
 void checkEEPROM() {
@@ -53,23 +54,17 @@ void initEEPROM() {
   LED_red(false);
 }
 
-void getDeviceId(byte* dest) {
-  getDeviceId((char*) dest);
-}
-
-void getDeviceId(char* dest) {
-  snprintf(dest, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
-}
-
 void loadConfig() {
   bool cfg = validateEEPROM();
   if(!cfg) {
+    checkEEPROM();
     initEEPROM();
   } else {
     // Load MAC Address
     for (int i = 0; i < 6; i++) {
       ethernetMac[i] = EEPROM.read(30+i);
     }
+    snprintf(deviceid, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
   }
 }
 
@@ -122,12 +117,6 @@ void checkMACAddress() {
   if (ethernetMac[0] == 0) {
     generateMACAddress();
   }
-}
-
-void selectSD() {
-}
-
-void selectEthernet() {
 }
 
 /*

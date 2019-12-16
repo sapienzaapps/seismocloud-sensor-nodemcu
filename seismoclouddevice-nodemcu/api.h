@@ -4,16 +4,6 @@
 
 #include "common.h"
 
-// API commands
-#define API_KEEPALIVE   1
-#define API_QUAKE       2
-#define API_TIMEREQ     3
-#define API_TIMERESP    4
-#define API_CFG         5
-#define API_DISCONNECT  6
-#define API_TEMPERATURE 7
-#define API_REBOOT      8
-
 /**
  * Connect to API server
  */
@@ -28,7 +18,7 @@ void apiAlive();
 /**
  * Send a QUAKE event to API server
  */
-void apiQuake();
+void apiQuake(double x, double y, double z);
 
 /**
  * Request a time update to API server
@@ -36,9 +26,14 @@ void apiQuake();
 void apiTimeReq();
 
 /**
- * Returns current UNIX Time
+ * Send the current sensor temperature
  */
-unsigned long getUNIXTime();
+void apiTemperature(float temperature);
+
+/**
+ * Send the stream to API server
+ */
+void apiStream(double x, double y, double z);
 
 /**
  * Maintain API server connection
@@ -51,23 +46,15 @@ void apiTick();
  */
 void apiDisconnect();
 
+/**
+ * Returns current UNIX Time
+ */
+unsigned long getUNIXTime();
 
-// LAN discovery APIs
-#define CMD_INTERFACE_PORT  62001
-
-#define PKTTYPE_DISCOVERY        1
-#define PKTTYPE_DISCOVERY_REPLY  2
 
 /**
- * LAN discovery init
+ * Returns current UNIX Time in milliseconds
  */
-void commandInterfaceInit();
-
-/**
- * Maintain LAN discovery process
- * You should call this function at each loop() function execution
- */
-void commandInterfaceTick();
-
+uint64 getUNIXTimeMS();
 
 #endif

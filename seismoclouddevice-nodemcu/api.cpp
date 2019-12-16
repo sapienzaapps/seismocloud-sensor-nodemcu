@@ -1,124 +1,30 @@
 
 #include "api.h"
 
+#define TOPIC_BUFFER_SIZE 60
 #ifdef IS_ESP
 WiFiClient ethernetClient;
 #endif
 PubSubClient mqttClient(ethernetClient);
 
-unsigned long lastNTPTime = 0;
+uint64 lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
 
-/**
- * MQTT Callback (executed when a MQTT message is received)
- */
-void apiCallback(char* topic, byte* payload, unsigned int len) {
-  if (len == 0) {
-    return;
-  }
+char emptypayload[2] = { 'y' , 0 };
+char topicbuffer[TOPIC_BUFFER_SIZE + 1] = { 0 };
 
-  switch (payload[0]) {
-    // Time response
-    case API_TIMERESP:
-      memcpy(&lastNTPTime, payload + 1, 4);
-      Debug(F("Time:"));
-      Debugln(lastNTPTime);
-      lastNTPMillis = millis();
-      break;
-	// New configuration received
-	case API_CFG:
-      if (len < 7) {
-        break;
-      }
-      /**
-         Payload (after type):
-         Offset       Byte      Desc
-         1            4         Sigma (IEEE 754)
-         5            1         Host len
-         6            len(host) Hostname
-         6+len(host)  1         Path len
-         7+len(host)  len(path) Script path
-      */
-#ifndef DONT_UPDATE
-      byte hlen, plen;
-      memcpy(&hlen, payload + 5, 1);
-      if (hlen > 0) {
-        memcpy(&plen, payload + 6 + hlen, 1);
-        if (plen > 0) {
-          *(payload + 6 + hlen) = 0;
-          memset(buffer, 0, BUFFER_SIZE);
-          memcpy(buffer, payload + 6 + hlen + 1, plen);
-          if (update((char*)(payload + 6), (char*)buffer)) {
-            Debugln(F("Update succeded, reboot"));
-            soft_restart();
-          } else {
-            Debugln(F("Update failed"));
-          }
-        }
-      }
-#endif
-
-      float sigma;
-      memcpy(&sigma, payload + 1, 4);
-      setSigmaIter(sigma);
-      Debug(F("Setting sigma to "));
-      Debugln(sigma);
-      resetLastPeriod();
-      break;
-    // Reboot request received
-    case API_REBOOT:
-      apiDisconnect();
-      soft_restart();
-      break;
-    default:
-      break;
-  }
-}
-
-unsigned long getUNIXTime() {
-  if (lastNTPTime == 0) {
-    return 0;
-  }
-  unsigned long diffms = millis() - lastNTPMillis;
-  return lastNTPTime + (diffms / 1000);
-}
-
-void apiDisconnect() {
-  // Will message for disconnection
-  memset(buffer, 0, BUFFER_SIZE);
-  byte j = 0;
-  buffer[j] = API_DISCONNECT;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
-  // END Will message
-  mqttClient.publish("server", buffer, j, false);
-  mqttClient.disconnect();
-}
+void apiCallback(char* topic, byte* payload, unsigned int len);
 
 boolean apiConnect() {
   // Will message for disconnection
-  memset(buffer, 0, BUFFER_SIZE);
-  byte j = 0;
-  buffer[j] = API_DISCONNECT;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
+  char willtopic[TOPIC_BUFFER_SIZE + 1] = { 0 };
+  memset(willtopic, 0, TOPIC_BUFFER_SIZE);
+  snprintf(willtopic, TOPIC_BUFFER_SIZE, "sensor/%s/disconnect", deviceid);
   // END Will message
 
   mqttClient.setServer("mqtt.seismocloud.com", 1883);
   mqttClient.setCallback(apiCallback);
-  mqttClient.connect((char*)(buffer + 2), "embedded", "embedded", "server", 0, 0, (char*)buffer);
+  mqttClient.connect((char*)(buffer + 2), "embedded", "embedded", willtopic, 0, 0, emptypayload);
 
 #ifdef DEBUG
   switch (mqttClient.state()) {
@@ -156,15 +62,136 @@ boolean apiConnect() {
 #endif
 
   if (mqttClient.state() == MQTT_CONNECTED) {
-    memset(buffer, 0, BUFFER_SIZE);
-    snprintf((char*)buffer, BUFFER_SIZE, "device-%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
-    Debug("Subscribing ");
-    Debugln((char*)buffer);
-    mqttClient.subscribe((char*)buffer, 1);
+    Debugln("Subscribing to topics");
+    
+    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/sigma", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
+    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/update", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
+    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/reboot", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
+    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/timesync", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
+    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
+    Debugln("Done");
     return true;
   } else {
     return false;
   }
+}
+
+/**
+ * MQTT Callback (executed when a MQTT message is received)
+ */
+void apiCallback(char* topic, byte* payload, unsigned int len) {
+  uint64 t3 = getUNIXTimeMS();
+  if (len == 0) {
+    return;
+  }
+
+  // Skip the "sensor/<mysensorid>/" part in topic, and detect shorter topics
+  if (strlen(topic) < 7 + strlen(deviceid) + 1) {
+    return;
+  }
+  char *command = topic + 7 + strlen(deviceid) + 1;
+
+  if (strcmp(command, "sigma")) {
+    float sigma;
+    sscanf((char*)payload, "%f", &sigma);
+    setSigmaIter(sigma);
+    resetLastPeriod();
+
+    Debug(F("Setting sigma to "));
+    Debugln(sigma);
+  } else if (strcmp(command, "reboot")) {
+    apiDisconnect();
+    soft_restart();
+  } else if (strcmp(command, "update")) {
+#ifndef DONT_UPDATE
+    // TODO: read URL and split
+    update((char*)(payload + 6), (char*)buffer);
+#endif
+  } else if (strcmp(command, "timesync")) {
+    uint64 t0, t1, t2;
+    sscanf((char*)payload, "%llu;%llu;%llu", &t0, &t1, &t2);
+    
+		lastNTPTime = t2 + ((t1 - t0 + t2 - t3) / 2.0);
+    lastNTPMillis = millis();
+
+#ifdef DEBUG
+    Debug(F("Time sync'ed: "));
+    printUNIXTime();
+#endif
+  } else if (strcmp(command, "stream")) {
+    streamingEnabled = strncmp("on", (char*)payload, len) == 0;
+  } else {
+    // Unknown/unsupported command received
+    Debug("Unsupported command received: ");
+    Debugln(command);
+  }
+}
+
+void apiAlive() {
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "%s;%s", MODEL, VERSION);
+
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/alive", deviceid);
+
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+}
+
+void apiQuake(double x, double y, double z) {
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "%d;%f;%f;%f", getUNIXTimeMS(), x, y, z);
+
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/quake", deviceid);
+
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+}
+
+void apiTimeReq() {
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "%llu", lastNTPTime);
+
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/timereq", deviceid);
+
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+}
+
+void apiTemperature(float temperature) {
+#ifdef IS_ESP
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "%f", temperature);
+
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/temperature", deviceid);
+
+  mqttClient.publish((const char*)topicbuffer, (const char*)buffer);
+#endif
+}
+
+void apiStream(double x, double y, double z) {
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "%d;%f;%f;%f", getUNIXTimeMS(), x, y, z);
+
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
+
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
 }
 
 void apiTick() {
@@ -174,131 +201,25 @@ void apiTick() {
   }
 }
 
-void apiAlive() {
-  /**
-     Keep alive message format:
-     Position   Size      Value
-     0          1         1 (type=alive)
-     1          1         device id length
-     2          len(did)  device id as ASCII string
-     #          1         device model length
-     #          len(mod)  device model
-     #          1         version length
-     #          len(ver)  version as ASCII string
-
-  */
-  memset(buffer, 0, BUFFER_SIZE);
-  byte j = 0;
-  buffer[j] = API_KEEPALIVE;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
-  // Model
-  buffer[j] = strlen(MODEL);
-  j++;
-  memcpy(buffer + j, MODEL, strlen(MODEL));
-  j += strlen(MODEL);
-
-  // Version
-  buffer[j] = strlen(VERSION);
-  j++;
-  memcpy(buffer + j, VERSION, strlen(VERSION));
-  j += strlen(VERSION);
-
-  mqttClient.publish("server", buffer, j, false);
-
-#ifdef IS_ESP
-  memset(buffer, 0, BUFFER_SIZE);
-  j = 0;
-  buffer[j] = API_TEMPERATURE;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
-  // Temperature
-  buffer[j] = sizeof(float);
-  j++;
-  memcpy(buffer + j, &Tmp, sizeof(float));
-  j += sizeof(float);
-
-  mqttClient.publish("server", buffer, j, false);
-#endif
+void apiDisconnect() {
+  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/disconnect", deviceid);
+  mqttClient.publish((char*)topicbuffer, emptypayload);
+  mqttClient.disconnect();
 }
 
-void apiQuake() {
-  memset(buffer, 0, BUFFER_SIZE);
-  byte j = 0;
-  buffer[j] = API_QUAKE;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
-  mqttClient.publish("server", buffer, j, false);
-}
-
-void apiTimeReq() {
-  byte j = 0;
-  buffer[j] = API_TIMEREQ;
-  j++;
-
-  // Device ID
-  buffer[j] = 12;
-  j++;
-  getDeviceId(buffer + j);
-  j += 12;
-
-  mqttClient.publish("server", buffer, j, false);
-}
-
-
-// LAN discovery
-#ifdef IS_ESP
-WiFiUDP cmdsock;
-#endif
-
-void commandInterfaceInit() {
-  Debugln("Command interface init");
-  cmdsock.begin(62001);
-}
-
-void commandInterfaceTick() {
-  int packetSize = cmdsock.parsePacket();
-  if (cmdsock.available()) {
-
-    // read the packet into packetBufffer
-    cmdsock.read(buffer, BUFFER_SIZE);
-    Debugln("New packet received");
-
-    if (memcmp("INGV\0", buffer, 5) != 0 || buffer[5] != PKTTYPE_DISCOVERY) {
-      Debugln("Invalid packet");
-      return;
-    }
-
-    // Reply to discovery
-    buffer[5] = PKTTYPE_DISCOVERY_REPLY;
-
-    memcpy(buffer + 6, ethernetMac, 6);
-
-    memcpy(buffer + 12, VERSION, min(strlen(VERSION), 4));
-    memcpy(buffer + 16, MODEL, min(strlen(MODEL), 8));
-
-    cmdsock.beginPacket(cmdsock.remoteIP(), cmdsock.remotePort());
-    cmdsock.write(buffer, 24);
-    cmdsock.endPacket();
-    cmdsock.flush();
-    Debugln("Reply packet sent");
+unsigned long getUNIXTime() {
+  if (lastNTPTime == 0) {
+    return 0;
   }
+  unsigned long diffms = millis() - lastNTPMillis;
+  return (lastNTPTime / 1000) + (diffms / 1000);
+}
+
+uint64 getUNIXTimeMS() {
+  if (lastNTPTime == 0) {
+    return 0;
+  }
+  unsigned long diffms = millis() - lastNTPMillis;
+  return lastNTPTime + diffms;
 }

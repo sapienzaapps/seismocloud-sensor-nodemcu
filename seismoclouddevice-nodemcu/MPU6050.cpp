@@ -46,7 +46,7 @@ void AcceleroMPU6050::calibrate() {
   Debugln(AccelerationFactor);
 }
 
-double AcceleroMPU6050::getTotalVector() {
+double AcceleroMPU6050::getTotalVector(double *x, double *y, double *z) {
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
   Wire.endTransmission(false);
@@ -62,9 +62,18 @@ double AcceleroMPU6050::getTotalVector() {
   Y = AcY * AccelerationFactor;
   Z = AcZ * AccelerationFactor;
 
+  if (x != NULL) {
+    *x = X - iX;
+  }
+  if (y != NULL) {
+    *y = Y - iY;
+  }
+  if (z != NULL) {
+    *z = Z - iZ;
+  }
+
   // Calculate force
   return sqrt(sq(X - iX) + sq(Y - iY) + sq(Z - iZ));
 }
 
 #endif
-

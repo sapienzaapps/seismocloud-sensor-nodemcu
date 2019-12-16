@@ -20,16 +20,11 @@ void setup() {
   Debug(F("SeismoCloud-Arduino version "));
   Debugln(VERSION);
 
-  checkEEPROM();
-
-  // Switching SPI to ethernet
-  selectEthernet();
-
   Debugln(F("Init seismometer and calibrate"));
   seismometerInit();
 
   Debugln(F("Loading config"));
-  // Check config, load MAC and lat/lon
+  // Check config, load MAC address (device id)
   loadConfig();
 
 #ifdef IS_ESP
@@ -99,6 +94,8 @@ void loop() {
   if(millis() - lastProbeMs >= 1000) {
     lastProbeMs = millis();
     setProbeSpeedStatistic(probeCount);
+    Debug(F("Probe speed (values per second): ");
+    Debugln(probeCount);
     probeCount = 0;
   }
   probeCount++;

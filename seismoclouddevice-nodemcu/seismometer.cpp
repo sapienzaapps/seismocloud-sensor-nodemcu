@@ -11,6 +11,8 @@ unsigned int elements = 0;
 double quakeThreshold = 1;
 double sigmaIter = 3.0;
 
+double accelVector, x, y, z;
+
 /**
  * Returns the current quake threshold
  */
@@ -45,7 +47,7 @@ void seismometerInit() {
 
 void seismometerTick() {
 
-  double accelVector = accelero.getTotalVector();
+  accelVector = accelero.getTotalVector(&x, &y, &z);
 
   if(accelVector > quakeThreshold) {
     LED_red(true);
@@ -54,11 +56,16 @@ void seismometerTick() {
     Debug(accelVector);
     Debug(F(" > "));
     Debugln(quakeThreshold);
-    apiQuake();
+    apiQuake(x, y, z);
     delay(5000);
     Debugln(F("QUAKE Timeout END"));
     LED_red(false);
   }
+
+  if (streamingEnabled) {
+    apiStream(x, y, z);
+  }
+  
   addValueToAvgVar(accelVector);
 }
 
