@@ -5,68 +5,8 @@ byte ethernetMac[6] = { 0 };
 char deviceid[13] = { 0 };
 bool streamingEnabled = false;
 byte buffer[BUFFER_SIZE];
-
-void checkEEPROM() {
-  // TODO: use pseudorandom bytes
-  EEPROM.write(0, 'S');
-  EEPROM.write(1, 'E');
-
-  if(!EEPROM.read(0) == 'S' || !EEPROM.read(1) == 'E') {
-    Debugln(F("EEPROM failed"));
-    while(true) {
-      LED_green(false);
-      LED_red(true);
-      LED_yellow(true);
-      delay(400);
-      LED_green(false);
-      LED_red(false);
-      LED_yellow(false);
-      delay(400);
-    }
-  }
-}
-
-bool validateEEPROM() {
-  return EEPROM.read(0) == 'S'
-    && EEPROM.read(1) == 'E'
-    && EEPROM.read(2) == 'I'
-    && EEPROM.read(3) == 'S'
-    && EEPROM.read(4) == 'M'
-    && EEPROM.read(5) == 'O';
-}
-
-void initEEPROM() {
-  LED_green(false);
-  LED_red(true);
-  LED_yellow(false);
-
-  for (int i = 0 ; i < 100; i++) {
-    EEPROM.write(i, 0);
-  }
-
-  EEPROM.write(0, 'S');
-  EEPROM.write(1, 'E');
-  EEPROM.write(2, 'I');
-  EEPROM.write(3, 'S');
-  EEPROM.write(4, 'M');
-  EEPROM.write(5, 'O');
-
-  LED_red(false);
-}
-
-void loadConfig() {
-  bool cfg = validateEEPROM();
-  if(!cfg) {
-    checkEEPROM();
-    initEEPROM();
-  } else {
-    // Load MAC Address
-    for (int i = 0; i < 6; i++) {
-      ethernetMac[i] = EEPROM.read(30+i);
-    }
-    snprintf(deviceid, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
-  }
-}
+ushort probeSpeedHz = 100;
+uint32_t probeSpeedStat = 0;
 
 #ifdef DEBUG
 void printMACAddress() {
@@ -78,45 +18,9 @@ void printMACAddress() {
 }
 #endif
 
-void _saveMACAddress() {
-  for (int i = 0; i < 6; i++) {
-    EEPROM.write(30+i, ethernetMac[i]);
-  }
-}
-
-#ifdef DEBUG
-uint32_t probeSpeedStat = 0;
-
-void setProbeSpeedStatistic(uint32_t v) {
-  probeSpeedStat = v;
-}
-
-uint32_t getProbeSpeedStatistic() {
-  return probeSpeedStat;
-}
-#endif
-
-void generateMACAddress() {
-  randomSeed(analogRead(A0));
-
-  *(ethernetMac+0) = 0x06; // LAA
-  *(ethernetMac+1) = (byte)random(0, 255);
-  *(ethernetMac+2) = (byte)random(0, 255);
-  *(ethernetMac+3) = (byte)random(0, 255);
-  *(ethernetMac+4) = (byte)random(0, 255);
-  *(ethernetMac+5) = (byte)random(0, 255);
-  _saveMACAddress();
-}
-
 void setMACAddress(byte* mac) {
   memcpy(ethernetMac, mac, 6);
-  _saveMACAddress();
-}
-
-void checkMACAddress() {
-  if (ethernetMac[0] == 0) {
-    generateMACAddress();
-  }
+  snprintf(deviceid, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
 }
 
 /*
@@ -205,58 +109,3 @@ void printUNIXTime() {
   Debug((char*)buffer);
 }
 #endif
-
-MyRingBuffer::MyRingBuffer(unsigned int size)
-{
-  _size = size;
-  // add one char to terminate the string
-  ringBuf = new char[size+1];
-  ringBufEnd = &ringBuf[size];
-  init();
-}
-
-MyRingBuffer::~MyRingBuffer() {}
-
-void MyRingBuffer::reset()
-{
-  ringBufP = ringBuf;
-}
-
-void MyRingBuffer::init()
-{
-  ringBufP = ringBuf;
-  memset(ringBuf, 0, _size+1);
-}
-
-void MyRingBuffer::push(char c)
-{
-  *ringBufP = c;
-  ringBufP++;
-  if (ringBufP>=ringBufEnd)
-    ringBufP = ringBuf;
-}
-
-bool MyRingBuffer::endsWith(const char* str)
-{
-  int findStrLen = strlen(str);
-
-  // b is the start position into the ring buffer
-  char* b = ringBufP-findStrLen;
-  if(b < ringBuf)
-    b = b + _size;
-
-  char *p1 = (char*)&str[0];
-  char *p2 = p1 + findStrLen;
-
-  for(char *p=p1; p<p2; p++)
-  {
-    if(*p != *b)
-      return false;
-
-    b++;
-    if (b == ringBufEnd)
-      b=ringBuf;
-  }
-
-  return true;
-}

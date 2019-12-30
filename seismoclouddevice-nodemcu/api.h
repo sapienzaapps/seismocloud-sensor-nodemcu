@@ -55,6 +55,6 @@ unsigned long getUNIXTime();
 /**
  * Returns current UNIX Time in milliseconds
  */
-uint64 getUNIXTimeMS();
+uint64_t getUNIXTimeMS();
 
 #endif

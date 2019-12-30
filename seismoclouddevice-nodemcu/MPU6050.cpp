@@ -1,6 +1,5 @@
 
 #include "MPU6050.h"
-#ifdef IS_ESP
 
 int16_t AcX, AcY, AcZ, AcTmp;
 double iX, iY, iZ, X, Y, Z;
@@ -75,5 +74,3 @@ double AcceleroMPU6050::getTotalVector(double *x, double *y, double *z) {
   // Calculate force
   return sqrt(sq(X - iX) + sq(Y - iY) + sq(Z - iZ));
 }
-
-#endif

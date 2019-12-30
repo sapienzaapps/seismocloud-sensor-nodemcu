@@ -2,7 +2,6 @@
 #define __MPU6050_H
 
 #include "common.h"
-#ifdef IS_ESP
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -22,7 +21,5 @@ class AcceleroMPU6050
 
 
 extern float Tmp;
-
-#endif
 
 #endif

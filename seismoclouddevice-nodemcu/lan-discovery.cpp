@@ -1,9 +1,7 @@
 #include "lan-discovery.h"
 
 // LAN discovery
-#ifdef IS_ESP
 WiFiUDP cmdsock;
-#endif
 
 void commandInterfaceInit() {
   Debugln("Command interface init");

@@ -2,9 +2,7 @@
 #include "api.h"
 
 #define TOPIC_BUFFER_SIZE 60
-#ifdef IS_ESP
 WiFiClient ethernetClient;
-#endif
 PubSubClient mqttClient(ethernetClient);
 
 uint64 lastNTPTime = 0;
@@ -22,9 +20,10 @@ boolean apiConnect() {
   snprintf(willtopic, TOPIC_BUFFER_SIZE, "sensor/%s/disconnect", deviceid);
   // END Will message
 
-  mqttClient.setServer("mqtt.seismocloud.com", 1883);
+  Debugln(F("[MQTT] Connecting"));
+  mqttClient.setServer(MQTT_SEISMOCLOUD_HOST, MQTT_SEISMOCLOUD_PORT);
   mqttClient.setCallback(apiCallback);
-  mqttClient.connect((char*)(buffer + 2), "embedded", "embedded", willtopic, 0, 0, emptypayload);
+  mqttClient.connect((char*)(deviceid), "embedded", "embedded", willtopic, 0, 0, emptypayload);
 
 #ifdef DEBUG
   switch (mqttClient.state()) {
@@ -62,14 +61,14 @@ boolean apiConnect() {
 #endif
 
   if (mqttClient.state() == MQTT_CONNECTED) {
-    Debugln("Subscribing to topics");
+    Debugln("[MQTT] Subscribing to topics");
     
     memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/sigma", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
     memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
-    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/update", deviceid);
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/probespeed", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
     memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
@@ -84,7 +83,7 @@ boolean apiConnect() {
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
-    Debugln("Done");
+    Debugln("[MQTT] Done");
     return true;
   } else {
     return false;
@@ -105,39 +104,40 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
     return;
   }
   char *command = topic + 7 + strlen(deviceid) + 1;
+  memset(buffer, 0, BUFFER_SIZE);
+  memcpy(buffer, payload, min(len, BUFFER_SIZE-1));
 
-  if (strcmp(command, "sigma")) {
+  if (strcmp(command, "sigma") == 0) {
     float sigma;
-    sscanf((char*)payload, "%f", &sigma);
+    sscanf((char*)buffer, "%f", &sigma);
     setSigmaIter(sigma);
     resetLastPeriod();
 
-    Debug(F("Setting sigma to "));
+    Debug(F("[MQTT] Setting sigma to "));
     Debugln(sigma);
-  } else if (strcmp(command, "reboot")) {
+  } else if (strcmp(command, "reboot") == 0) {
     apiDisconnect();
     soft_restart();
-  } else if (strcmp(command, "update")) {
-#ifndef DONT_UPDATE
-    // TODO: read URL and split
-    update((char*)(payload + 6), (char*)buffer);
-#endif
-  } else if (strcmp(command, "timesync")) {
-    uint64 t0, t1, t2;
-    sscanf((char*)payload, "%llu;%llu;%llu", &t0, &t1, &t2);
+  } else if (strcmp(command, "timesync") == 0) {
+    double t0, t1, t2;
+    sscanf((char*)buffer, "%lf;%lf;%lf", &t0, &t1, &t2);
     
-		lastNTPTime = t2 + ((t1 - t0 + t2 - t3) / 2.0);
+		lastNTPTime = t2 + ((t3 - t0) - (t2 - t1));
     lastNTPMillis = millis();
 
 #ifdef DEBUG
-    Debug(F("Time sync'ed: "));
+    Debug(F("[MQTT] Time sync'ed: "));
     printUNIXTime();
 #endif
-  } else if (strcmp(command, "stream")) {
-    streamingEnabled = strncmp("on", (char*)payload, len) == 0;
+  } else if (strcmp(command, "stream") == 0) {
+    streamingEnabled = strncmp("on", (char*)buffer, len) == 0;
+  } else if (strcmp(command, "probespeed") == 0) {
+    sscanf((char*)buffer, "%hu", &probeSpeedHz);
+    Debug(F("[MQTT] New probe speed: "));
+    Debugln(probeSpeedHz);
   } else {
     // Unknown/unsupported command received
-    Debug("Unsupported command received: ");
+    Debug("[MQTT] Unsupported command received: ");
     Debugln(command);
   }
 }
@@ -173,7 +173,6 @@ void apiTimeReq() {
 }
 
 void apiTemperature(float temperature) {
-#ifdef IS_ESP
   memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%f", temperature);
 
@@ -181,15 +180,14 @@ void apiTemperature(float temperature) {
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/temperature", deviceid);
 
   mqttClient.publish((const char*)topicbuffer, (const char*)buffer);
-#endif
 }
 
 void apiStream(double x, double y, double z) {
   memset(buffer, 0, BUFFER_SIZE);
-  snprintf((char*)buffer, BUFFER_SIZE, "%d;%f;%f;%f", getUNIXTimeMS(), x, y, z);
+  snprintf((char*)buffer, BUFFER_SIZE, "%lu000;%f;%f;%f", getUNIXTime(), x, y, z);
 
   memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
-  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/streamdata", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
 }
@@ -216,7 +214,7 @@ unsigned long getUNIXTime() {
   return (lastNTPTime / 1000) + (diffms / 1000);
 }
 
-uint64 getUNIXTimeMS() {
+uint64_t getUNIXTimeMS() {
   if (lastNTPTime == 0) {
     return 0;
   }

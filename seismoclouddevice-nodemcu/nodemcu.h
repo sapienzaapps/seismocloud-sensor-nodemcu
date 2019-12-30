@@ -3,7 +3,6 @@
 #define __NODEMCU_H
 
 #include "common.h"
-#ifdef IS_ESP
 
 #include <WiFiManager.h>
 #include <ESP8266WiFi.h>
@@ -15,5 +14,4 @@ class NodeMCU {
     static void begin();
 };
 
-#endif
 #endif

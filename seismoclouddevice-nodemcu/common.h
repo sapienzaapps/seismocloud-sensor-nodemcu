@@ -1,16 +1,7 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-// ************************** PLATFORM AUTODETECTION ****************************
 #include <Arduino.h>
-
-// NodeMCU 12E
-#ifdef ESP8266
-#define IS_ESP
-#define MODEL "esp8266"
-#else
-
-#endif
 
 // ************************ BEGIN CONFIG **************************
 
@@ -20,12 +11,9 @@
 // On Arduino this flag has no effect if you use avr_boot bootloader (for self-update). You should switch to standard bootloader
 // #define DEBUG
 
-#ifdef IS_ESP
-// LED for NodeMCU/ESP8266
 #define LED_RED     D7
 #define LED_YELLOW  D6
 #define LED_GREEN   D5
-#endif
 
 // ************************ END CONFIG **************************
 
@@ -35,6 +23,7 @@
 #include <PubSubClient.h>
 
 #define VERSION     "1.30"
+#define MODEL       "esp8266"
 
 // ******* DEBUG PART
 #ifdef DEBUG
@@ -46,14 +35,6 @@
 #endif
 // ******* /DEBUG PART
 
-// ******* UPDATE
-#ifndef DONT_UPDATE
-
-#include "update.h"
-#endif
-// ******* /UPDATE
-
-#ifdef IS_ESP
 #include <Wire.h>                // I2C
 #include <ESP8266WiFi.h>         // ESP8266 Core WiFi Library
 #include <WiFiUdp.h>             // WiFi UDP client Library
@@ -68,8 +49,18 @@
 apiDisconnect();            \
 delay(5000);                \
 ESP.restart()
+
+#ifdef DEBUG
+#define MQTT_SEISMOCLOUD_HOST  "mqtt-seismocloud.test.sapienzaapps.it"
+#define MQTT_SEISMOCLOUD_PORT  1883
+#define UPDATE_SERVER          "firmware-seismocloud.test.sapienzaapps.it"
+#else
+#define MQTT_SEISMOCLOUD_HOST  "mqtt.seismocloud.com"
+#define MQTT_SEISMOCLOUD_PORT  1883
+#define UPDATE_SERVER          "firmware.seismocloud.com"
 #endif
 
+#include "update.h"
 #include "LED.h"
 #include "seismometer.h"
 #include "api.h"
@@ -81,66 +72,18 @@ extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 extern char deviceid[13];
 extern bool streamingEnabled;
-
-/**
- * Format EEPROM (you'll lose all data)
- */
-void initEEPROM();
-
-/**
- * Check if EEPROM is faulty or not
- */
-void checkEEPROM();
-
-/**
- * Check MAC Address - if not present, a new one will be generated
- */
-void checkMACAddress();
+extern ushort probeSpeedHz;
+extern uint32_t probeSpeedStat;
+extern const char *tlspubkey PROGMEM;
 
 /**
  * Force a MAC Address
  */
 void setMACAddress(byte* mac);
 
-/**
- * Load config from EEPROM if it's valid
- */
-void loadConfig();
-
-/**
- * Returns the device ID (as char array)
- */
-void getDeviceId(char* dest);
-
-/**
- * Returns the device ID (as byte array)
- */
-void getDeviceId(byte* dest);
-
 #ifdef DEBUG
 void printMACAddress();
 void printUNIXTime();
-void setProbeSpeedStatistic(uint32_t);
-uint32_t getProbeSpeedStatistic();
 #endif
-
-class MyRingBuffer
-{
-public:
-  MyRingBuffer(unsigned int size);
-  ~MyRingBuffer();
-
-  void reset();
-  void init();
-  void push(char c);
-  int getPos();
-  bool endsWith(const char* str);
-
-  unsigned int _size;
-  char* ringBuf;
-  char* ringBufEnd;
-  char* ringBufP;
-
-};
 
 #endif

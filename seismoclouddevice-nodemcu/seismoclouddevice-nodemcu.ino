@@ -3,11 +3,6 @@
 
 unsigned long lastAliveMs = 0;
 
-#ifdef DEBUG
-unsigned long lastProbeMs = 0;
-uint32_t probeCount = 0;
-#endif
-
 void setup() {
 #ifdef DEBUG
   // start serial port:
@@ -23,13 +18,10 @@ void setup() {
   Debugln(F("Init seismometer and calibrate"));
   seismometerInit();
 
-  Debugln(F("Loading config"));
-  // Check config, load MAC address (device id)
-  loadConfig();
-
-#ifdef IS_ESP
   NodeMCU::begin();
-#endif
+
+  checkForUpdates();
+
   if (!apiConnect()) {
     soft_restart();
   }
@@ -74,30 +66,20 @@ void loop() {
 
   // Calling alive every 14 minutes
   if((millis() - lastAliveMs) >= 840000) {
-    Debug(F("Keepalive at "));
 #ifdef DEBUG
+    Debug(F("Keepalive at "));
     printUNIXTime();
-#endif
     Debugln();
+#endif
 
     // Trigger API alive
     apiAlive();
     lastAliveMs = millis();
 
-	// Trigger NTP update
+	  // Trigger NTP update
     apiTimeReq();
   }
 
   // Detection
   seismometerTick();
-#ifdef DEBUG
-  if(millis() - lastProbeMs >= 1000) {
-    lastProbeMs = millis();
-    setProbeSpeedStatistic(probeCount);
-    Debug(F("Probe speed (values per second): ");
-    Debugln(probeCount);
-    probeCount = 0;
-  }
-  probeCount++;
-#endif
 }

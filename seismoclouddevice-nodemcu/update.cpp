@@ -1,40 +1,41 @@
 
+#include "common.h"
 #include "update.h"
-
-#ifndef DONT_UPDATE
-/*
- * TODO: implement HTTPs
- * 
 #include <WiFiClientSecure.h>
 
-WiFiClientSecure client;
-
-if (!client.connect(host, httpsPort)) {
-    Serial.println("connection failed");
-    return;
-}
-
-if (client.verify(fingerprint, host)) {
-    Serial.println("certificate matches");
-  } else {
-    Serial.println("certificate doesn't match");
-    return;
-}
-
-auto ret = ESPhttpUpdate.update(client, host, url);
-*/
-
-#ifdef IS_ESP
 // https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
-bool update(char *host, char *path) {
-  // Checksum should be into "x-MD5" HTTP header
-  Debug("Requesting update from ");
-  Debug(host);
-  Debug(" path: ");
-  Debugln(path);
-  HTTPUpdateResult r = ESPhttpUpdate.update(host, 80, path);
-  return r == HTTPUpdateResult::HTTP_UPDATE_OK;
-}
-#endif
+void checkForUpdates() {
+#ifndef DONT_UPDATE
+  Debugln(F("[UPDATE] Starting update check process"));
+  BearSSL::WiFiClientSecure client;
 
+  BearSSL::PublicKey key(tlspubkey);
+  client.setKnownKey(&key);
+
+  if (!client.connect(UPDATE_SERVER, 443)) {
+    Debugln(F("[UPDATE] Connection failed"));
+    client.stop();
+    return;
+  }
+
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "https://%s/firmware/%s/bin", UPDATE_SERVER, MODEL);
+
+  HTTPUpdateResult r = ESPhttpUpdate.update(client, (char*)buffer, "");
+  switch (r) {
+    case HTTPUpdateResult::HTTP_UPDATE_OK:
+      Debugln(F("[UPDATE] Update OK, reboot"));
+      soft_restart();
+      while(true) {};
+      break;
+    case HTTPUpdateResult::HTTP_UPDATE_NO_UPDATES:
+      Debugln(F("[UPDATE] No updates available"));
+      break;
+    case HTTPUpdateResult::HTTP_UPDATE_FAILED:
+    default:
+      Debugln(F("[UPDATE] Error checking updates"));
+      break;
+  }
+  client.stop();
 #endif
+}

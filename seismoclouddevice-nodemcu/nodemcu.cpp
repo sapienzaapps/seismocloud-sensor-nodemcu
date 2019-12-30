@@ -1,6 +1,5 @@
 
 #include "nodemcu.h"
-#ifdef IS_ESP
 
 void NodeMCU::begin() {
   Debug("Connecting to WiFi ");
@@ -23,14 +22,13 @@ void NodeMCU::begin() {
   Debugln((char*)buffer);
 #endif
 
-  memset(buffer, 0, 16);
+  memset(buffer, 0, BUFFER_SIZE);
   // Getting MAC Address
   WiFi.macAddress(buffer);
   setMACAddress(buffer);
-  Debug("MAC Address: ");
+
 #ifdef DEBUG
+  Debug("MAC Address: ");
   printMACAddress();
 #endif
 }
-
-#endif
