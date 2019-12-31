@@ -1,76 +1,74 @@
 
 #include "MPU6050.h"
+#include "cma.h"
 
-int16_t AcX, AcY, AcZ, AcTmp;
-double iX, iY, iZ, X, Y, Z;
-float Tmp;
 #define AccelerationFactor (0.20/32768.0) // Assuming +/- 16G.
 
-void AcceleroMPU6050::begin() {
+double calibrationX, calibrationY, calibrationZ, acceleroX, acceleroY, acceleroZ;
+float Tmp;
+
+void MPU6050_begin() {
   Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x6B);  // PWR_MGMT_1 register
   Wire.write(0);     // set to zero (wakes up the MPU-6050)
   Wire.endTransmission(true);
   delay(2000);
-  calibrate();
+  MPU6050_calibrate();
 }
 
-void AcceleroMPU6050::calibrate() {
+void MPU6050_calibrate() {
+  int16_t AcX, AcY, AcZ, AcTmp;
+  CMA AvgX, AvgY, AvgZ;
+  unsigned long startms = millis();
+  CMA_RESET(AvgX); CMA_RESET(AvgY); CMA_RESET(AvgZ);
+
+  while(millis()-startms < CALIBRATION_SECONDS*1000) {
+    Wire.beginTransmission(MPU_ADDRESS);
+    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);
+    Wire.requestFrom((uint8_t)MPU_ADDRESS, (size_t)8, true); // request a total of 8 registers
+
+    AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+    AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    AcTmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+
+    // Calculate average values
+    CMA_ADD(AvgX, AcX);
+    CMA_ADD(AvgY, AcY);
+    CMA_ADD(AvgZ, AcZ);
+
+    delay(10);
+  }
+
+  // Error during calibration
+  if (AvgX.value == -1 && AvgY.value == -1 && AvgZ.value == -1) {
+    soft_restart();
+  }
+
+  calibrationX = AvgX.value * AccelerationFactor;
+  calibrationY = AvgY.value * AccelerationFactor;
+  calibrationZ = AvgZ.value * AccelerationFactor;
+
+  Tmp = AcTmp / 340.00 + 36.53;
+  
+#ifdef DEBUG
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "Calibration X:%f Y:%f Z:%f Temp:%f", calibrationX, calibrationY, calibrationZ, Tmp);
+  Debugln((char*)buffer);
+#endif
+}
+
+void MPU6050_probe() {
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
   Wire.endTransmission(false);
   Wire.requestFrom((uint8_t)MPU_ADDRESS, (size_t)8, true); // request a total of 8 registers
 
-  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  AcTmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-  Tmp = AcTmp / 340.00 + 36.53;
+  acceleroX = ((int16_t)(Wire.read() << 8 | Wire.read()) * AccelerationFactor) - calibrationX;
+  acceleroY = ((int16_t)(Wire.read() << 8 | Wire.read()) * AccelerationFactor) - calibrationY;
+  acceleroZ = ((int16_t)(Wire.read() << 8 | Wire.read()) * AccelerationFactor) - calibrationZ;
 
-  iX = AcX * AccelerationFactor;
-  iY = AcY * AccelerationFactor;
-  iZ = AcZ * AccelerationFactor;
-
-  Debugln("Calibrated with");
-  Debug("X:");
-  Debugln(iX);
-  Debug("Y:");
-  Debugln(iY);
-  Debug("Z:");
-  Debugln(iZ);
-  Debug("Temp:");
-  Debugln(Tmp);
-  Debug("Accel factor: ");
-  Debugln(AccelerationFactor);
-}
-
-double AcceleroMPU6050::getTotalVector(double *x, double *y, double *z) {
-  Wire.beginTransmission(MPU_ADDRESS);
-  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom((uint8_t)MPU_ADDRESS, (size_t)8, true); // request a total of 8 registers
-
-  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  AcTmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-  Tmp = AcTmp / 340.00 + 36.53;
-
-  X = AcX * AccelerationFactor;
-  Y = AcY * AccelerationFactor;
-  Z = AcZ * AccelerationFactor;
-
-  if (x != NULL) {
-    *x = X - iX;
-  }
-  if (y != NULL) {
-    *y = Y - iY;
-  }
-  if (z != NULL) {
-    *z = Z - iZ;
-  }
-
-  // Calculate force
-  return sqrt(sq(X - iX) + sq(Y - iY) + sq(Z - iZ));
+  Tmp = (Wire.read() << 8 | Wire.read()) / 340.00 + 36.53;
 }

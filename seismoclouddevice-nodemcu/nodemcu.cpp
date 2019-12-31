@@ -1,12 +1,13 @@
 
 #include "nodemcu.h"
 
-void NodeMCU::begin() {
-  Debug("Connecting to WiFi ");
+void NodeMCU_init() {
+  Debug("Creating config portal in ");
   Debugln(CFGSSID);
 
   WiFiManager wifi;
   wifi.setConfigPortalTimeout(180);
+
   bool connected = wifi.autoConnect(CFGSSID);
   if (!connected) {
     ESP.restart();

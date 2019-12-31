@@ -10,16 +10,17 @@
 #define WIRE_SDA      D1
 #define WIRE_SCL      D2
 
-class AcceleroMPU6050
-{
-  public:
-    static void begin();
-    static double getTotalVector(double *x, double *y, double *z);
-    static void calibrate();
+#ifdef DEBUG
+#define CALIBRATION_SECONDS  3
+#else
+#define CALIBRATION_SECONDS  10
+#endif
 
-};
-
+void MPU6050_begin();
+void MPU6050_probe();
+void MPU6050_calibrate();
 
 extern float Tmp;
+extern double acceleroX, acceleroY, acceleroZ;
 
 #endif

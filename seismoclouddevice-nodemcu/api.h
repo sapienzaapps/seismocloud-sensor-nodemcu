@@ -18,7 +18,7 @@ void apiAlive();
 /**
  * Send a QUAKE event to API server
  */
-void apiQuake(double x, double y, double z);
+void apiQuake();
 
 /**
  * Request a time update to API server
@@ -33,7 +33,7 @@ void apiTemperature(float temperature);
 /**
  * Send the stream to API server
  */
-void apiStream(double x, double y, double z);
+void apiStream();
 
 /**
  * Maintain API server connection

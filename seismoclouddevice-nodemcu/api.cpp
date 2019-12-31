@@ -7,6 +7,7 @@ PubSubClient mqttClient(ethernetClient);
 
 uint64 lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
+unsigned long lastAliveMs = 0;
 
 char emptypayload[2] = { 'y' , 0 };
 char topicbuffer[TOPIC_BUFFER_SIZE + 1] = { 0 };
@@ -108,13 +109,11 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   memcpy(buffer, payload, min(len, BUFFER_SIZE-1));
 
   if (strcmp(command, "sigma") == 0) {
-    float sigma;
-    sscanf((char*)buffer, "%f", &sigma);
-    setSigmaIter(sigma);
+    sscanf((char*)buffer, "%f", &sigmaIter);
     resetLastPeriod();
 
     Debug(F("[MQTT] Setting sigma to "));
-    Debugln(sigma);
+    Debugln(sigmaIter);
   } else if (strcmp(command, "reboot") == 0) {
     apiDisconnect();
     soft_restart();
@@ -128,6 +127,7 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
 #ifdef DEBUG
     Debug(F("[MQTT] Time sync'ed: "));
     printUNIXTime();
+    Debugln();
 #endif
   } else if (strcmp(command, "stream") == 0) {
     streamingEnabled = strncmp("on", (char*)buffer, len) == 0;
@@ -150,11 +150,14 @@ void apiAlive() {
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/alive", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
+  lastAliveMs = millis();
 }
 
-void apiQuake(double x, double y, double z) {
+void apiQuake() {
+  unsigned long diffms = millis() - lastNTPMillis;
+  
   memset(buffer, 0, BUFFER_SIZE);
-  snprintf((char*)buffer, BUFFER_SIZE, "%d;%f;%f;%f", getUNIXTimeMS(), x, y, z);
+  snprintf((char*)buffer, BUFFER_SIZE, "%lu%03d;%f;%f;%f", getUNIXTime(), diffms%1000, acceleroX, acceleroY, acceleroZ);
 
   memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/quake", deviceid);
@@ -182,9 +185,11 @@ void apiTemperature(float temperature) {
   mqttClient.publish((const char*)topicbuffer, (const char*)buffer);
 }
 
-void apiStream(double x, double y, double z) {
+void apiStream() {
+  unsigned long diffms = millis() - lastNTPMillis;
+
   memset(buffer, 0, BUFFER_SIZE);
-  snprintf((char*)buffer, BUFFER_SIZE, "%lu000;%f;%f;%f", getUNIXTime(), x, y, z);
+  snprintf((char*)buffer, BUFFER_SIZE, "%lu%03d;%f;%f;%f", getUNIXTime(), diffms%1000, acceleroX, acceleroY, acceleroZ);
 
   memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/streamdata", deviceid);
@@ -193,9 +198,31 @@ void apiStream(double x, double y, double z) {
 }
 
 void apiTick() {
+  // Do MQTT loop and check for MQTT connection
   if (!mqttClient.loop()) {
+    LED_lost_api();
+    Debugln(F("[MQTT] Connection lost, retrying in 3 seconds"));
     delay(3000);
-    apiConnect();
+    if (!apiConnect()) {
+      Debugln(F("[MQTT] Connection failed, rebooting"));
+      soft_restart();
+    }
+    LED_restore_api();
+  }
+
+  // Calling alive every 14 minutes
+  if((millis() - lastAliveMs) >= 840000) {
+#ifdef DEBUG
+    Debug(F("Keepalive at "));
+    printUNIXTime();
+    Debugln();
+#endif
+
+    // Trigger API alive
+    apiAlive();
+
+	  // Trigger NTP update
+    apiTimeReq();
   }
 }
 

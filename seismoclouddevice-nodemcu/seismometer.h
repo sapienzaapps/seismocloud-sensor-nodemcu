@@ -15,16 +15,6 @@ void seismometerInit();
 void seismometerTick();
 
 /**
- * Set the sigma multiplier for threshold
- */
-void setSigmaIter(double i);
-
-/**
- * Returns current sigma multiplier
- */
-double getSigmaIter();
-
-/**
  * Reset mean and standard dev values
  */
 void resetLastPeriod();
@@ -34,5 +24,8 @@ void resetLastPeriod();
  * Knuth variance calculation algorithm
  */
 double getCurrentSTDDEV();
+
+
+extern float sigmaIter;
 
 #endif

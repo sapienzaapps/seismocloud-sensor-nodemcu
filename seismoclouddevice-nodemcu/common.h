@@ -22,6 +22,8 @@
 #include <Ethernet.h>
 #include <PubSubClient.h>
 
+#define CFGSSID "SeismoCloud"
+
 #define VERSION     "1.30"
 #define MODEL       "esp8266"
 
@@ -48,7 +50,8 @@
 #define soft_restart()      \
 apiDisconnect();            \
 delay(5000);                \
-ESP.restart()
+ESP.restart();              \
+while(true)
 
 #ifdef DEBUG
 #define MQTT_SEISMOCLOUD_HOST  "mqtt-seismocloud.test.sapienzaapps.it"

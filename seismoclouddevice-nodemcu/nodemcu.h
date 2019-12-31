@@ -7,11 +7,7 @@
 #include <WiFiManager.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#define CFGSSID "SeismoCloud"
 
-class NodeMCU {
-  public:
-    static void begin();
-};
+void NodeMCU_init();
 
 #endif

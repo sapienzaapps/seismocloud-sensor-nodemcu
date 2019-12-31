@@ -1,33 +1,41 @@
 
 #include "common.h"
 
-unsigned long lastAliveMs = 0;
-
+// Initialize device
 void setup() {
 #ifdef DEBUG
-  // start serial port:
+  delay(1000);
+  // start serial port for debug
   Serial.begin(115200);
 #endif
 
   LED_init();
-  LED_startupBlink();
 
   Debug(F("SeismoCloud-Arduino version "));
   Debugln(VERSION);
 
+  // Power up and calibrate the seismometer
   Debugln(F("Init seismometer and calibrate"));
+  LED_accel_calibr();
   seismometerInit();
 
-  NodeMCU::begin();
+  // Initialize NodeMCU WiFi
+  LED_wait_net_cfg();
+  NodeMCU_init();
 
+  // Check for firmware updates
+  LED_update();
   checkForUpdates();
 
+  LED_connection();
+  // Connect to API server
   if (!apiConnect()) {
+    LED_lost_api();
     soft_restart();
   }
 
-  Debugln(F("Updating Time"));
-
+  // Force time update using MQTT
+  Debugln(F("Force update local time (20s timeout)"));
   apiTimeReq();
   for(int i=0; i < 200 && getUNIXTime() == 0; i++) {
     apiTick();
@@ -35,51 +43,30 @@ void setup() {
   }
   if (getUNIXTime() == 0) {
     Debugln(F("Timeout updating time, reboot"));
-    delay(2000);
     soft_restart();
-    while(true);
   }
 
-  Debug(F("Local time: "));
-#ifdef DEBUG
-  printUNIXTime();
-#endif
-  Debugln();
-
+  // Starting local discovery interface
   Debugln(F("Init cmd interface"));
   commandInterfaceInit();
 
+  // Sending first keep alive to server
   Debugln(F("Send keep-alive"));
   apiAlive();
-  lastAliveMs = millis();
 
   Debugln(F("Boot completed"));
   Debugln();
-  LED_startupBlink();
-  LED_green(true);
+  LED_startup_blink();
+  LED_ready();
 }
 
 void loop() {
+  // Execute local discovery events
   commandInterfaceTick();
 
+  // Execute API events
   apiTick();
 
-  // Calling alive every 14 minutes
-  if((millis() - lastAliveMs) >= 840000) {
-#ifdef DEBUG
-    Debug(F("Keepalive at "));
-    printUNIXTime();
-    Debugln();
-#endif
-
-    // Trigger API alive
-    apiAlive();
-    lastAliveMs = millis();
-
-	  // Trigger NTP update
-    apiTimeReq();
-  }
-
-  // Detection
+  // Execute seismometer events
   seismometerTick();
 }
