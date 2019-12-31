@@ -1,11 +1,9 @@
 
 #include "common.h"
+#include "cma.h"
 
-// CMA_StdDev partialCma;
+CMA_StdDev partialCma;
 
-double partialAvg = 0;
-double partialStdDev = 0;
-unsigned int elements = 0;
 double quakeThreshold = 1;
 float sigmaIter = 3.0;
 
@@ -21,15 +19,9 @@ uint16_t partialProbeSpeedStat = 0;
  * Knuth mean/avg calculation algorithm
  */
 void addValueToAvgVar(double val) {
-  // CMA_STDDEV_ADD(partialCma, val);
-
-  elements++;
-  double delta = val - partialAvg;
-  partialAvg += delta / elements;
-  partialStdDev += delta * (val - partialAvg);
-  if (elements > 1) {
-    quakeThreshold = partialAvg + (getCurrentSTDDEV() * sigmaIter);
-    // quakeThreshold = partialCma.value + (CMA_STDDEV_GET(partialCma) * sigmaIter);
+  CMA_STDDEV_ADD(partialCma, val);
+  if (partialCma.count > 1) {
+    quakeThreshold = partialCma.value + (CMA_STDDEV_GET(partialCma) * sigmaIter);
   }
 }
 
@@ -90,13 +82,5 @@ void seismometerTick() {
 }
 
 void resetLastPeriod() {
-  partialAvg = 0;
-  partialStdDev = 0;
-  elements = 0;
-
-  // CMA_STDDEV_RESET(partialCma);
-}
-
-double getCurrentSTDDEV() {
-  return sqrt(partialStdDev / (elements - 1));
+  CMA_STDDEV_RESET(partialCma);
 }

@@ -19,12 +19,6 @@ void seismometerTick();
  */
 void resetLastPeriod();
 
-/**
- * Returns the current standard deviation value
- * Knuth variance calculation algorithm
- */
-double getCurrentSTDDEV();
-
 
 extern float sigmaIter;
 
