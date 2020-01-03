@@ -19,9 +19,9 @@ void checkForUpdates() {
   }
 
   memset(buffer, 0, BUFFER_SIZE);
-  snprintf((char*)buffer, BUFFER_SIZE, "https://%s/firmware/%s/bin", UPDATE_SERVER, MODEL);
+  snprintf((char*)buffer, BUFFER_SIZE, "https://%s/firmware/%s/%s/bin", UPDATE_SERVER, MODEL, deviceid);
 
-  HTTPUpdateResult r = ESPhttpUpdate.update(client, (char*)buffer, "");
+  HTTPUpdateResult r = ESPhttpUpdate.update(client, (char*)buffer, VERSION);
   switch (r) {
     case HTTPUpdateResult::HTTP_UPDATE_OK:
       Debugln(F("[UPDATE] Update OK, reboot"));
