@@ -1,6 +1,6 @@
 SeismoCloud project: http://www.seismocloud.com
 
-For 🇮🇹 Italian, see (README.ita.md)[README.ita.md]
+For 🇮🇹 Italian, see [README.ita.md](README.ita.md)
 
 [![Build Status](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu.svg?branch=master)](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu)
 
