@@ -1,5 +1,7 @@
 SeismoCloud project: http://www.seismocloud.com
 
+For 🇮🇹 Italian, see (README.ita.md)[README.ita.md]
+
 [![Build Status](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu.svg?branch=master)](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu)
 
 # Supported boards
@@ -8,23 +10,30 @@ SeismoCloud project: http://www.seismocloud.com
 
 # Network requirements
 
+The device will acquire all IPv4 configurations (address, netmask, gateway, DNS) via DHCP.
+
 If you have any firewall in your network, please allow these ports (outgoing, to internet):
 
-* TCP: 80, 443, 1883
-
-Also, Wi-Fi or Ethernet networks should have a DHCP service running.
+* TCP: 443, 1883
 
 # LED status description
 
-LEDs can be in these different states:
+LEDs can be in these different states (empty cells means "OFF"):
 
-* **Green**: device is ready
-* **Green + Yellow**: device is ready but there is an issue connecting to SeismoCloud APIs
-* **Green + Red (only for about 5 seconds)**: shake detected
-* **Green + Yellow + Red**: software is loading
-* **Green + Yellow + Red - ALL blinking fast**: software is loaded, starting accelerometer
-* **Green + Yellow + Red - ALL blinking slow**: network init failed
-* **Yellow + Red - ALL blinking**: EEPROM failed
+| Green | Yellow | Red  | Status
+|:-----:|:------:|:----:| ------
+| ON    |        |      | Device is idle and listening
+| ON    | ON     |      | The device has lost its connection, and it's trying to reconnect
+| ON    |        | ON   | A vibration/shake is detected!
+| ON    | ON     | ON   | The device is connecting to the SeismoCloud network
+|       | ON     | ON   | Checking for updates or updating
+|       | ON     |      | Connecting to Wi-Fi network*
+|       |        | ON   | Calibration in progress
+
+At the end of the boot sequence all three LEDs will blink rapidly to signal that it's OK.
+
+*: If only the yellow LED is ON for more than 10 seconds then the NodeMCU is waiting for
+Wi-Fi network configuration (see the chapter "How to build/upload the software")
 
 # How to build the device (hardware)
 
@@ -45,7 +54,7 @@ LEDs can be in these different states:
 
 Tested with `Arduino/Genuino IDE 1.8.10`, board SDK `esp8266 2.6.2`, libraries `PubSubClient 2.7` and `WiFiManager 0.15.0-beta`
 
-## Step 1: Accelerometer MPU6050
+## Wiring the Accelerometer MPU6050
 
 Link these pins from Accelerometer MPU6050 to NodeMCU board:
 
@@ -54,7 +63,7 @@ Link these pins from Accelerometer MPU6050 to NodeMCU board:
 * SDA: D1
 * SCL: D2
 
-## Step 2: (optional) LEDs
+## Wiring LEDs
 
 Remember to put a resistor with LED (after/before is not really important) to limit
 current flowing, otherwise you may damage the NodeMCU board.
@@ -65,7 +74,7 @@ By default, LED pins are:
 * Pin D6 : Yellow
 * Pin D7 : Red
 
-# How to build/upload the software (step 3)
+# How to build/upload the software
 
 For NodeMCU, you need to download `WifiManager` library (by using *Sketch > include library > library manager*)
 
@@ -75,6 +84,18 @@ For NodeMCU, you need to download `WifiManager` library (by using *Sketch > incl
 4. Compile and upload (2nd button below menus) in your board
 5. Connect to `SeismoCloud` Wi-Fi network and configure Wi-Fi client network parameters. On save, the board reboots and will try to connect to Wi-Fi network. If it fails, you can reconnect to `SeismoCloud` network and modify/fix network parameters.
 6. Open SeismoCloud app, connect to the same network of the board and register your device. Enjoy!
+
+# FAQ
+
+## My device has only the yellow LED powered on for more than 10 seconds
+
+The sensor failed to connect to the Wi-Fi network. Please follow the instruction in chapter "How to build/upload the software" step 5
+
+## I'm connected to the Wi-Fi network, but no configuration portal appears.
+
+Try to open a browser and navigate to http://192.168.4.1 . If the Wi-Fi portal still not showing, disconnect the board from
+the power source for few seconds. If it still fails, flash again the board erasing the Wi-Fi configuration using the option
+from the **Tools** menu.
 
 # License
 
