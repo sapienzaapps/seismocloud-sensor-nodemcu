@@ -7,4 +7,4 @@ before_install:
 install:
   - make prepare
 script:
-  - make verify-debug
+  - make verify

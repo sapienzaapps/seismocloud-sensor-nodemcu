@@ -55,11 +55,11 @@ while(true)
 
 #ifdef DEBUG
 #define MQTT_SEISMOCLOUD_HOST  "mqtt-seismocloud.test.sapienzaapps.it"
-#define MQTT_SEISMOCLOUD_PORT  1883
+#define MQTT_SEISMOCLOUD_PORT  443
 #define UPDATE_SERVER          "firmware-seismocloud.test.sapienzaapps.it"
 #else
 #define MQTT_SEISMOCLOUD_HOST  "mqtt.seismocloud.com"
-#define MQTT_SEISMOCLOUD_PORT  1883
+#define MQTT_SEISMOCLOUD_PORT  443
 #define UPDATE_SERVER          "firmware.seismocloud.com"
 #endif
 
@@ -77,7 +77,7 @@ extern char deviceid[13];
 extern bool streamingEnabled;
 extern ushort probeSpeedHz;
 extern uint32_t probeSpeedStat;
-extern const char *tlspubkey PROGMEM;
+extern BearSSL::PublicKey tlspubkey;
 
 /**
  * Force a MAC Address

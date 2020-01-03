@@ -9,8 +9,7 @@ void checkForUpdates() {
   Debugln(F("[UPDATE] Starting update check process"));
   BearSSL::WiFiClientSecure client;
 
-  BearSSL::PublicKey key(tlspubkey);
-  client.setKnownKey(&key);
+  client.setKnownKey(&tlspubkey);
 
   if (!client.connect(UPDATE_SERVER, 443)) {
     Debugln(F("[UPDATE] Connection failed"));

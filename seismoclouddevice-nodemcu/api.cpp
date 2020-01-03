@@ -1,9 +1,10 @@
 
 #include "api.h"
+#include <WiFiClientSecure.h>
 
 #define TOPIC_BUFFER_SIZE 60
-WiFiClient ethernetClient;
-PubSubClient mqttClient(ethernetClient);
+BearSSL::WiFiClientSecure ethernetClient;
+PubSubClient mqttClient;
 
 uint64 lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
@@ -15,6 +16,8 @@ char topicbuffer[TOPIC_BUFFER_SIZE + 1] = { 0 };
 void apiCallback(char* topic, byte* payload, unsigned int len);
 
 boolean apiConnect() {
+  ethernetClient.setKnownKey(&tlspubkey);
+
   // Will message for disconnection
   char willtopic[TOPIC_BUFFER_SIZE + 1] = { 0 };
   memset(willtopic, 0, TOPIC_BUFFER_SIZE);
@@ -22,6 +25,7 @@ boolean apiConnect() {
   // END Will message
 
   Debugln(F("[MQTT] Connecting"));
+  mqttClient.setClient(ethernetClient);
   mqttClient.setServer(MQTT_SEISMOCLOUD_HOST, MQTT_SEISMOCLOUD_PORT);
   mqttClient.setCallback(apiCallback);
   mqttClient.connect((char*)(deviceid), "embedded", "embedded", willtopic, 0, 0, emptypayload);
