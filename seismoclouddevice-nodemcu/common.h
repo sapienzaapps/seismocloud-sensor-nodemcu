@@ -69,6 +69,7 @@ while(true)
 #include "api.h"
 #include "lan-discovery.h"
 #include "nodemcu.h"
+#include "display.h"
 
 #define BUFFER_SIZE 512
 extern byte buffer[BUFFER_SIZE];

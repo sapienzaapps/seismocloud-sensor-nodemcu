@@ -8,7 +8,7 @@ double calibrationX, calibrationY, calibrationZ, acceleroX, acceleroY, acceleroZ
 float Tmp;
 
 void MPU6050_begin() {
-  Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
+  //Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x6B);  // PWR_MGMT_1 register
   Wire.write(0);     // set to zero (wakes up the MPU-6050)

@@ -1,12 +1,24 @@
 
 #include "nodemcu.h"
 
+void NodeMCU_apcallback(WiFiManager *wifi) {
+	oled.clear();
+	oled.println(F("Please configure me!"));
+	oled.println();
+	oled.println(F("Wi-Fi: SeismoCloud"));
+	oled.println(F("No password!"));
+	oled.println(F("http://192.168.4.1/"));
+	LED_wificonfig_blink();
+	LED_wait_net_cfg();
+}
+
 void NodeMCU_init() {
   Debug("Creating config portal in ");
   Debugln(CFGSSID);
 
   WiFiManager wifi;
   wifi.setConfigPortalTimeout(180);
+  wifi.setAPCallback(&NodeMCU_apcallback);
 
   bool connected = wifi.autoConnect(CFGSSID);
   if (!connected) {

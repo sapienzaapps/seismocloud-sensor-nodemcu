@@ -61,15 +61,19 @@ void seismometerTick() {
 
 #ifdef DEBUG
     memset(buffer, 0, BUFFER_SIZE);
-    snprintf((char*)buffer, BUFFER_SIZE, "QUAKE: %lf > %lf", accelVector, quakeThreshold);
+    snprintf((char*)buffer, BUFFER_SIZE, "%lf > %lf", accelVector, quakeThreshold);
     Debugln((char*)buffer);
+  	oled.println((char*)buffer);
 #endif
 
     apiQuake();
     lastQuakeMillis = millis();
+
+  	displayQuake();
   } else if (!inQuake) {
     // End quake period
     LED_quake_end();
+  	oled.clear();
   }
 
   // Stream data to server if streaming is enabled

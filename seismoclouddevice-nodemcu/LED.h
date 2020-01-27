@@ -27,6 +27,14 @@ for(int i=0; i < 10; i++) {   \
   delay(50);                  \
 }
 
+#define LED_wificonfig_blink()   \
+for(int i=0; i < 10; i++) {   \
+  LED(LOW , HIGH, LOW );      \
+  delay(50);                  \
+  LED(LOW , LOW , LOW );      \
+  delay(50);                  \
+}
+
 // Statuses in normal working conditions
 #define LED_lost_api()         digitalWrite(LED_YELLOW, HIGH)
 #define LED_restore_api()      digitalWrite(LED_YELLOW, LOW)
