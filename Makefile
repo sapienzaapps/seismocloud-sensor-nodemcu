@@ -10,7 +10,7 @@ all:
 
 prepare:
 	-arduino ${PREFS} --install-boards "esp8266:esp8266:2.6.2"
-	arduino ${PREFS} --install-library "PubSubClient:2.7,WiFiManager:0.15.0-beta"
+	arduino ${PREFS} --install-library "PubSubClient:2.7,WiFiManager:0.15.0-beta,SSD1306Ascii:1.3.0"
 
 verify:
 	arduino --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
