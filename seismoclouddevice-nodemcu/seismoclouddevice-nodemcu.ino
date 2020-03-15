@@ -1,6 +1,8 @@
 
 #include "common.h"
 
+unsigned long debug_lastms = 0;
+
 // Initialize device
 void setup() {
 #ifdef DEBUG
@@ -58,6 +60,9 @@ void setup() {
   Debugln();
   LED_startup_blink();
   LED_ready();
+
+  // Issue a new NTP sync as esp8266 is not well stable
+  apiTimeReq();
 }
 
 void loop() {
@@ -69,4 +74,14 @@ void loop() {
 
   // Execute seismometer events
   seismometerTick();
+
+#ifdef DEBUG
+  if (millis() - debug_lastms > 1000) {
+    Debug(F("Current time: "));
+    printUNIXTime();
+    Debugln();
+
+    debug_lastms = millis();
+  }
+#endif
 }

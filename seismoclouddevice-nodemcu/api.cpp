@@ -1,11 +1,13 @@
 
 #include "api.h"
+#include "int64time-reader.h"
 #include <WiFiClientSecure.h>
 
 #define TOPIC_BUFFER_SIZE 60
 BearSSL::WiFiClientSecure ethernetClient;
 PubSubClient mqttClient;
 
+NTPTimeSync ntpts;
 uint64 lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
 unsigned long lastAliveMs = 0;
@@ -99,7 +101,7 @@ boolean apiConnect() {
  * MQTT Callback (executed when a MQTT message is received)
  */
 void apiCallback(char* topic, byte* payload, unsigned int len) {
-  uint64 t3 = getUNIXTimeMS();
+  ntpts.t3 = getUNIXTimeMS();
   if (len == 0) {
     return;
   }
@@ -122,10 +124,8 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
     apiDisconnect();
     soft_restart();
   } else if (strcmp(command, "timesync") == 0) {
-    double t0, t1, t2;
-    sscanf((char*)buffer, "%lf;%lf;%lf", &t0, &t1, &t2);
-    
-		lastNTPTime = t2 + ((t3 - t0) - (t2 - t1));
+    readNTPString((char*)buffer, &ntpts);
+		lastNTPTime = syncCurrentTime(lastNTPTime, &ntpts);
     lastNTPMillis = millis();
 
 #ifdef DEBUG
