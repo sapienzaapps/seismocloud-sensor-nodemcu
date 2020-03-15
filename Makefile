@@ -5,6 +5,8 @@ endif
 
 PREFS = --pref build.path=$(shell pwd)/tmp/ --pref serial.port=${PORT} --preferences-file $(shell pwd)/preferences.txt
 ARDUINO = arduino
+PLATFORM = $(shell grep MODEL seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
+VERSION = $(shell grep VERSION seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
 
 ifneq (${USE_DOCKER},)
 ARDUINO = ${USE_DOCKER} run --rm -it -v $(pwd):/src arduino-ide-env:latest arduino
@@ -24,6 +26,12 @@ verify-debug:
 	make set-debug
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino || (make unset-debug && exit 1)
 	make unset-debug
+
+build:
+	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
+	mkdir -p out/
+	cp -v tmp/seismoclouddevice-nodemcu.ino.elf out/${PLATFORM}-${VERSION}.bin
+	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
 
 upload:
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
