@@ -13,7 +13,7 @@ ARDUINO = ${USE_DOCKER} run --rm -it -v $(pwd):/src arduino-ide-env:latest ardui
 endif
 
 all:
-	$(info Please use verify|upload)
+	$(info Please use verify|build|upload (add -debug to target debug versions))
 
 prepare:
 	-${ARDUINO} ${PREFS} --install-boards "esp8266:esp8266:2.6.2"
@@ -30,7 +30,15 @@ verify-debug:
 build:
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 	mkdir -p out/
-	cp -v tmp/seismoclouddevice-nodemcu.ino.elf out/${PLATFORM}-${VERSION}.bin
+	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
+	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
+
+build-debug:
+	make set-debug
+	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
+	make unset-debug
+	mkdir -p out/
+	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
 	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
 
 upload:

@@ -44,6 +44,7 @@ void MPU6050_calibrate() {
 
   // Error during calibration
   if (AvgX.value == -1 && AvgY.value == -1 && AvgZ.value == -1) {
+    Debugln("Calibration error");
     soft_restart();
   }
 
