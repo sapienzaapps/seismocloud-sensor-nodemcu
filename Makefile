@@ -13,27 +13,29 @@ ARDUINO = ${USE_DOCKER} run --rm -it -v $(pwd):/src arduino-ide-env:latest ardui
 endif
 
 all:
-	$(info Please use verify|build|upload (add -debug to target debug versions))
+	$(info Please use verify|build|upload (add -prod to target prod versions))
 
 prepare:
 	-${ARDUINO} ${PREFS} --install-boards "esp8266:esp8266:2.6.2"
 	${ARDUINO} ${PREFS} --install-library "PubSubClient:2.7,WiFiManager:0.15.0-beta"
 
-verify:
+verify-prod:
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 
-verify-debug:
+verify:
 	make set-debug
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino || (make unset-debug && exit 1)
 	make unset-debug
 
-build:
+build-prod:
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 	mkdir -p out/
 	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
 	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
+	$(ccred)
+	$(info Environment built: production)
 
-build-debug:
+build-test:
 	make set-debug
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 	make unset-debug
@@ -41,10 +43,10 @@ build-debug:
 	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
 	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
 
-upload:
+upload-prod:
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 
-upload-debug:
+upload:
 	make set-debug
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino || (make unset-debug && exit 1)
 	make unset-debug
