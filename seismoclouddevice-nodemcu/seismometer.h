@@ -15,11 +15,8 @@ void seismometerInit();
 void seismometerTick();
 
 /**
- * Reset mean and standard dev values
+ * Set new Sigma value
  */
-void resetLastPeriod();
-
-
-extern float sigmaIter;
+void setNewSigma(float);
 
 #endif

@@ -115,8 +115,10 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   memcpy(buffer, payload, min(len, BUFFER_SIZE-1));
 
   if (strcmp(command, "sigma") == 0) {
+    float sigmaIter;
     sscanf((char*)buffer, "%f", &sigmaIter);
-    resetLastPeriod();
+
+    setNewSigma(sigmaIter);
 
     Debug(F("[MQTT] Setting sigma to "));
     Debugln(sigmaIter);

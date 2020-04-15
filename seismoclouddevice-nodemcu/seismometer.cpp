@@ -3,33 +3,53 @@
 #include "cma.h"
 
 CMA_StdDev partialCma;
+CMA_StdDev lastCma;
 
-double quakeThreshold = 1;
-float sigmaIter = 3.0;
+float sigmaIter = 6.0;
 
 double accelVector;
 unsigned long lastQuakeMillis = 0;
 unsigned long lastAcceleroTick = 0;
 unsigned long lastProbeMs = 0;
-
+unsigned long lastThresholdUpdate = 0;
+double quakeThreshold = 0;
 uint16_t partialProbeSpeedStat = 0;
 
-/**
- * Add a new value to mean and standard deviation values
- * Knuth mean/avg calculation algorithm
- */
-void addValueToAvgVar(double val) {
-  CMA_STDDEV_ADD(partialCma, val);
-  if (partialCma.count > 1) {
-    quakeThreshold = partialCma.value + (CMA_STDDEV_GET(partialCma) * sigmaIter);
-  }
+void rotateThreshold() {
+  CMA_STDDEV_COPY(lastCma, partialCma);
+  CMA_STDDEV_RESET(partialCma);
+  quakeThreshold = lastCma.value + (CMA_STDDEV_GET(lastCma) * sigmaIter);
+
+  memset(buffer, 0, BUFFER_SIZE);
+  snprintf((char*)buffer, BUFFER_SIZE, "Threshold rotation: %lf", quakeThreshold);
+  Debugln((char*)buffer);
 }
 
 void seismometerInit() {
   MPU6050_begin();
+
+  // Pre-fill threshold
+  unsigned long oneSecondMs = millis();
+  while(millis()-oneSecondMs < 1000) {
+    MPU6050_probe();
+    accelVector = sqrt(sq(acceleroX) + sq(acceleroY) + sq(acceleroZ));
+    CMA_STDDEV_ADD(partialCma, accelVector);
+  }
+
+  rotateThreshold();
+}
+
+void setNewSigma(float newSigma) {
+  sigmaIter = newSigma;
+  quakeThreshold = lastCma.value + (CMA_STDDEV_GET(lastCma) * newSigma);
 }
 
 void seismometerTick() {
+  if (millis()-lastThresholdUpdate > 15*60*1000) {
+    rotateThreshold();
+    lastThresholdUpdate = millis();
+  }
+
   // Probe speed limiter
   if (probeSpeedHz > 0 && millis()-lastAcceleroTick < (1000/probeSpeedHz)) {
     return;
@@ -78,9 +98,5 @@ void seismometerTick() {
   }
   
   // Add value to threshold calculator
-  addValueToAvgVar(accelVector);
-}
-
-void resetLastPeriod() {
-  CMA_STDDEV_RESET(partialCma);
+  CMA_STDDEV_ADD(partialCma, accelVector);
 }
