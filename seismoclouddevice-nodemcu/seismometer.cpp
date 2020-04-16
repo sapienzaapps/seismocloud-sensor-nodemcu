@@ -20,7 +20,6 @@ void rotateThreshold() {
   CMA_STDDEV_RESET(partialCma);
   quakeThreshold = lastCma.value + (CMA_STDDEV_GET(lastCma) * sigmaIter);
 
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "Threshold rotation: %lf", quakeThreshold);
   Debugln((char*)buffer);
 }
@@ -80,7 +79,6 @@ void seismometerTick() {
     LED_quake();
 
 #ifdef DEBUG
-    memset(buffer, 0, BUFFER_SIZE);
     snprintf((char*)buffer, BUFFER_SIZE, "QUAKE: %lf > %lf", accelVector, quakeThreshold);
     Debugln((char*)buffer);
 #endif

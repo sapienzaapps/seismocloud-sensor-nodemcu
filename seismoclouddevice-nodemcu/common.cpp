@@ -104,7 +104,6 @@ void printUNIXTime() {
   uint8_t smonth = month + 1;  // jan is month 1
   uint8_t day = time + 1;     // day of month
 
-  memset(buffer, 0, 50);
   snprintf((char*)buffer, 50, "%04i-%02i-%02i %02i:%02i:%02i UTC", year+1970, smonth, day, hour, minute, second);
   Debug((char*)buffer);
 }

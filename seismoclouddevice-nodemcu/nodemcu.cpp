@@ -14,7 +14,6 @@ void NodeMCU_init() {
   }
 
 #ifdef DEBUG
-  memset(buffer, 0, BUFFER_SIZE);
   // if you get here you have connected to the WiFi
   Debugln("Wifi connected!");
   Debug("IP Address: ");

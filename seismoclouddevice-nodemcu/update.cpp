@@ -17,7 +17,6 @@ void checkForUpdates() {
     return;
   }
 
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "https://%s/firmware/%s/%s/bin", UPDATE_SERVER, MODEL, deviceid);
 
   HTTPUpdateResult r = ESPhttpUpdate.update(client, (char*)buffer, VERSION);

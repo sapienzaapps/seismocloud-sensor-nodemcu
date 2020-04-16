@@ -55,7 +55,6 @@ void MPU6050_calibrate() {
   Tmp = AcTmp / 340.00 + 36.53;
   
 #ifdef DEBUG
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "Calibration X:%f Y:%f Z:%f Temp:%f", calibrationX, calibrationY, calibrationZ, Tmp);
   Debugln((char*)buffer);
 #endif
