@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "external-ip.h"
 
 unsigned long debug_lastms = 0;
 
@@ -28,6 +29,9 @@ void setup() {
   // Check for firmware updates
   LED_update();
   checkForUpdates();
+
+  // Get public IP
+  getExternalIP();
 
   LED_connection();
   // Connect to API server

@@ -1,6 +1,7 @@
 
 #include "api.h"
 #include "int64time-reader.h"
+#include "external-ip.h"
 #include <WiFiClientSecure.h>
 
 #define TOPIC_BUFFER_SIZE 60
@@ -11,6 +12,7 @@ NTPTimeSync ntpts;
 uint64 lastNTPTime = 0;
 unsigned long lastNTPMillis = 0;
 unsigned long lastAliveMs = 0;
+unsigned long lastStatsMs = 0;
 
 char emptypayload[2] = { 'y' , 0 };
 char topicbuffer[TOPIC_BUFFER_SIZE + 1] = { 0 };
@@ -22,7 +24,6 @@ boolean apiConnect() {
 
   // Will message for disconnection
   char willtopic[TOPIC_BUFFER_SIZE + 1] = { 0 };
-  memset(willtopic, 0, TOPIC_BUFFER_SIZE);
   snprintf(willtopic, TOPIC_BUFFER_SIZE, "sensor/%s/disconnect", deviceid);
   // END Will message
 
@@ -70,23 +71,18 @@ boolean apiConnect() {
   if (mqttClient.state() == MQTT_CONNECTED) {
     Debugln("[MQTT] Subscribing to topics");
     
-    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/sigma", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
-    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/probespeed", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
-    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/reboot", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
-    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/timesync", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
-    memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
@@ -148,11 +144,33 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   }
 }
 
+void apiStats() {
+  // RSSI
+  snprintf((char*)buffer, BUFFER_SIZE, "%d", WiFi.RSSI());
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/rssi", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // BSSID
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/bssid", deviceid);
+  mqttClient.publish((char*)topicbuffer, WiFi.BSSIDstr().c_str());
+
+  // Local IP
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/localip", deviceid);
+  mqttClient.publish((char*)topicbuffer, WiFi.localIP().toString().c_str());
+
+  // Public IP
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/publicip", deviceid);
+  mqttClient.publish((char*)topicbuffer, externalIP);
+
+  // Current threshold
+  snprintf((char*)buffer, BUFFER_SIZE, "%lf", quakeThreshold);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/threshold", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+}
+
 void apiAlive() {
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%s;%s", MODEL, VERSION);
 
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/alive", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
@@ -162,30 +180,24 @@ void apiAlive() {
 void apiQuake() {
   unsigned long diffms = millis() - lastNTPMillis;
   
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%lu%03d;%f;%f;%f", getUNIXTime(), diffms%1000, acceleroX, acceleroY, acceleroZ);
 
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/quake", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
 }
 
 void apiTimeReq() {
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%llu", lastNTPTime);
 
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/timereq", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
 }
 
 void apiTemperature(float temperature) {
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%f", temperature);
 
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/temperature", deviceid);
 
   mqttClient.publish((const char*)topicbuffer, (const char*)buffer);
@@ -194,10 +206,8 @@ void apiTemperature(float temperature) {
 void apiStream() {
   unsigned long diffms = millis() - lastNTPMillis;
 
-  memset(buffer, 0, BUFFER_SIZE);
   snprintf((char*)buffer, BUFFER_SIZE, "%lu%03d;%f;%f;%f", getUNIXTime(), diffms%1000, acceleroX, acceleroY, acceleroZ);
 
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/streamdata", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
@@ -209,6 +219,8 @@ void apiTick() {
     LED_lost_api();
     Debugln(F("[MQTT] Connection lost, retrying in 3 seconds"));
     delay(3000);
+
+    getExternalIP();
     if (!apiConnect()) {
       Debugln(F("[MQTT] Connection failed, rebooting"));
       soft_restart();
@@ -230,10 +242,14 @@ void apiTick() {
 	  // Trigger NTP update
     apiTimeReq();
   }
+
+  if (millis() - lastStatsMs > 15000) {
+    apiStats();
+    lastStatsMs = millis();
+  }
 }
 
 void apiDisconnect() {
-  memset(topicbuffer, 0, TOPIC_BUFFER_SIZE);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/disconnect", deviceid);
   mqttClient.publish((char*)topicbuffer, emptypayload);
   mqttClient.disconnect();

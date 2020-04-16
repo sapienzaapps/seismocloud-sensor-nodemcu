@@ -19,4 +19,6 @@ void seismometerTick();
  */
 void setNewSigma(float);
 
+extern double quakeThreshold;
+
 #endif
