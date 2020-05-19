@@ -1,0 +1,13 @@
+stages:
+  - codecheck
+
+codecheck:
+  tags:
+    - docker
+  stage: codecheck
+  image: registry.sapienzaapps.it/sapienzaapps/arduino-ide-env:4963
+  script:
+    - echo "Checking debug build"
+    - make clean build-test
+    - echo "Checking production build"
+    - make clean build-prod

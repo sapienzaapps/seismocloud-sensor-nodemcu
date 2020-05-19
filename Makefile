@@ -4,13 +4,9 @@ PORT = /dev/ttyUSB0
 endif
 
 PREFS = --pref build.path=$(shell pwd)/tmp/ --pref serial.port=${PORT} --preferences-file $(shell pwd)/preferences.txt
-ARDUINO = arduino
+ARDUINO ?= arduino
 PLATFORM = $(shell grep MODEL seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
 VERSION = $(shell grep VERSION seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
-
-ifneq (${USE_DOCKER},)
-ARDUINO = ${USE_DOCKER} run --rm -it -v $(pwd):/src arduino-ide-env:latest arduino
-endif
 
 all:
 	$(info Please use verify|build|upload (add -prod to target prod versions))
