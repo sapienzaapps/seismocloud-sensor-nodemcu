@@ -5,7 +5,7 @@ codecheck:
   tags:
     - docker
   stage: codecheck
-  image: registry.sapienzaapps.it/sapienzaapps/arduino-ide-env:4963
+  image: registry.sapienzaapps.it/sapienzaapps/arduino-ide-env:4965
   script:
     - echo "Checking debug build"
     - make clean build-test
