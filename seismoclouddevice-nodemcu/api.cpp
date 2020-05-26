@@ -154,6 +154,10 @@ void apiStats() {
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/bssid", deviceid);
   mqttClient.publish((char*)topicbuffer, WiFi.BSSIDstr().c_str());
 
+  // ESSID
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/essid", deviceid);
+  mqttClient.publish((char*)topicbuffer, WiFi.SSID().c_str());
+
   // Local IP
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/localip", deviceid);
   mqttClient.publish((char*)topicbuffer, WiFi.localIP().toString().c_str());
