@@ -51,7 +51,7 @@ console:
 	minicom -o -D ${PORT} -b 115200
 
 clean:
-	rm -rf tmp/
+	rm -rf tmp/ out/
 
 set-debug:
 	@sed -i 's%^// #define DEBUG%#define DEBUG%' seismoclouddevice-nodemcu/common.h
