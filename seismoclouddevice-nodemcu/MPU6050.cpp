@@ -70,5 +70,5 @@ void MPU6050_probe() {
   acceleroY = ((int16_t)(Wire.read() << 8 | Wire.read()) * AccelerationFactor) - calibrationY;
   acceleroZ = ((int16_t)(Wire.read() << 8 | Wire.read()) * AccelerationFactor) - calibrationZ;
 
-  Tmp = (Wire.read() << 8 | Wire.read()) / 340.00 + 36.53;
+  Tmp = (float)((int16_t)(Wire.read() << 8 | Wire.read())) / 340.00 + 36.53;
 }

@@ -145,6 +145,11 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
 }
 
 void apiStats() {
+  // Temperature
+  snprintf((char*)buffer, BUFFER_SIZE, "%f", Tmp);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/temperature", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
   // RSSI
   snprintf((char*)buffer, BUFFER_SIZE, "%d", WiFi.RSSI());
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/rssi", deviceid);
@@ -197,14 +202,6 @@ void apiTimeReq() {
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/timereq", deviceid);
 
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
-}
-
-void apiTemperature(float temperature) {
-  snprintf((char*)buffer, BUFFER_SIZE, "%f", temperature);
-
-  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/temperature", deviceid);
-
-  mqttClient.publish((const char*)topicbuffer, (const char*)buffer);
 }
 
 void apiStream() {

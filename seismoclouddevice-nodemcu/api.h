@@ -26,11 +26,6 @@ void apiQuake();
 void apiTimeReq();
 
 /**
- * Send the current sensor temperature
- */
-void apiTemperature(float temperature);
-
-/**
  * Send the stream to API server
  */
 void apiStream();
