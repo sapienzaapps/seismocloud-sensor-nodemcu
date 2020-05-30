@@ -25,9 +25,9 @@ verify:
 
 build-prod:
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
-	mkdir -p out/
-	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
-	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
+	mkdir -p out/prod/
+	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/prod/${PLATFORM}-${VERSION}.bin
+	cd out/prod/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
 	$(ccred)
 	$(info Environment built: production)
 
@@ -35,9 +35,9 @@ build-test:
 	make set-debug
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 	make unset-debug
-	mkdir -p out/
-	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/${PLATFORM}-${VERSION}.bin
-	cd out/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
+	mkdir -p out/test/
+	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/test/${PLATFORM}-${VERSION}.bin
+	cd out/test/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
 
 upload-prod:
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
