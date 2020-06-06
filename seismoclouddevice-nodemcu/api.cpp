@@ -183,6 +183,8 @@ void apiStats() {
   snprintf((char*)buffer, BUFFER_SIZE, "%lf", quakeThreshold);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/threshold", deviceid);
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  lastStatsMs = millis();
 }
 
 void apiAlive() {
@@ -263,7 +265,6 @@ void apiTick() {
 
   if (millis() - lastStatsMs > API_STATS_INTERVAL * 60 * 1000) {
     apiStats();
-    lastStatsMs = millis();
   }
 }
 

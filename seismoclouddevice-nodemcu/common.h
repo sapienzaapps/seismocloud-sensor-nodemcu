@@ -24,7 +24,7 @@
 
 #define CFGSSID "SeismoCloud"
 
-#define VERSION     "1.30.7"
+#define VERSION     "1.30.8"
 #define MODEL       "esp8266"
 
 // ******* DEBUG PART

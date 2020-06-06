@@ -48,6 +48,11 @@ void apiBootTick();
 void apiDisconnect();
 
 /**
+ * Send statistics
+ */
+void apiStats();
+
+/**
  * Returns current UNIX Time
  */
 unsigned long getUNIXTime();

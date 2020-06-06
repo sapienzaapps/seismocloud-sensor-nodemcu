@@ -59,6 +59,7 @@ void setup() {
   // Sending first keep alive to server
   Debugln(F("Send keep-alive"));
   apiAlive();
+  apiStats();
 
   Debugln(F("Boot completed"));
   Debugln();
