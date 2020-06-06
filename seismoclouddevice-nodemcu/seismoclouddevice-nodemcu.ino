@@ -44,7 +44,7 @@ void setup() {
   Debugln(F("Force update local time (20s timeout)"));
   apiTimeReq();
   for(int i=0; i < 200 && getUNIXTime() == 0; i++) {
-    apiTick();
+    apiBootTick();
     delay(100);
   }
   if (getUNIXTime() == 0) {

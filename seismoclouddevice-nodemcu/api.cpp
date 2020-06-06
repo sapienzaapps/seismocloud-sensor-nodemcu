@@ -222,6 +222,15 @@ void apiStream() {
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
 }
 
+void apiBootTick() {
+  // Do MQTT loop and check for MQTT connection
+  if (!mqttClient.loop()) {
+    LED_lost_api();
+    Debugln(F("[MQTT] Connection failed, rebooting"));
+    soft_restart();
+  }
+}
+
 void apiTick() {
   // Do MQTT loop and check for MQTT connection
   if (!mqttClient.loop()) {

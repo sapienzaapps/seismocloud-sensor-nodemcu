@@ -37,6 +37,12 @@ void apiStream();
 void apiTick();
 
 /**
+ * Maintain API server connection
+ * You should call this function only on boot
+ */
+void apiBootTick();
+
+/**
  * Disconnect from API server
  */
 void apiDisconnect();
