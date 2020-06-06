@@ -4,7 +4,15 @@
 #include "external-ip.h"
 #include <WiFiClientSecure.h>
 
+// API topic buffer max size (in bytes)
 #define TOPIC_BUFFER_SIZE 60
+
+// API stats interval (in minutes)
+#define API_STATS_INTERVAL 5
+
+// API alive interval (in minutes)
+#define API_ALIVE_INTERVAL 14
+
 BearSSL::WiFiClientSecure ethernetClient;
 PubSubClient mqttClient;
 
@@ -230,7 +238,7 @@ void apiTick() {
   }
 
   // Calling alive every 14 minutes
-  if((millis() - lastAliveMs) >= 840000) {
+  if((millis() - lastAliveMs) >= API_ALIVE_INTERVAL * 60 * 1000) {
 #ifdef DEBUG
     Debug(F("Keepalive at "));
     printUNIXTime();
@@ -244,7 +252,7 @@ void apiTick() {
     apiTimeReq();
   }
 
-  if (millis() - lastStatsMs > 15000) {
+  if (millis() - lastStatsMs > API_STATS_INTERVAL * 60 * 1000) {
     apiStats();
     lastStatsMs = millis();
   }
