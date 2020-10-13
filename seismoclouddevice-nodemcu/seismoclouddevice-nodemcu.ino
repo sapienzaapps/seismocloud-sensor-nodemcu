@@ -1,11 +1,17 @@
 
 #include "common.h"
 #include "external-ip.h"
+#include "rawlog.h"
 
 unsigned long debug_lastms = 0;
 
 // Initialize device
 void setup() {
+#ifdef RAWLOG
+  // If the mode is RAWLOG, jump directly to it
+  rawlog();
+  return;
+#endif
 #ifdef DEBUG
   delay(1000);
   // start serial port for debug
@@ -70,6 +76,9 @@ void setup() {
   apiTimeReq();
 }
 
+#ifdef RAWLOG
+void loop() {}
+#else
 void loop() {
   // Execute local discovery events
   commandInterfaceTick();
@@ -90,3 +99,4 @@ void loop() {
   }
 #endif
 }
+#endif

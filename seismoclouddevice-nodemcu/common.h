@@ -11,6 +11,9 @@
 // On Arduino this flag has no effect if you use avr_boot bootloader (for self-update). You should switch to standard bootloader
 // #define DEBUG
 
+// This flag will make the sensor print out the raw log into the stdout instead of connecting to the server
+#define RAWLOG
+
 #define LED_RED     D7
 #define LED_YELLOW  D6
 #define LED_GREEN   D5
