@@ -8,6 +8,6 @@ codecheck:
   image: registry.sapienzaapps.it/sapienzaapps/arduino-ide-env:4967
   script:
     - echo "Checking debug build"
-    - make clean build-test
+    - DEBUG=y make clean build
     - echo "Checking production build"
-    - make clean build-prod
+    - make clean build
