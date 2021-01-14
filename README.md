@@ -1,8 +1,14 @@
 SeismoCloud project: http://www.seismocloud.com
 
-For 🇮🇹 Italian, see [README.ita.md](README.ita.md)
+For 🇮🇹 Italian, [please follow this page](https://www.seismocloud.com/il-sismometro/).
 
-[![Build Status](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu.svg?branch=master)](https://travis-ci.org/sapienzaapps/seismoclouddevice-nodemcu)
+Want to install a new sensor? [All instructions in this page!](https://www.seismocloud.com/nodemcu-instructions/)
+
+# SeismoCloud
+
+SeismoCloud is a community network about the tracking of seismism whose goal is an Early Warning, i.e. an immediate alert to the citizens of an earthquake area. The network works with low-cost seismometers (physical devices or smartphone sensors) stored in a cloud that receives and analyzes informations from seisometers, decide if an earthquake is taking place and send an Early Warning to the provinces potentially affected
+
+This repository contains the code for ESP8266-compatible boards. [If you want to add a new sensor, you can find the complete guide at this link.](https://www.seismocloud.com/nodemcu-instructions/)
 
 # Supported boards
 
@@ -35,24 +41,11 @@ At the end of the boot sequence all three LEDs will blink rapidly to signal that
 *: If only the yellow LED is ON for more than 10 seconds then the NodeMCU is waiting for
 Wi-Fi network configuration (see the chapter "How to build/upload the software")
 
-# How to build the device (hardware)
+# Hardware
 
-## Requirements
-
-* Wi-Fi network (WPA-PSK, WPA2-PSK, open)
-* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
-	* Open *Preferences* window (from *File* menu)
-	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
-	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select *NodeMCU 1.0 (ESP-12E)* board from *Tools* > *Board* menu after installation).
-* Arduino/Genuino IDE libraries: `WiFiManager, PubSubClient`
-	* Open *Include Libraries* from *Sketch* menu, and choose *Manage Libraries*
-	* Type `WiFiManager` into search bar, then install it by clicking on *Install* button below; the same for `PubSubClient`
-	* Close window
 * NodeMCU 1.0 devkit board with ESP-12E module
 * MPU6050 Accelerometer
 * (optional) 3 LEDs (red-green-yellow) with 3 resistors
-
-Tested with `Arduino/Genuino IDE 1.8.10`, board SDK `esp8266 2.6.2`, libraries `PubSubClient 2.7` and `WiFiManager 0.15.0-beta`
 
 ## Wiring the Accelerometer MPU6050
 
@@ -74,16 +67,9 @@ By default, LED pins are:
 * Pin D6 : Yellow
 * Pin D7 : Red
 
-# How to build/upload the software
+# Software upload (binary)
 
-For NodeMCU, you need to download `WifiManager` library (by using *Sketch > include library > library manager*)
-
-1. Download the source code (for stable releases, please checkout latest git tag)
-2. Open project in Arduino IDE
-3. Choose the right **Port** and **Board** into **Tools** menu (if you're unsure, use `NodeMCU 1.0`)
-4. Compile and upload (2nd button below menus) in your board
-5. Connect to `SeismoCloud` Wi-Fi network and configure Wi-Fi client network parameters. On save, the board reboots and will try to connect to Wi-Fi network. If it fails, you can reconnect to `SeismoCloud` network and modify/fix network parameters.
-6. Open SeismoCloud app, connect to the same network of the board and register your device. Enjoy!
+[See this page (bottom section)](https://www.seismocloud.com/nodemcu-instructions/)
 
 # FAQ
 
@@ -96,6 +82,36 @@ The sensor failed to connect to the Wi-Fi network. Please follow the instruction
 Try to open a browser and navigate to http://192.168.4.1 . If the Wi-Fi portal still not showing, disconnect the board from
 the power source for few seconds. If it still fails, flash again the board erasing the Wi-Fi configuration using the option
 from the **Tools** menu.
+
+
+# For advanced users
+
+This way of installing a sensor is not supported. If you're installing a sensor please refer to the official guide in the website: https://www.seismocloud.com/the-seismometer/
+
+Build is done and tested in GNU/Linux. Tested with `Arduino/Genuino IDE 1.8.10`, board SDK `esp8266 2.6.2`, libraries `PubSubClient 2.7` and `WiFiManager 0.15.0-beta`
+
+## Requirements (command line / other IDEs)
+
+Install the Arduino IDE and make sure that `arduino` command is in the system path.
+
+Requirements can be installed using:
+
+```sh
+make prepare
+```
+
+## Requirements (Arduino IDE GUI)
+
+* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
+	* Open *Preferences* window (from *File* menu)
+	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
+	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select *NodeMCU 1.0 (ESP-12E)* board from *Tools* > *Board* menu after installation).
+* Arduino/Genuino IDE libraries: `WiFiManager, PubSubClient`
+	* Open *Include Libraries* from *Sketch* menu, and choose *Manage Libraries*
+	* Type `WiFiManager` into search bar, then install it by clicking on *Install* button below; the same for `PubSubClient`
+	* Close window
+
+Note that you need to create the file `config.h` yourself. Refer to the code.
 
 # License
 

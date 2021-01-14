@@ -3,58 +3,73 @@ ifeq (${PORT},)
 PORT = /dev/ttyUSB0
 endif
 
-PREFS = --pref build.path=$(shell pwd)/tmp/ --pref serial.port=${PORT} --preferences-file $(shell pwd)/preferences.txt
-ARDUINO ?= arduino
-PLATFORM = $(shell grep MODEL seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
-VERSION = $(shell grep VERSION seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
+VERSION = 1.30.8
 
+ARDUINO ?= arduino
+#MODEL = $(shell grep MODEL seismoclouddevice-nodemcu/common.h | cut -d '"' -f 2)
+MODEL ?= esp8266
+PREFFILE = $(shell pwd)/preferences.${MODEL}.txt
+PREFS = --pref build.path=$(shell pwd)/tmp/ --pref serial.port=${PORT} --preferences-file ${PREFFILE}
+
+ifeq ($(shell test -f ${PREFFILE} || echo x),x)
+$(error Unsupported platform)
+endif
+
+OUTDIR=out/prod
+ifneq (${DEBUG},)
+OUTDIR=out/test
+endif
+
+.PHONY: all
 all:
 	$(info Please use verify|build|upload (add -prod to target prod versions))
 
+.PHONY: info
+info:
+ifneq (${DEBUG},)
+	$(info *** DEBUG MODE ***)
+endif
+	$(info Arduino command: ${ARDUINO})
+	$(info Platform: ${MODEL})
+	$(info Version: ${VERSION})
+	$(info Port: ${PORT})
+	$(info Pref command line: ${PREFS})
+	@:
+
+.PHONY: prepare
 prepare:
 	-${ARDUINO} ${PREFS} --install-boards "esp8266:esp8266:2.6.2"
 	${ARDUINO} ${PREFS} --install-library "PubSubClient:2.7,WiFiManager:0.15.0-beta"
 
-verify-prod:
+.PHONY: seismoclouddevice-nodemcu/config.h
+seismoclouddevice-nodemcu/config.h:
+	echo "#define MODEL \"${MODEL}\"" > seismoclouddevice-nodemcu/config.h
+	echo "#define MODEL_${MODEL}" | tr -d '-' >> seismoclouddevice-nodemcu/config.h
+	echo "#define VERSION \"${VERSION}\"" >> seismoclouddevice-nodemcu/config.h
+ifneq (${DEBUG},)
+	echo "#define DEBUG" >> seismoclouddevice-nodemcu/config.h
+	echo "#define DONT_UPDATE" >> seismoclouddevice-nodemcu/config.h
+endif
+
+.PHONY: verify
+verify: seismoclouddevice-nodemcu/config.h
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 
-verify:
-	make set-debug
-	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino || (make unset-debug && exit 1)
-	make unset-debug
-
-build-prod:
+.PHONY: build
+build: seismoclouddevice-nodemcu/config.h
 	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
-	mkdir -p out/prod/
-	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/prod/${PLATFORM}-${VERSION}.bin
-	cd out/prod/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
-	$(ccred)
-	$(info Environment built: production)
+	mkdir -p ${OUTDIR}
+	cp -v tmp/seismoclouddevice-nodemcu.ino.bin ${OUTDIR}/${MODEL}-${VERSION}.bin
+	cd ${OUTDIR}/ && md5sum ${MODEL}-${VERSION}.bin > ${MODEL}-${VERSION}.md5
 
-build-test:
-	make set-debug
-	${ARDUINO} --verify -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
-	make unset-debug
-	mkdir -p out/test/
-	cp -v tmp/seismoclouddevice-nodemcu.ino.bin out/test/${PLATFORM}-${VERSION}.bin
-	cd out/test/ && md5sum ${PLATFORM}-${VERSION}.bin > ${PLATFORM}-${VERSION}.md5
-
-upload-prod:
+.PHONY: upload
+upload: seismoclouddevice-nodemcu/config.h
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 
-upload:
-	make set-debug
-	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino || (make unset-debug && exit 1)
-	make unset-debug
-
+.PHONY: console
 console:
 	minicom -o -D ${PORT} -b 115200
 
+.PHONY: clean
 clean:
 	rm -rf tmp/ out/
-
-set-debug:
-	@sed -i 's%^// #define DEBUG%#define DEBUG%' seismoclouddevice-nodemcu/common.h
-
-unset-debug:
-	@sed -i 's%^#define DEBUG%// #define DEBUG%' seismoclouddevice-nodemcu/common.h

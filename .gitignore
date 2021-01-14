@@ -2,3 +2,4 @@
 .DS_Store
 tmp/
 out/
+seismoclouddevice-nodemcu/config.h

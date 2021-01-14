@@ -7,8 +7,14 @@
 #include <Wire.h>
 
 #define MPU_ADDRESS   0x68
+
+#ifdef MODEL_esp01
+#define WIRE_SDA      2
+#define WIRE_SCL      0
+#else
 #define WIRE_SDA      D1
 #define WIRE_SCL      D2
+#endif
 
 #ifdef DEBUG
 #define CALIBRATION_SECONDS  3
