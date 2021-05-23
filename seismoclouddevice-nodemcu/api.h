@@ -10,22 +10,6 @@
 boolean apiConnect();
 
 /**
- * Send an ALIVE event to API server
- * You should call this function regularly (every 15 minutes)
- */
-void apiAlive();
-
-/**
- * Send a QUAKE event to API server
- */
-void apiQuake();
-
-/**
- * Request a time update to API server
- */
-void apiTimeReq();
-
-/**
  * Send the stream to API server
  */
 void apiStream();
@@ -37,30 +21,8 @@ void apiStream();
 void apiTick();
 
 /**
- * Maintain API server connection
- * You should call this function only on boot
- */
-void apiBootTick();
-
-/**
  * Disconnect from API server
  */
 void apiDisconnect();
-
-/**
- * Send statistics
- */
-void apiStats();
-
-/**
- * Returns current UNIX Time
- */
-unsigned long getUNIXTime();
-
-
-/**
- * Returns current UNIX Time in milliseconds
- */
-uint64_t getUNIXTimeMS();
 
 #endif

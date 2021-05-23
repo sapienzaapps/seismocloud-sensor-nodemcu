@@ -55,18 +55,6 @@ void seismometerTick() {
   }
   lastAcceleroTick = millis();
 
-  // Probe speed statistics
-  if(millis() - lastProbeMs >= 1000) {
-    lastProbeMs = millis();
-    probeSpeedStat = partialProbeSpeedStat;
-    
-    Debug(F("Probe speed (values per second): "));
-    Debugln(probeSpeedStat);
-
-    partialProbeSpeedStat = 0;
-  }
-  partialProbeSpeedStat++;
-
   // Read values
   MPU6050_probe();
   accelVector = sqrt(sq(acceleroX) + sq(acceleroY) + sq(acceleroZ));
@@ -83,7 +71,6 @@ void seismometerTick() {
     Debugln((char*)buffer);
 #endif
 
-    apiQuake();
     lastQuakeMillis = millis();
   } else if (!inQuake) {
     // End quake period
@@ -91,9 +78,7 @@ void seismometerTick() {
   }
 
   // Stream data to server if streaming is enabled
-  if (streamingEnabled) {
-    apiStream();
-  }
+  apiStream();
   
   // Add value to threshold calculator
   CMA_STDDEV_ADD(partialCma, accelVector);

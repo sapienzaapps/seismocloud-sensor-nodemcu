@@ -48,32 +48,17 @@ delay(5000);                \
 ESP.restart();              \
 while(true)
 
-#ifdef DEBUG
-#define MQTT_SEISMOCLOUD_HOST  "mqtt-seismocloud.test.sapienzaapps.it"
-#define MQTT_SEISMOCLOUD_PORT  443
-#define UPDATE_SERVER          "firmware-seismocloud.test.sapienzaapps.it"
-#else
-#define MQTT_SEISMOCLOUD_HOST  "mqtt.seismocloud.com"
-#define MQTT_SEISMOCLOUD_PORT  443
-#define UPDATE_SERVER          "firmware.seismocloud.com"
-#endif
-
 #include "MPU6050.h"
-#include "update.h"
 #include "LED.h"
 #include "seismometer.h"
 #include "api.h"
-#include "lan-discovery.h"
 #include "nodemcu.h"
 
 #define BUFFER_SIZE 512
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 extern char deviceid[13];
-extern bool streamingEnabled;
 extern ushort probeSpeedHz;
-extern uint32_t probeSpeedStat;
-extern BearSSL::PublicKey tlspubkey;
 
 /**
  * Force a MAC Address
@@ -82,7 +67,6 @@ void setMACAddress(byte* mac);
 
 #ifdef DEBUG
 void printMACAddress();
-void printUNIXTime();
 #endif
 
 #endif
