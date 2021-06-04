@@ -94,6 +94,9 @@ boolean apiConnect() {
     snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/stream", deviceid);
     mqttClient.subscribe((char*)topicbuffer, 0);
     
+    snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/outpin", deviceid);
+    mqttClient.subscribe((char*)topicbuffer, 0);
+    
     Debugln("[MQTT] Done");
     return true;
   } else {
@@ -145,6 +148,14 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
     sscanf((char*)buffer, "%hu", &probeSpeedHz);
     Debug(F("[MQTT] New probe speed: "));
     Debugln(probeSpeedHz);
+  } else if (strcmp(command, "outpin") == 0) {
+    if (strcmp("1", (char*)buffer) == 0) {
+      digitalWrite(OUT_PIN, HIGH);
+    } else if (strcmp("0", (char*)buffer) == 0) {
+      digitalWrite(OUT_PIN, LOW);
+    }
+    Debug(F("[MQTT] Out pin control command: "));
+    Debugln((char*)buffer);
   } else {
     // Unknown/unsupported command received
     Debug("[MQTT] Unsupported command received: ");
@@ -182,6 +193,31 @@ void apiStats() {
   // Current threshold
   snprintf((char*)buffer, BUFFER_SIZE, "%lf", quakeThreshold);
   snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/threshold", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // ESP Free heap
+  snprintf((char*)buffer, BUFFER_SIZE, "%ld", ESP.getFreeHeap());
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/freeheap", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // ESP Vcc
+  snprintf((char*)buffer, BUFFER_SIZE, "%lf", ESP.getVcc()/1024.00f);
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/vcc", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // ESP8266 Chip ID
+  snprintf((char*)buffer, BUFFER_SIZE, "%ld", ESP.getChipId());
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/chipid", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // ESP8266 Flash ID
+  snprintf((char*)buffer, BUFFER_SIZE, "%ld", ESP.getFlashChipId());
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/flashid", deviceid);
+  mqttClient.publish((char*)topicbuffer, (char*)buffer);
+
+  // ESP8266 Flash size
+  snprintf((char*)buffer, BUFFER_SIZE, "%ld", ESP.getFlashChipSize());
+  snprintf(topicbuffer, TOPIC_BUFFER_SIZE, "sensor/%s/flashsize", deviceid);
   mqttClient.publish((char*)topicbuffer, (char*)buffer);
 
   lastStatsMs = millis();
@@ -263,9 +299,16 @@ void apiTick() {
     apiTimeReq();
   }
 
+#ifdef DEBUG
+  // In debug, statistics are sent each 10s
+  if (millis() - lastStatsMs > 10 * 1000) {
+    apiStats();
+  }
+#else
   if (millis() - lastStatsMs > API_STATS_INTERVAL * 60 * 1000) {
     apiStats();
   }
+#endif
 }
 
 void apiDisconnect() {

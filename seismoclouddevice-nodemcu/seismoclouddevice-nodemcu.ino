@@ -2,7 +2,7 @@
 #include "common.h"
 #include "external-ip.h"
 
-unsigned long debug_lastms = 0;
+ADC_MODE(ADC_VCC);
 
 // Initialize device
 void setup() {
@@ -79,14 +79,4 @@ void loop() {
 
   // Execute seismometer events
   seismometerTick();
-
-#ifdef DEBUG
-  if (millis() - debug_lastms > 1000) {
-    Debug(F("Current time: "));
-    printUNIXTime();
-    Debugln();
-
-    debug_lastms = millis();
-  }
-#endif
 }

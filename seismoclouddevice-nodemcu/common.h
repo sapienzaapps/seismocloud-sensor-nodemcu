@@ -17,6 +17,8 @@
 // This file will be generated during the build process
 #include "config.h"
 
+#define OUT_PIN     D8
+
 #ifdef MODEL_esp01
 // No LEDs in esp01
 #else

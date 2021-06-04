@@ -66,6 +66,10 @@ build: seismoclouddevice-nodemcu/config.h
 upload: seismoclouddevice-nodemcu/config.h
 	${ARDUINO} --upload -v ${PREFS} seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
 
+.PHONY: upload-wipe-all
+upload-wipe-all: seismoclouddevice-nodemcu/config.h
+	${ARDUINO} --upload -v ${PREFS} --pref custom_wipe=nodemcuv2_all seismoclouddevice-nodemcu/seismoclouddevice-nodemcu.ino
+
 .PHONY: console
 console:
 	minicom -o -D ${PORT} -b 115200
