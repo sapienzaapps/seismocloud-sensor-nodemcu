@@ -1,7 +1,7 @@
 
 #include "common.h"
 
-unsigned long debug_lastms = 0;
+unsigned long lastAcceleroTick = 0;
 
 // Initialize device
 void setup() {
@@ -19,7 +19,7 @@ void setup() {
   // Power up and calibrate the seismometer
   Debugln(F("Init seismometer and calibrate"));
   LED_accel_calibr();
-  seismometerInit();
+  MPU6050_begin();
 
   // Initialize NodeMCU WiFi
   LED_wait_net_cfg();
@@ -43,5 +43,11 @@ void loop() {
   apiTick();
 
   // Execute seismometer events
-  seismometerTick();
+  if (probeSpeedHz > 0 && millis()-lastAcceleroTick < (1000/probeSpeedHz)) {
+    return;
+  }
+  lastAcceleroTick = millis();
+
+  MPU6050_probe();
+  apiStream();
 }

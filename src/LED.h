@@ -2,8 +2,8 @@
 #ifndef __LED_H
 #define __LED_H
 
-#ifdef MODEL_esp01
-// Disable LED functions for ESP-01
+#ifdef NO_LEDS
+// Disable LED functions
 #define LED_init()
 #define LED(green, yellow, red)
 #define LED_startup_blink()

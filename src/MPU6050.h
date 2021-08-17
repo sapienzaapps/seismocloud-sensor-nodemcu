@@ -8,11 +8,11 @@
 
 #define MPU_ADDRESS   0x68
 
-#ifdef MODEL_esp01
-#define WIRE_SDA      2
-#define WIRE_SCL      0
-#else
+#ifndef WIRE_SDA
 #define WIRE_SDA      D1
+#endif
+
+#ifndef WIRE_SCL
 #define WIRE_SCL      D2
 #endif
 
