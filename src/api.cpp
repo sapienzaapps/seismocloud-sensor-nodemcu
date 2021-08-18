@@ -8,20 +8,24 @@
 #include "MPU6050.h"
 #include "debug_print.h"
 #include "nodemcu.h"
+#include "LED.h"
 
 #ifdef DEBUG
-const String seismoCloudServer("http://192.168.183.234:8000");
+
+String rpiHostName = "192.168.142.234";
+uint16_t rpiPort = 3000;
+const String seismoCloudServer("http://192.168.142.234:3000");
+
 #else
 
+String rpiHostName;
+uint16_t rpiPort = 80;
 const String seismoCloudServer();
 
 #endif
 
 WiFiClient client;
 WebSocketsClient webSocket;
-
-String rpiHostName;
-uint16_t rpiPort = 80;
 
 void extractValue(char* dst, int maxlength, const char *src, char separator) {
   char *nextsep = strchr(src, separator);
@@ -60,14 +64,16 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
     case WStype_ERROR:
       Debugln("[API] WS internal error");
+      LED_lost_api();
+      NodeMCU_reboot();
       break;
     case WStype_DISCONNECTED:
       Debugln("[API] Disconnected");
+      LED_lost_api();
+      NodeMCU_reboot();
       break;
     case WStype_CONNECTED:
       Debugln("[API] Connected");
-      // send message to server when Connected
-      webSocket.sendTXT("Connected");
       break;
     case WStype_TEXT:
       Debug("[API] Rcvd text: ");
@@ -106,7 +112,6 @@ bool apiConnect() {
 
       // TODO: parse config
       parseConfig(payload.c_str());
-      return true;
     } else if (httpCode <= 0) {
       Debug(F("[API] Connection error: "));
       Debugln(http.errorToString(httpCode).c_str());
@@ -125,15 +130,20 @@ bool apiConnect() {
   }
 
   Debugln(F("[API] Connecting to web socket"));
+#ifdef DEBUG
   webSocket.begin(rpiHostName, rpiPort, "/probes/v1/" + String(deviceid) + "/stream");
+#else
+  // TODO: fingerprint/certificate check
+  webSocket.beginSSL(rpiHostName, rpiPort, "/probes/v1/" + String(deviceid) + "/stream");
+#endif
   webSocket.onEvent(webSocketEvent);
   //webSocket.setAuthorization("user", "Password");
   webSocket.setReconnectInterval(5000);
-  webSocket.enableHeartbeat(10000, 3000, 2);
+  webSocket.enableHeartbeat(15000, 3000, 2);
   webSocket.setExtraHeaders();
 
-  // TODO: timeout
-  while (!webSocket.isConnected()) {
+  unsigned long startms = millis();
+  while (!webSocket.isConnected() && (millis() - startms < 1000 * 60)) {
     delay(50);
     webSocket.loop();
   }

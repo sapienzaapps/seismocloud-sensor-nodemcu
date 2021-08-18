@@ -41,6 +41,7 @@ void NodeMCU_init() {
 }
 
 void NodeMCU_reboot() {
+  delay(5000);
   ESP.restart();
   while(true);
 }
