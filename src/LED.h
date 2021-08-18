@@ -13,6 +13,10 @@
 #define LED_quake_end()
 #else
 
+#define LED_RED     D7
+#define LED_YELLOW  D6
+#define LED_GREEN   D5
+
 #define LED_init()            \
 pinMode(LED_GREEN,  OUTPUT);  \
 pinMode(LED_YELLOW, OUTPUT);  \
@@ -48,5 +52,4 @@ for(int i=0; i < 10; i++) {   \
 #define LED_connection()       LED(HIGH, HIGH, HIGH)
 #define LED_ready()            LED(HIGH, LOW , LOW )
 
-#endif
-
+#endif // __LED_H

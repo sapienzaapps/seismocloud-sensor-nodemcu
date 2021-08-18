@@ -1,23 +1,23 @@
 
+#include <Arduino.h>
+#include <Wire.h>
 #include "MPU6050.h"
 #include "cma.h"
+#include "debug_print.h"
 
-#define AccelerationFactor (0.20/32768.0) // Assuming +/- 16G.
+constexpr double AccelerationFactor (0.20/32768.0); // Assuming +/- 16G.
 
 double calibrationX, calibrationY, calibrationZ, acceleroX, acceleroY, acceleroZ;
 float Tmp;
 
-void MPU6050_begin() {
+bool MPU6050_begin() {
   Wire.begin(WIRE_SDA, WIRE_SCL); // sda, scl  // GPIO4 and GPIO5 - on Arduino: Wire.begin()
   Wire.beginTransmission(MPU_ADDRESS);
   Wire.write(0x6B);  // PWR_MGMT_1 register
   Wire.write(0);     // set to zero (wakes up the MPU-6050)
   Wire.endTransmission(true);
   delay(2000);
-  MPU6050_calibrate();
-}
 
-void MPU6050_calibrate() {
   int16_t AcX, AcY, AcZ, AcTmp = 0;
   CMA AvgX, AvgY, AvgZ;
   unsigned long startms = millis();
@@ -44,8 +44,8 @@ void MPU6050_calibrate() {
 
   // Error during calibration
   if (AvgX.value == -1 && AvgY.value == -1 && AvgZ.value == -1) {
-    Debugln("Calibration error");
-    soft_restart();
+    Debugln(F("[MPU6050] Calibration error - error reading values"));
+    return false;
   }
 
   calibrationX = AvgX.value * AccelerationFactor;
@@ -55,9 +55,11 @@ void MPU6050_calibrate() {
   Tmp = AcTmp / 340.00 + 36.53;
   
 #ifdef DEBUG
-  snprintf((char*)buffer, BUFFER_SIZE, "Calibration X:%f Y:%f Z:%f Temp:%f", calibrationX, calibrationY, calibrationZ, Tmp);
-  Debugln((char*)buffer);
+  char buffer[100] = { 0 };
+  snprintf(buffer, 100, "[MPU6050] Calibration X:%f Y:%f Z:%f Temp:%f", calibrationX, calibrationY, calibrationZ, Tmp);
+  Debugln(buffer);
 #endif
+  return true;
 }
 
 void MPU6050_probe() {

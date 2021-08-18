@@ -2,10 +2,11 @@
 .DS_Store
 tmp/
 out/
-src/config.h
+src/common.h
 .pioenvs
 .piolibdeps
 .clang_complete
 .gcc-flags.json
 .pio
 .idea
+tmp_pio_*

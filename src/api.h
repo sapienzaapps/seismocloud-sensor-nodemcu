@@ -2,12 +2,10 @@
 #ifndef __API_H
 #define __API_H
 
-#include "common.h"
-
 /**
  * Connect to API server
  */
-boolean apiConnect();
+bool apiConnect();
 
 /**
  * Send the stream to API server
@@ -24,5 +22,9 @@ void apiTick();
  * Disconnect from API server
  */
 void apiDisconnect();
+
+void parseConfig(const char *payload);
+extern String rpiHostName;
+extern uint16_t rpiPort;
 
 #endif

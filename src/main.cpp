@@ -1,7 +1,14 @@
+#ifndef UNIT_TEST
 
-#include "common.h"
+#include <Arduino.h>
+#include "nodemcu.h"
+#include "LED.h"
+#include "MPU6050.h"
+#include "api.h"
+#include "debug_print.h"
 
 unsigned long lastAcceleroTick = 0;
+uint16_t probeSpeedHz = 100;
 
 // Initialize device
 void setup() {
@@ -17,9 +24,12 @@ void setup() {
   Debugln(VERSION);
 
   // Power up and calibrate the seismometer
-  Debugln(F("Init seismometer and calibrate"));
+  Debugln(F("Init accelerometer and calibrate"));
   LED_accel_calibr();
-  MPU6050_begin();
+  if (!MPU6050_begin()) {
+    Debugln(F("Accelerometer init error"));
+    NodeMCU_reboot();
+  }
 
   // Initialize NodeMCU WiFi
   LED_wait_net_cfg();
@@ -29,7 +39,7 @@ void setup() {
   // Connect to API server
   if (!apiConnect()) {
     LED_lost_api();
-    soft_restart();
+    NodeMCU_reboot();
   }
 
   Debugln(F("Boot completed"));
@@ -51,3 +61,5 @@ void loop() {
   MPU6050_probe();
   apiStream();
 }
+
+#endif

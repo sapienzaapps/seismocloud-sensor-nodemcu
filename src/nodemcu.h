@@ -2,12 +2,10 @@
 #ifndef __NODEMCU_H
 #define __NODEMCU_H
 
-#include "common.h"
-
-#include <WiFiManager.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+extern char deviceid[13];
 
 void NodeMCU_init();
+
+void NodeMCU_reboot();
 
 #endif
