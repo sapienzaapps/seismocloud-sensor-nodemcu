@@ -1,25 +1,23 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-#include <Arduino.h>
-#include <SPI.h>
-#include <EEPROM.h>
-#include <Ethernet.h>
-#include <PubSubClient.h>
-#include <Wire.h>                // I2C
-#include <ESP8266WiFi.h>         // ESP8266 Core WiFi Library
-#include <WiFiUdp.h>             // WiFi UDP client Library
-#include <DNSServer.h>           // Local DNS Server used for redirecting all requests to the configuration portal
-#include <ESP8266WebServer.h>    // Local WebServer used to serve the configuration portal
-#include <WiFiManager.h>         // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-#include <ESP8266httpUpdate.h>   // For OTA
+// #include <Arduino.h>
+// #include <SPI.h>
+// #include <EEPROM.h>
+// #include <Ethernet.h>
+// #include <PubSubClient.h>
+// #include <Wire.h>                // I2C
+#include <ESP8266WiFi.h>         // ESP8266 Core WiFi Library - for BearSSL
+// #include <WiFiUdp.h>             // WiFi UDP client Library
+// #include <DNSServer.h>           // Local DNS Server used for redirecting all requests to the configuration portal
+// #include <ESP8266WebServer.h>    // Local WebServer used to serve the configuration portal
+// #include <WiFiManager.h>         // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+// #include <ESP8266httpUpdate.h>   // For OTA
 
 // This file will be generated during the build process
 #include "config.h"
 
-#ifdef MODEL_esp01
-// No LEDs in esp01
-#else
+#ifndef NO_LEDS
 #define LED_RED     D7
 #define LED_YELLOW  D6
 #define LED_GREEN   D5
@@ -41,7 +39,6 @@
 #endif
 // ******* /DEBUG PART
 
-#define min(X,Y) ((X)<(Y) ? (X) : (Y))
 #define soft_restart()      \
 apiDisconnect();            \
 delay(5000);                \

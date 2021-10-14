@@ -3,6 +3,7 @@
 #include "int64time-reader.h"
 #include "external-ip.h"
 #include <WiFiClientSecure.h>
+#include <PubSubClient.h>
 
 // API topic buffer max size (in bytes)
 #define TOPIC_BUFFER_SIZE 60
@@ -116,7 +117,7 @@ void apiCallback(char* topic, byte* payload, unsigned int len) {
   }
   char *command = topic + 7 + strlen(deviceid) + 1;
   memset(buffer, 0, BUFFER_SIZE);
-  memcpy(buffer, payload, min(len, BUFFER_SIZE-1));
+  memcpy(buffer, payload, len < BUFFER_SIZE-1 ? len : BUFFER_SIZE - 1);
 
   if (strcmp(command, "sigma") == 0) {
     float sigmaIter;

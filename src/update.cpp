@@ -1,6 +1,7 @@
 
 #include "common.h"
 #include "update.h"
+#include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
 
 // https://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html

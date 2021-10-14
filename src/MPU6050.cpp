@@ -18,7 +18,7 @@ void MPU6050_begin() {
 }
 
 void MPU6050_calibrate() {
-  int16_t AcX, AcY, AcZ, AcTmp;
+  int16_t AcX, AcY, AcZ, AcTmp = 0;
   CMA AvgX, AvgY, AvgZ;
   unsigned long startms = millis();
   CMA_RESET(AvgX); CMA_RESET(AvgY); CMA_RESET(AvgZ);

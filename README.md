@@ -8,7 +8,7 @@ Want to install a new sensor? [All instructions in this page!](https://www.seism
 
 SeismoCloud is a community network about the tracking of seismism whose goal is an Early Warning, i.e. an immediate alert to the citizens of an earthquake area. The network works with low-cost seismometers (physical devices or smartphone sensors) stored in a cloud that receives and analyzes informations from seisometers, decide if an earthquake is taking place and send an Early Warning to the provinces potentially affected
 
-This repository contains the code for ESP8266-compatible boards. [If you want to add a new sensor, you can find the complete guide at this link.](https://www.seismocloud.com/nodemcu-instructions/)
+This repository contains the code for ESP8266-compatible boards. [If you want to build a new sensor, you can find the complete guide at this link.](https://www.seismocloud.com/nodemcu-instructions/)
 
 # Supported boards
 
@@ -20,7 +20,7 @@ The device will acquire all IPv4 configurations (address, netmask, gateway, DNS)
 
 If you have any firewall in your network, please allow these ports (outgoing, to internet):
 
-* TCP: 443, 1883
+* TCP: 443
 
 # LED status description
 
@@ -30,7 +30,6 @@ LEDs can be in these different states (empty cells means "OFF"):
 |:-----:|:------:|:----:| ------
 | ON    |        |      | Device is idle and listening
 | ON    | ON     |      | The device has lost its connection, and it's trying to reconnect
-| ON    |        | ON   | A vibration/shake is detected!
 | ON    | ON     | ON   | The device is connecting to the SeismoCloud network
 |       | ON     | ON   | Checking for updates or updating
 |       | ON     |      | Connecting to Wi-Fi network*
@@ -88,30 +87,7 @@ from the **Tools** menu.
 
 This way of installing a sensor is not supported. If you're installing a sensor please refer to the official guide in the website: https://www.seismocloud.com/the-seismometer/
 
-Build is done and tested in GNU/Linux. Tested with `Arduino/Genuino IDE 1.8.10`, board SDK `esp8266 2.6.2`, libraries `PubSubClient 2.7` and `WiFiManager 0.15.0-beta`
-
-## Requirements (command line / other IDEs)
-
-Install the Arduino IDE and make sure that `arduino` command is in the system path.
-
-Requirements can be installed using:
-
-```sh
-make prepare
-```
-
-## Requirements (Arduino IDE GUI)
-
-* Arduino/Genuino IDE with ESP8266 sdk installed. If you haven't ESP8266 sdk:
-	* Open *Preferences* window (from *File* menu)
-	* Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
-	* Close with "OK", open *Boards Manager* from *Tools* > *Board* menu and install *esp8266* platform (and don't forget to select *NodeMCU 1.0 (ESP-12E)* board from *Tools* > *Board* menu after installation).
-* Arduino/Genuino IDE libraries: `WiFiManager, PubSubClient`
-	* Open *Include Libraries* from *Sketch* menu, and choose *Manage Libraries*
-	* Type `WiFiManager` into search bar, then install it by clicking on *Install* button below; the same for `PubSubClient`
-	* Close window
-
-Note that you need to create the file `config.h` yourself. Refer to the code.
+TODO
 
 # License
 

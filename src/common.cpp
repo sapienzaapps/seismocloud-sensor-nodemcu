@@ -70,7 +70,7 @@ void printUNIXTime() {
   uint8_t hour = time % 24;
   time /= 24;
 
-  uint8_t dayOfWeek = ((time + 4) % 7) + 1;
+  // uint8_t dayOfWeek = ((time + 4) % 7) + 1;
 
   year = 0;
   days = 0;

@@ -1,3 +1,4 @@
+#include <WiFiUdp.h>
 #include "lan-discovery.h"
 
 // LAN discovery
@@ -9,7 +10,7 @@ void commandInterfaceInit() {
 }
 
 void commandInterfaceTick() {
-  int packetSize = cmdsock.parsePacket();
+  cmdsock.parsePacket();
   if (cmdsock.available()) {
 
     // read the packet into packetBufffer
@@ -26,8 +27,8 @@ void commandInterfaceTick() {
 
     memcpy(buffer + 6, ethernetMac, 6);
 
-    memcpy(buffer + 12, VERSION, min(strlen(VERSION), 4));
-    memcpy(buffer + 16, MODEL, min(strlen(MODEL), 8));
+    memcpy(buffer + 12, VERSION, strlen(VERSION) < 4 ? strlen(VERSION) : 4);
+    memcpy(buffer + 16, MODEL, strlen(MODEL) < 4 ? strlen(MODEL) : 8);
 
     cmdsock.beginPacket(cmdsock.remoteIP(), cmdsock.remotePort());
     cmdsock.write(buffer, 24);

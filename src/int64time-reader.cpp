@@ -2,7 +2,7 @@
 #include "int64time-reader.h"
 
 int readNTPString(char* buf, NTPTimeSync* ts) {
-  int i = 0;
+  size_t i = 0;
 
   // This function assume that the number won't overflow...
   // TODO: make some checks if the number overflows or fields are missing

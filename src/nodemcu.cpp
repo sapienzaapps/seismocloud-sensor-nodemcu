@@ -1,4 +1,4 @@
-
+#include <WiFiManager.h>
 #include "nodemcu.h"
 
 void NodeMCU_init() {
