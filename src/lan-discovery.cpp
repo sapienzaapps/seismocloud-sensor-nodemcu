@@ -1,4 +1,5 @@
 #include <WiFiUdp.h>
+#include <ESP8266mDNS.h>
 #include "lan-discovery.h"
 
 // LAN discovery
@@ -7,9 +8,22 @@ WiFiUDP cmdsock;
 void commandInterfaceInit() {
   Debugln("Command interface init");
   cmdsock.begin(62001);
+
+  if(MDNS.begin("seismosensor")) {
+    Debugln("mDNS responder OK");
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addServiceTxt("http", "tcp", "version", VERSION);
+    MDNS.addServiceTxt("http", "tcp", "model", MODEL);
+    MDNS.addServiceTxt("http", "tcp", "id", deviceid);
+  } else {
+    Debugln("Can't start the mDNS responder");
+  }
 }
 
 void commandInterfaceTick() {
+  MDNS.update();
+
   cmdsock.parsePacket();
   if (cmdsock.available()) {
 

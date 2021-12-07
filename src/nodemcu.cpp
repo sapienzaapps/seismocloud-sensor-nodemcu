@@ -5,6 +5,8 @@ void NodeMCU_init() {
   Debug("Creating config portal in ");
   Debugln(CFGSSID);
 
+  WiFi.setSleep(false);
+
   WiFiManager wifi;
   wifi.setConfigPortalTimeout(180);
 
