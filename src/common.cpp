@@ -1,6 +1,7 @@
 
 #include "common.h"
 
+const char hostname[12+7+1] = { 0 };
 byte ethernetMac[6] = { 0 };
 char deviceid[13] = { 0 };
 bool streamingEnabled = false;
@@ -21,6 +22,7 @@ void printMACAddress() {
 void setMACAddress(byte* mac) {
   memcpy(ethernetMac, mac, 6);
   snprintf(deviceid, 13, "%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
+  snprintf((char*) hostname, 12+7+1, "seismo-%02x%02x%02x%02x%02x%02x", ethernetMac[0], ethernetMac[1], ethernetMac[2], ethernetMac[3], ethernetMac[4], ethernetMac[5]);
 }
 
 /*

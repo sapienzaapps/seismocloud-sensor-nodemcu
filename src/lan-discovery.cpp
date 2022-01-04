@@ -9,7 +9,7 @@ void commandInterfaceInit() {
   Debugln("Command interface init");
   cmdsock.begin(62001);
 
-  if(MDNS.begin("seismosensor")) {
+  if(MDNS.begin(hostname)) {
     Debugln("mDNS responder OK");
 
     MDNS.addService("http", "tcp", 80);

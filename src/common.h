@@ -64,6 +64,7 @@ while(true)
 #include "nodemcu.h"
 
 #define BUFFER_SIZE 512
+extern const char hostname[12+7+1];
 extern byte buffer[BUFFER_SIZE];
 extern byte ethernetMac[6];
 extern char deviceid[13];
