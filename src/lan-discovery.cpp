@@ -12,10 +12,10 @@ void commandInterfaceInit() {
   if(MDNS.begin(hostname)) {
     Debugln("mDNS responder OK");
 
-    MDNS.addService("http", "tcp", 80);
-    MDNS.addServiceTxt("http", "tcp", "version", VERSION);
-    MDNS.addServiceTxt("http", "tcp", "model", MODEL);
-    MDNS.addServiceTxt("http", "tcp", "id", deviceid);
+    MDNS.addService("scs", "tcp", 62001);
+    MDNS.addServiceTxt("scs", "tcp", "version", VERSION);
+    MDNS.addServiceTxt("scs", "tcp", "model", MODEL);
+    MDNS.addServiceTxt("scs", "tcp", "id", deviceid);
   } else {
     Debugln("Can't start the mDNS responder");
   }
