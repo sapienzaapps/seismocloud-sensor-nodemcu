@@ -5,6 +5,6 @@ codecheck:
  tags:
    - docker
  stage: codecheck
- image: registry.sapienzaapps.it/sapienzaapps/sapps-platformio:1
+ image: registry.git.sapienzaapps.it/sapienzaapps/utility-containers/sapps-platformio:1
  script:
    - pio run
